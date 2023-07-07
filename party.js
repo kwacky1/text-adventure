@@ -10,6 +10,7 @@ class Party {
     constructor() {
         this.characters = [];
         this.nextId = 1;
+        this.inventory = [];
     }
 
     addCharacter(character) {

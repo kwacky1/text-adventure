@@ -75,18 +75,20 @@ export function playTurn() {
                 // output the event to the events div
                 addEvent(`${character.name} ${event}`);
 
-                // Give items to a character chosen by the player
-                if (event === 'found food' || event === 'found medical' || event === 'found weapon') {
+                // Add found items to the party inventory
+                if (event === 'found food' || event === 'found medical') {
+                    const item = event.split(' ')[1];
+                    gameParty.inventory.push(item);
+                }
+                if (event === 'found weapon') {
                     const item = event.split(' ')[1];
                     const characterListDiv = document.getElementById('characterList');
-//                    characterListDiv.innerHTML = '';
                     for (const availableCharacter of gameParty.characters) {
                       const button = document.createElement('button');
-                      button.innerText = availableCharacter.name;
+                      button.innerText = `Give ${item} to ${availableCharacter.name}`;
                       button.addEventListener('click', () => {
                         availableCharacter.inventory.push(item);
                         addEvent(`${character.name} gave ${item} to ${availableCharacter.name}`);
-//                        characterListDiv.innerHTML = '';
                         button.remove();
                       });
                       characterListDiv.parentNode.insertBefore(button, characterListDiv);
