@@ -95,7 +95,9 @@ export function playTurn() {
                     }
                 }
     
-            }    
+            }  else {
+                addEvent(`${character.name} looks around`);
+            }  
         } else {
             addEvent(`${character.name} died of hunger`);
             gameParty.removeCharacter(character);
@@ -215,7 +217,8 @@ async function addPlayer(party) {
         const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
         const character = new Character(party.nextId, firstName, hunger, posTrait, negTrait );
         party.addCharacter(character);
-        character.update();
+        character.createCharacter();
+        character.updateCharacter();
         updateRelationships(party);
     } catch (error) {
         console.error(error);
@@ -224,7 +227,7 @@ async function addPlayer(party) {
 
 function updateRelationships(party) {
     for (const character of party.characters) {
-        const characterItem = document.getElementById(`character-${character.id}`);
+        const characterItem = document.getElementById(character.name);
         const relationshipsList = characterItem.querySelector('.relationships');
         relationshipsList.innerHTML = '';
         for (const relationship of character.relationships) {
@@ -255,3 +258,4 @@ startGame().then((gameParty) => {
         playTurn();
     });
 });
+

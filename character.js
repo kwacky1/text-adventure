@@ -64,7 +64,7 @@ class Character {
     if (this.hunger < 0) {
       return false;
     } else {
-      this.update();
+      this.updateCharacter();
       return true;
     }
   }
@@ -121,7 +121,7 @@ class Character {
     }
   }
 
-  update() {
+  /* update() {
     const characterList = document.getElementById('characterList');
     let characterItem = document.getElementById(`character-${this.id}`);
     console.log(characterItem);
@@ -150,7 +150,7 @@ class Character {
     }
 
   }
-
+ */
   useItem(itemName) {
     const index = this.inventory.indexOf(itemName);
     if (index === -1) {
@@ -175,6 +175,69 @@ class Character {
     }
     this.inventory.splice(index, 1);
     this.update();
+  }
+
+  createCharacter() {
+    const characterDiv = document.createElement('div');
+    characterDiv.id = this.name;
+    characterDiv.classList.add('character');
+  
+    const nameElement = document.createElement('h2');
+    nameElement.textContent = this.name;
+    characterDiv.appendChild(nameElement);
+  
+    const ageElement = document.createElement('p');
+    ageElement.innerHTML = `Age: <span class="age">${this.age}</span>`;
+    characterDiv.appendChild(ageElement);
+  
+    const posTraitElement = document.createElement('p');
+    posTraitElement.innerHTML = `Positive Trait: <span class="pos-trait">${this.posTrait}</span>`;
+    characterDiv.appendChild(posTraitElement);
+  
+    const negTraitElement = document.createElement('p');
+    negTraitElement.innerHTML = `Negative Trait: <span class="neg-trait">${this.negTrait}</span>`;
+    characterDiv.appendChild(negTraitElement);
+  
+    const moraleElement = document.createElement('p');
+    moraleElement.innerHTML = `Morale: <span class="morale">${moraleArray[this.morale]}</span>`;
+    characterDiv.appendChild(moraleElement);
+  
+    const hungerElement = document.createElement('p');
+    hungerElement.innerHTML = `Hunger: <span class="hunger">${hungerArray[this.hunger]}</span>`;
+    characterDiv.appendChild(hungerElement);
+  
+    const injuryElement = document.createElement('p');
+    injuryElement.innerHTML = `Injury: <span class="injury">${injuries[this.injuryLevel]}</span>`;
+    characterDiv.appendChild(injuryElement);
+  
+    const relationshipsList = document.createElement('ul');
+    relationshipsList.classList.add('relationships');
+    characterDiv.appendChild(relationshipsList);
+  
+    const inventoryElement = document.createElement('ul');
+    inventoryElement.classList.add('inventory');
+    characterDiv.appendChild(inventoryElement);
+  
+    document.getElementById('characterList').appendChild(characterDiv);
+  }
+
+  updateCharacter() {
+    const characterDiv = document.getElementById(this.name);
+    characterDiv.querySelector('.age').textContent = this.age;
+    characterDiv.querySelector('.pos-trait').textContent = this.posTrait;
+    characterDiv.querySelector('.neg-trait').textContent = this.negTrait;
+    characterDiv.querySelector('.morale').textContent = moraleArray[this.morale];
+    characterDiv.querySelector('.hunger').textContent = hungerArray[this.hunger];
+    characterDiv.querySelector('.injury').textContent = injuries[this.injuryLevel];
+  
+    // Update inventory display
+    const inventoryList = characterDiv.querySelector('.inventory');
+    inventoryList.innerHTML = '';
+    this.inventory.forEach(item => {
+      const itemElement = document.createElement('li');
+      itemElement.textContent = item;
+      inventoryList.appendChild(itemElement);
+    });
   }
 }
 
