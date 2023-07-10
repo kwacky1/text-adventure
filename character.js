@@ -210,11 +210,11 @@ class Character {
     injuryElement.innerHTML = `Injury: <span class="injury">${injuries[this.injuryLevel]}</span>`;
     characterDiv.appendChild(injuryElement);
   
-    const relationshipsList = document.createElement('ul');
+    const relationshipsList = document.createElement('div');
     relationshipsList.classList.add('relationships');
     characterDiv.appendChild(relationshipsList);
   
-    const inventoryElement = document.createElement('ul');
+    const inventoryElement = document.createElement('div');
     inventoryElement.classList.add('inventory');
     characterDiv.appendChild(inventoryElement);
   
@@ -223,7 +223,7 @@ class Character {
 
   updateCharacter() {
     const characterDiv = document.getElementById(this.name);
-    characterDiv.querySelector('.age').textContent = this.age;
+    characterDiv.querySelector('.age').textContent = ageArray[this.age];
     characterDiv.querySelector('.pos-trait').textContent = this.posTrait;
     characterDiv.querySelector('.neg-trait').textContent = this.negTrait;
     characterDiv.querySelector('.morale').textContent = moraleArray[this.morale];
@@ -232,11 +232,13 @@ class Character {
   
     // Update inventory display
     const inventoryList = characterDiv.querySelector('.inventory');
-    inventoryList.innerHTML = '';
+    inventoryList.innerHTML = `<p>Inventory for ${this.name}</p>`;
+    const inventoryElement = document.createElement('ul');
+    inventoryList.appendChild(inventoryElement);
     this.inventory.forEach(item => {
       const itemElement = document.createElement('li');
       itemElement.textContent = item;
-      inventoryList.appendChild(itemElement);
+      inventoryElement.appendChild(itemElement);
     });
   }
 }

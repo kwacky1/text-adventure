@@ -50,8 +50,10 @@ const enemy = [
 
 const events = [
     'found food',
-    'found medical',
-    'found weapon'
+    'found medical supplies',
+    'found a weapon',
+    'found an enemy',
+    'found a friend'
 ]
 
 import Party from './party.js';
@@ -73,25 +75,37 @@ export function playTurn() {
                 // pick a random event
                 const event = events[Math.floor(Math.random() * events.length)];
                 // output the event to the events div
-                addEvent(`${character.name} ${event}`);
+                addEvent(`The party ${event}`);
 
                 // Add found items to the party inventory
                 if (event === 'found food' || event === 'found medical') {
                     const item = event.split(' ')[1];
                     gameParty.inventory.push(item);
                 }
-                if (event === 'found weapon') {
-                    const item = event.split(' ')[1];
+                if (event === 'found a weapon') {
+                    const item = event.split(' ')[2];
                     const characterListDiv = document.getElementById('characterList');
                     for (const availableCharacter of gameParty.characters) {
                       const button = document.createElement('button');
                       button.innerText = `Give ${item} to ${availableCharacter.name}`;
                       button.addEventListener('click', () => {
                         availableCharacter.inventory.push(item);
-                        addEvent(`${character.name} gave ${item} to ${availableCharacter.name}`);
+                        addEvent(`${availableCharacter.name} picked up the ${item}`);
                         button.remove();
-                      });
+                        character.updateCharacter();
+                    });
                       characterListDiv.parentNode.insertBefore(button, characterListDiv);
+                    }
+                }
+                if (event == 'found an enemy') {
+                    // select a random enemy from the enemy array
+                    const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
+                    addEvent(`A ${enemyType[0]} has appeared!`);
+                }
+                if (event == 'found a friend') {
+                    // add a character to the party if there is space
+                    if (gameParty.characters.length < 4) {
+                        addPlayer(gameParty);
                     }
                 }
     
@@ -103,7 +117,7 @@ export function playTurn() {
             gameParty.removeCharacter(character);
         }
 
-
+        gameParty.updateInventory();
         // TODO
         turnNumber += 1;
     };
@@ -217,6 +231,11 @@ async function addPlayer(party) {
         const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
         const character = new Character(party.nextId, firstName, hunger, posTrait, negTrait );
         party.addCharacter(character);
+        if (party.characters.length > 1) {
+            addEvent(`${character.name} has joined the party!`);
+        } else {
+            addEvent(`${character.name} has started the adventure!`);
+        }
         character.createCharacter();
         character.updateCharacter();
         updateRelationships(party);
@@ -228,8 +247,10 @@ async function addPlayer(party) {
 function updateRelationships(party) {
     for (const character of party.characters) {
         const characterItem = document.getElementById(character.name);
-        const relationshipsList = characterItem.querySelector('.relationships');
-        relationshipsList.innerHTML = '';
+        const relationshipsDiv = characterItem.querySelector('.relationships');
+        relationshipsDiv.innerHTML = '<p>Relationships</p>';
+        const relationshipsList = document.createElement('ul');
+        relationshipsDiv.appendChild(relationshipsList);
         for (const relationship of character.relationships) {
             const relationshipItem = document.createElement('li');
             relationshipItem.textContent = `${relationship.type[0]} with ${relationship.character.name}`;

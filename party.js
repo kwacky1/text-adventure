@@ -41,7 +41,7 @@ class Party {
         const index = this.characters.indexOf(character);
         if (index !== -1) {
             this.characters.splice(index, 1);
-            const characterItem = document.getElementById(`character-${character.id}`);
+            const characterItem = document.getElementById(character.name);
             console.log(characterItem);
             if (characterItem) {
                 console.log('removing character');
@@ -52,6 +52,18 @@ class Party {
             console.log(`${character.name} is not in the party.`);
         }
     }
-}
+    
+    updateInventory() {
+        const partyInventoryDiv = document.getElementById('partyInventory');
+      
+        // Update inventory display
+        partyInventoryDiv.innerHTML = '<p>Party Inventory</p>';
+        this.inventory.forEach(item => {
+          const itemElement = document.createElement('li');
+          itemElement.textContent = item;
+          partyInventoryDiv.appendChild(itemElement);
+        });
+      }
+    }
 
 export default Party;
