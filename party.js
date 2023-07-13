@@ -48,6 +48,13 @@ class Party {
                 characterItem.remove();
             }
             console.log(`${character.name} has left the party.`);
+            // Remove character from relationships of other characters
+            for (const remainingCharacter of this.characters) {
+            const relationshipIndex = remainingCharacter.relationships.findIndex(relationship => relationship.character === character);
+            if (relationshipIndex !== -1) {
+            remainingCharacter.relationships.splice(relationshipIndex, 1);
+            }
+        }
         } else {
             console.log(`${character.name} is not in the party.`);
         }

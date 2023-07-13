@@ -74,6 +74,7 @@ export function playTurn() {
         } else {
             addEvent(`${character.name} died of hunger`);
             gameParty.removeCharacter(character);
+            updateRelationships(gameParty);
         }
     };
     if (gameParty.characters.length === 0) {
@@ -98,6 +99,24 @@ export function playTurn() {
             if (event === 'found food' || event === 'found medical') {
                 const item = event.split(' ')[1];
                 gameParty.inventory.push(item);
+            }
+            if (gameParty.inventory.includes('food')) {
+                const eventsDiv = document.getElementById('events');
+                for (const character of gameParty.characters) {
+                  const button = document.createElement('button');
+                  button.innerText = `Feed ${character.name}`;
+                  button.addEventListener('click', () => {
+                    const itemIndex = gameParty.inventory.indexOf('food');
+                    if (itemIndex !== -1) {
+                      gameParty.inventory.splice(itemIndex, 1);
+                      character.hunger += 1;
+                      addEvent(`${character.name} ate some food`);
+                      eventsDiv.querySelectorAll('button').forEach(button => button.remove());
+                      character.updateCharacter();
+                    }
+                  });
+                  eventsDiv.appendChild(button);
+                }
             }
             if (event === 'found a weapon') {
                 const item = event.split(' ')[2];
