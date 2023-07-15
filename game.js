@@ -49,11 +49,11 @@ const enemy = [
 ];
 
 const events = [
-    'found food',
-    'found medical supplies',
-    'found a weapon',
-    'found an enemy',
-    'found a friend'
+    'found food', // x2
+    'found medical supplies', // x1
+    'found a weapon', // x0.5
+    'found an enemy', // x1
+    'found a friend' // x0.5 
 ]
 
 import Party from './party.js';
@@ -88,67 +88,95 @@ export function playTurn() {
         } else {
             who = gameParty.characters[0].name;
         }
+        var event = `looks around`;
         // 90% chance of an event happening
         if (Math.random() < 0.9) {
-            // pick a random event
-            const event = events[Math.floor(Math.random() * events.length)];
+            const chance = Math.random();
+            // 40% chance to find food
+            if (chance <= 0.4) {
+                event = 'found food';
+                const foodType = food[Math.floor(Math.random() * food.length)];
+                addEvent(`${who} ${event} (${foodType[0]})`);
+            } 
+            if (chance > 0.4 && chance <= 0.6) {
+            // 20% chance to find medical supplies
+                event = 'found medical supplies';
+                const medicalType = medical[Math.floor(Math.random() * medical.length)];
+                addEvent(`${who} ${event} (${medicalType[0]})`);
+            } 
+            if (chance > 0.6 && chance <= 0.7) {
+            // 10% chance to find a weapon
+                event = 'found a weapon';
+                const weaponType = weapon[Math.floor(Math.random() * weapon.length)];
+                addEvent(`${who} ${event} (${weaponType[0]})`);
+            } 
+            // 20% chance to find an enemy
+            if (chance > 0.7 && chance <= 0.9) {
+                event = 'found an enemy';
+                const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
+                addEvent(`${who} ${event} (${enemyType[0]})`);
+            } 
+            // 10% chance to find a friend
+            if (chance > 0.9 & chance <= 1) {
+                event = 'found a friend';
+                addEvent(`${who} ${event}`);
+            }
+        } else {
             // output the event to the events div
             addEvent(`${who} ${event}`);
+        }
 
-            // Add found items to the party inventory
-            if (event === 'found food' || event === 'found medical') {
-                const item = event.split(' ')[1];
-                gameParty.inventory.push(item);
-            }
-            if (gameParty.inventory.includes('food')) {
-                const eventsDiv = document.getElementById('events');
-                for (const character of gameParty.characters) {
-                  const button = document.createElement('button');
-                  button.innerText = `Feed ${character.name}`;
-                  button.addEventListener('click', () => {
-                    const itemIndex = gameParty.inventory.indexOf('food');
-                    if (itemIndex !== -1) {
-                      gameParty.inventory.splice(itemIndex, 1);
-                      character.hunger += 1;
-                      addEvent(`${character.name} ate some food`);
-                      eventsDiv.querySelectorAll('button').forEach(button => button.remove());
-                      character.updateCharacter();
-                    }
-                  });
-                  eventsDiv.appendChild(button);
+        // Add found items to the party inventory
+        if (event === 'found food' || event === 'found medical') {
+            const item = event.split(' ')[1];
+            gameParty.inventory.push(item);
+        }
+        if (gameParty.inventory.includes('food')) {
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.querySelectorAll('button').forEach(button => button.remove());
+            for (const character of gameParty.characters) {
+                const button = document.createElement('button');
+                button.innerText = `Feed ${character.name}`;
+                button.addEventListener('click', () => {
+                const itemIndex = gameParty.inventory.indexOf('food');
+                if (itemIndex !== -1) {
+                    gameParty.inventory.splice(itemIndex, 1);
+                    character.hunger += 1;
+                    addEvent(`${character.name} ate some food`);
+                    eventsDiv.querySelectorAll('button').forEach(button => button.remove());
+                    character.updateCharacter();
                 }
+                });
+                eventsDiv.appendChild(button);
             }
-            if (event === 'found a weapon') {
-                const item = event.split(' ')[2];
-                const eventsDiv = document.getElementById('events');
-                for (const availableCharacter of gameParty.characters) {
-                    const button = document.createElement('button');
-                    button.innerText = `Give ${item} to ${availableCharacter.name}`;
-                    button.addEventListener('click', () => 
-                    {
-                        availableCharacter.inventory.push(item);
-                        addEvent(`${availableCharacter.name} picked up the ${item}`);
-                        eventsDiv.querySelectorAll('button').forEach(button => button.remove());
-                        availableCharacter.updateCharacter();
-                    });
-                    eventsDiv.appendChild(button);
-                }
+        }
+        if (event === 'found a weapon') {
+            const item = event.split(' ')[2];
+            const eventsDiv = document.getElementById('events');
+            for (const availableCharacter of gameParty.characters) {
+                const button = document.createElement('button');
+                button.innerText = `Give ${item} to ${availableCharacter.name}`;
+                button.addEventListener('click', () => 
+                {
+                    availableCharacter.inventory.push(item);
+                    addEvent(`${availableCharacter.name} picked up the ${item}`);
+                    eventsDiv.querySelectorAll('button').forEach(button => button.remove());
+                    availableCharacter.updateCharacter();
+                });
+                eventsDiv.appendChild(button);
             }
-            if (event == 'found an enemy') {
-                // select a random enemy from the enemy array
-                const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-                addEvent(`A ${enemyType[0]} has appeared!`);
+        }
+        if (event == 'found an enemy') {
+            // select a random enemy from the enemy array
+            const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
+            addEvent(`A ${enemyType[0]} has appeared!`);
+        }
+        if (event == 'found a friend') {
+            // add a character to the party if there is space
+            if (gameParty.characters.length < 4) {
+                addPlayer(gameParty);
             }
-            if (event == 'found a friend') {
-                // add a character to the party if there is space
-                if (gameParty.characters.length < 4) {
-                    addPlayer(gameParty);
-                }
-            }
-
-        }  else {
-            addEvent(`${who} looks around`);            
-        }  
+        }
     }
     gameParty.updateInventory();
     turnNumber += 1;
