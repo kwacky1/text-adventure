@@ -59,7 +59,6 @@ class Character {
 
   checkHunger() {
     this.hunger -= 1;
-    console.log(`${this.name} is ${hungerArray[this.hunger]}`);
     // Check if character died from hunger
     if (this.hunger < 0) {
       return false;
@@ -227,7 +226,7 @@ class Character {
     characterDiv.querySelector('.pos-trait').textContent = this.posTrait;
     characterDiv.querySelector('.neg-trait').textContent = this.negTrait;
     characterDiv.querySelector('.morale').textContent = moraleArray[this.morale];
-    characterDiv.querySelector('.hunger').textContent = hungerArray[this.hunger];
+    characterDiv.querySelector('.hunger').textContent = hungerArray[Math.round(this.hunger)];
     characterDiv.querySelector('.injury').textContent = injuries[this.injuryLevel];
   
     // Update inventory display
