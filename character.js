@@ -11,7 +11,7 @@ const hungerArray = [
     'full'
 ];
 
-const ageArray = [
+export const ageArray = [
     'teen',
     'adult',
     'elder'
@@ -43,13 +43,13 @@ const injuries = [
     'near death'
 ];
 
-class Character {
-  constructor(id, name, hunger, posTrait, negTrait) { 
-    this.id = id;
+export class Character {
+  constructor(name, age, posTrait, negTrait) { 
+    this.id = 0;
     this.name = name;
-    this.age = Math.floor(Math.random() * ageArray.length);;
+    this.age = age;
     this.morale = Math.floor(Math.random() * moraleArray.length);
-    this.hunger = hunger;
+    this.hunger = 7;
     this.injuryLevel = 1;
     this.posTrait = posTrait;
     this.negTrait = negTrait;
@@ -59,7 +59,6 @@ class Character {
 
   checkHunger() {
     this.hunger -= 1;
-    console.log(`${this.name} is ${hungerArray[this.hunger]}`);
     // Check if character died from hunger
     if (this.hunger < 0) {
       return false;
@@ -227,7 +226,7 @@ class Character {
     characterDiv.querySelector('.pos-trait').textContent = this.posTrait;
     characterDiv.querySelector('.neg-trait').textContent = this.negTrait;
     characterDiv.querySelector('.morale').textContent = moraleArray[this.morale];
-    characterDiv.querySelector('.hunger').textContent = hungerArray[this.hunger];
+    characterDiv.querySelector('.hunger').textContent = hungerArray[Math.round(this.hunger)];
     characterDiv.querySelector('.injury').textContent = injuries[this.injuryLevel];
   
     // Update inventory display
@@ -242,5 +241,3 @@ class Character {
     });
   }
 }
-
-export default Character;
