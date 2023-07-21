@@ -11,7 +11,7 @@ const hungerArray = [
     'full'
 ];
 
-const ageArray = [
+export const ageArray = [
     'teen',
     'adult',
     'elder'
@@ -43,13 +43,13 @@ const injuries = [
     'near death'
 ];
 
-class Character {
-  constructor(id, name, hunger, posTrait, negTrait) { 
-    this.id = id;
+export class Character {
+  constructor(name, age, posTrait, negTrait) { 
+    this.id = 0;
     this.name = name;
-    this.age = Math.floor(Math.random() * ageArray.length);;
+    this.age = age;
     this.morale = Math.floor(Math.random() * moraleArray.length);
-    this.hunger = hunger;
+    this.hunger = 7;
     this.injuryLevel = 1;
     this.posTrait = posTrait;
     this.negTrait = negTrait;
@@ -241,5 +241,3 @@ class Character {
     });
   }
 }
-
-export default Character;

@@ -57,7 +57,7 @@ const events = [
 ]
 
 import Party from './party.js';
-import Character from './character.js';
+import { Character, ageArray } from './character.js';
 
 let gameParty = null;
 
@@ -293,21 +293,21 @@ function addEvent(eventText) {
 
 async function addPlayer(party) {
     try {
-        const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
-        const data = await response.json();
-        const firstName = getName(data);
-        const hunger = 7;
-        const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
-        const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
-        const character = new Character(party.nextId, firstName, hunger, posTrait, negTrait );
-        party.addCharacter(character);
-        if (party.characters.length > 1) {
-            addEvent(`${character.name} has joined the party!`);
+        if (party.characters.length == 0) {
+            createCharacterForm();
         } else {
-            addEvent(`${character.name} has started the adventure!`);
+            const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+            const data = await response.json();
+            const firstName = getName(data);
+            const age = Math.floor(Math.random() * ageArray.length);
+            const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
+            const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
+            const character = new Character(firstName, age, posTrait, negTrait );
+            party.addCharacter(character);
+            addEvent(`${character.name} has joined the party!`);
+            character.createCharacter();
+            character.updateCharacter();
         }
-        character.createCharacter();
-        character.updateCharacter();
         updateRelationships(party);
     } catch (error) {
         console.error(error);
@@ -329,9 +329,109 @@ function updateRelationships(party) {
     }
 }
 
-function checkDeathEffects() {
-    for (const character of gameParty.characters) {
+function createCharacterForm() {
+    const formDiv = document.createElement('div');
+  
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = 'Name: ';
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameLabel.appendChild(nameInput);
+    formDiv.appendChild(nameLabel);
+  
+    const ageLabel = document.createElement('label');
+    ageLabel.textContent = 'Age: ';
+    const ageInput = document.createElement('select');
+    for (let i = 0; i < ageArray.length; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = ageArray[i];
+        ageInput.appendChild(option);
+      }  
+    ageLabel.appendChild(ageInput);
+    formDiv.appendChild(ageLabel);
+  
+    const posTraitsLabel = document.createElement('label');
+    posTraitsLabel.textContent = 'Positive Trait: ';
+    const posTraitsSelect = document.createElement('select');
+    for (const trait of posTraits) {
+      const option = document.createElement('option');
+      option.value = trait;
+      option.textContent = trait;
+      posTraitsSelect.appendChild(option);
+    }
+    posTraitsLabel.appendChild(posTraitsSelect);
+    formDiv.appendChild(posTraitsLabel);
+  
+    const negTraitsLabel = document.createElement('label');
+    negTraitsLabel.textContent = 'Negative Trait: ';
+    const negTraitsSelect = document.createElement('select');
+    for (const trait of negTraits) {
+      const option = document.createElement('option');
+      option.value = trait;
+      option.textContent = trait;
+      negTraitsSelect.appendChild(option);
+    }
+    negTraitsLabel.appendChild(negTraitsSelect);
+    formDiv.appendChild(negTraitsLabel);
 
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Create Character';
+    submitButton.addEventListener('click', () => {
+        const name = nameInput.value;
+        const age = ageInput.value;
+        const posTrait = posTraitsSelect.value;
+        const negTrait = negTraitsSelect.value;
+        const character = new Character(name, age, posTrait, negTrait);
+        formDiv.remove();
+            startGame().then((gameParty) => {
+                const playTurnButton = document.createElement('button');
+                playTurnButton.id = 'playTurnButton';
+                playTurnButton.textContent = 'Play Turn 1';
+                playTurnButton.addEventListener('click', () => {
+                    playTurn();
+                });
+                document.getElementById('gameButtons').appendChild(playTurnButton);
+                gameParty.addCharacter(character);
+                character.createCharacter();
+                character.updateCharacter();
+
+                addEvent(`${character.name} has started the adventure!`);
+            });
+    });
+    formDiv.appendChild(submitButton);
+    document.body.appendChild(formDiv);
+  }
+
+function checkDeathEffects(character) {
+// when a character dies check the relationships of the other characters and set moreale accordingly
+/*
+    ['enemies'], + 1
+    ['strangers'], no change
+    ['acquaintances'], - 1
+    ['friends'], - 2
+    ['family'] - 3
+*/
+    for (const remainingCharacter of gameParty.characters) {
+        if (remainingCharacter !== character) {
+            const relationshipIndex = remainingCharacter.relationships.findIndex(rel => rel.character == character)
+            const relationship = character.relationships[relationshipIndex].type[0];
+            if (relationship === 'friends') {
+                remainingCharacter.morale -= 2;
+            }
+            if (relationship === 'family') {
+                remainingCharacter.morale -= 3;
+            }
+            if (relationship === 'acquaintances') {
+                remainingCharacter.morale -= 1;
+            }
+            if (relationship === 'enemies') {
+                remainingCharacter.morale += 1;
+            }
+            remainingCharacter.capAttributes();
+        }
+    }
+}
 
 function getName(data) {
     return data.results[0].name.first;
@@ -340,14 +440,16 @@ function getName(data) {
 async function startGame() {
     if (!gameParty) {
         gameParty = new Party();
-        await addPlayer(gameParty);
+        //await addPlayer(gameParty);
     }
     return gameParty;
 }
 
-startGame().then((gameParty) => {
+createCharacterForm();
+
+/* startGame().then((gameParty) => {
     const playTurnButton = document.getElementById('playTurnButton');
     playTurnButton.addEventListener('click', () => {
         playTurn();
     });
-});
+}); */
