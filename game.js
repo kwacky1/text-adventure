@@ -57,7 +57,7 @@ const events = [
 ]
 
 import Party from './party.js';
-import { Character, ageArray } from './character.js';
+import { Character, ageArray, hungerArray } from './character.js';
 
 let gameParty = null;
 
@@ -82,7 +82,7 @@ export function playTurn() {
     if (gameParty.characters.length === 0) {
         const playTurnButton = document.getElementById('playTurnButton');
         // output character is dead to the events div
-        addEvent('Everyone is dead');
+        addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
         playTurnButton.remove()
     } else {
         if (gameParty.characters.length > 1) {
@@ -119,9 +119,31 @@ export function playTurn() {
                 addEvent(`${who} ${event} (${enemyType[0]})`);
             } 
             // 10% chance to find a friend
-            if (chance > 0.9 & chance <= 1) {
-                event = 'found a friend';
-                addEvent(`${who} ${event}`);
+            if ((chance > 0.9 && chance <= 1) && gameParty.characters.length < 4) {
+                event = 'You are approached by an adventurer who wants to join your party.';
+                const friendDiv = document.createElement('div');
+                friendDiv.textContent = event;
+                const acceptButton = document.createElement('button');
+                acceptButton.textContent = 'Accept';
+                acceptButton.addEventListener('click', () => {
+                    if (gameParty.characters.length < 4) {
+                        addPlayer(gameParty);
+                    }
+                  friendDiv.remove();
+                  acceptButton.remove();
+                  declineButton.remove();
+                });
+                const declineButton = document.createElement('button');
+                declineButton.textContent = 'Decline';
+                declineButton.addEventListener('click', () => {
+                  addEvent(`The adventurer walks away.`);
+                  friendDiv.remove();
+                  acceptButton.remove();
+                  declineButton.remove();
+                });
+                document.getElementById('gameButtons').appendChild(friendDiv);
+                document.getElementById('gameButtons').appendChild(acceptButton);
+                document.getElementById('gameButtons').appendChild(declineButton);
             }
         } else {
             // output the event to the events div
@@ -143,7 +165,7 @@ export function playTurn() {
                   if (gameParty.inventory.some(item => foodItem.includes(item))) {
                     for (const character of gameParty.characters) {
                       const button = document.createElement('button');
-                      button.innerText = `Feed ${character.name} ${foodItem[0]}`;
+                      button.innerText = `Feed ${character.name} (${hungerArray[Math.round(character.hunger)]}) ${foodItem[0]}`;
                       button.addEventListener('click', () => {
                         const itemIndex = gameParty.inventory.findIndex(item => foodItem.includes(item));
                         if (itemIndex !== -1) {
@@ -189,17 +211,14 @@ export function playTurn() {
             const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
             addEvent(`A ${enemyType[0]} has appeared!`);
         }
-        if (event == 'found a friend') {
-            // add a character to the party if there is space
-            if (gameParty.characters.length < 4) {
-                addPlayer(gameParty);
-            }
-        }
+
     }
     gameParty.updateInventory();
     turnNumber += 1;
     const playTurnButton = document.getElementById('playTurnButton');
-    playTurnButton.innerText = `Play Turn ${turnNumber}`;
+    if (playTurnButton) {
+        playTurnButton.innerText = `Play Turn ${turnNumber}`;
+    }
 
     function checkNegTraitEvents(character) {
         if (character.negTrait === 'vulnerable') {
@@ -285,10 +304,14 @@ export function playTurn() {
 }
 
 function addEvent(eventText) {
-    const eventsDiv = document.getElementById('events');
-    const eventItem = document.createElement('li');
-    eventItem.textContent = eventText;
-    eventsDiv.insertBefore(eventItem, eventsDiv.firstChild);
+    const currentEventDiv = document.getElementById('currentEvent');
+    if (currentEventDiv.textContent !== '') {
+        const eventLogDiv = document.getElementById('eventLog');
+        const eventItem = document.createElement('li');
+        eventItem.textContent = currentEventDiv.textContent;
+        eventLogDiv.insertBefore(eventItem, eventLogDiv.firstChild);
+    }
+    currentEventDiv.textContent = eventText;
 }
 
 async function addPlayer(party) {

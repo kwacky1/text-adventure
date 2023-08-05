@@ -1,0 +1,5 @@
+#eventLog {
+    height: 100px;
+    overflow: scroll;
+    width: 40%;
+}

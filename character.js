@@ -1,4 +1,4 @@
-const hungerArray = [
+export const hungerArray = [
     'near death',
     'near death',
     'starving',
@@ -221,6 +221,7 @@ export class Character {
   }
 
   updateCharacter() {
+    this.capAttributes();
     const characterDiv = document.getElementById(this.name);
     characterDiv.querySelector('.age').textContent = ageArray[this.age];
     characterDiv.querySelector('.pos-trait').textContent = this.posTrait;
