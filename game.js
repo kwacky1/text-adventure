@@ -37,7 +37,7 @@ const food = [
     ['first aid kit', 4]
  ];
 
- const weapon = [
+ const weaponArray = [
     ['fist', 1],
     ['stick', 2],
     ['knife', 3],
@@ -65,20 +65,7 @@ export function playTurn() {
     var who = "The party";
     var foodType = "";
     console.log(`Turn ${turnNumber}`);
-    for (const character of gameParty.characters) {
-        if (character.checkHunger()) {
-            checkPosTraitEvents(character);
-            checkNegTraitEvents(character);
-            // Make sure attributes are within bounds
-            character.capAttributes();
-    
-        } else {
-            addEvent(`${character.name} died of hunger`);
-            checkDeathEffects(character);
-            gameParty.removeCharacter(character);
-            updateRelationships(gameParty);
-        }
-    };
+    updateParty();
     if (gameParty.characters.length === 0) {
         const playTurnButton = document.getElementById('playTurnButton');
         // output character is dead to the events div
@@ -96,54 +83,23 @@ export function playTurn() {
             const chance = Math.random();
             // 40% chance to find food
             if (chance <= 0.4) {
-                event = 'found food';
-                foodType = food[Math.floor(Math.random() * food.length)];
-                addEvent(`${who} ${event} (${foodType[0]})`);
+                foundFood();
             } 
-            if (chance > 0.4 && chance <= 0.6) {
             // 20% chance to find medical supplies
-                event = 'found medical supplies';
-                const medicalType = medical[Math.floor(Math.random() * medical.length)];
-                addEvent(`${who} ${event} (${medicalType[0]})`);
+            if (chance > 0.4 && chance <= 0.6) {
+                foundMedical();
             } 
-            if (chance > 0.6 && chance <= 0.7) {
             // 10% chance to find a weapon
-                event = 'found a weapon';
-                const weaponType = weapon[Math.floor(Math.random() * weapon.length)];
-                addEvent(`${who} ${event} (${weaponType[0]})`);
+            if (chance > 0.6 && chance <= 0.7) {
+                foundWeapon();
             } 
             // 20% chance to find an enemy
             if (chance > 0.7 && chance <= 0.9) {
-                event = 'found an enemy';
-                const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-                addEvent(`${who} ${event} (${enemyType[0]})`);
+                foundEnemy();
             } 
             // 10% chance to find a friend
             if ((chance > 0.9 && chance <= 1) && gameParty.characters.length < 4) {
-                event = 'You are approached by an adventurer who wants to join your party.';
-                const friendDiv = document.createElement('div');
-                friendDiv.textContent = event;
-                const acceptButton = document.createElement('button');
-                acceptButton.textContent = 'Accept';
-                acceptButton.addEventListener('click', () => {
-                    if (gameParty.characters.length < 4) {
-                        addPlayer(gameParty);
-                    }
-                  friendDiv.remove();
-                  acceptButton.remove();
-                  declineButton.remove();
-                });
-                const declineButton = document.createElement('button');
-                declineButton.textContent = 'Decline';
-                declineButton.addEventListener('click', () => {
-                  addEvent(`The adventurer walks away.`);
-                  friendDiv.remove();
-                  acceptButton.remove();
-                  declineButton.remove();
-                });
-                document.getElementById('gameButtons').appendChild(friendDiv);
-                document.getElementById('gameButtons').appendChild(acceptButton);
-                document.getElementById('gameButtons').appendChild(declineButton);
+                foundFriend();
             }
         } else {
             // output the event to the events div
@@ -191,20 +147,6 @@ export function playTurn() {
               }
         }
         if (event === 'found a weapon') {
-            const item = event.split(' ')[2];
-            const weaponDiv = document.getElementById('weaponButtons');
-            for (const availableCharacter of gameParty.characters) {
-                const button = document.createElement('button');
-                button.innerText = `Give ${item} to ${availableCharacter.name}`;
-                button.addEventListener('click', () => 
-                {
-                    availableCharacter.inventory.push(item);
-                    addEvent(`${availableCharacter.name} picked up the ${item}`);
-                    weaponDiv.querySelectorAll('button').forEach(button => button.remove());
-                    availableCharacter.updateCharacter();
-                });
-                weaponDiv.appendChild(button);
-            }
         }
         if (event == 'found an enemy') {
             // select a random enemy from the enemy array
@@ -218,6 +160,138 @@ export function playTurn() {
     const playTurnButton = document.getElementById('playTurnButton');
     if (playTurnButton) {
         playTurnButton.innerText = `Play Turn ${turnNumber}`;
+    }
+
+    function updateParty() {
+        for (const character of gameParty.characters) {
+            if (character.checkHunger()) {
+                checkPosTraitEvents(character);
+                checkNegTraitEvents(character);
+                // Make sure attributes are within bounds
+                character.capAttributes();
+
+            } else {
+                addEvent(`${character.name} died of hunger`);
+                checkDeathEffects(character);
+                gameParty.removeCharacter(character);
+                updateRelationships(gameParty);
+            }
+        };
+    }
+
+    function foundFriend() {
+        event = 'You are approached by an adventurer who wants to join your party.';
+        const friendDiv = document.createElement('div');
+        friendDiv.textContent = event;
+        const acceptButton = document.createElement('button');
+        acceptButton.textContent = 'Accept';
+        acceptButton.addEventListener('click', () => {
+            if (gameParty.characters.length < 4) {
+                addPlayer(gameParty);
+            }
+            friendDiv.remove();
+            acceptButton.remove();
+            declineButton.remove();
+        });
+        const declineButton = document.createElement('button');
+        declineButton.textContent = 'Decline';
+        declineButton.addEventListener('click', () => {
+            addEvent(`The adventurer walks away.`);
+            friendDiv.remove();
+            acceptButton.remove();
+            declineButton.remove();
+        });
+        document.getElementById('gameButtons').appendChild(friendDiv);
+        document.getElementById('gameButtons').appendChild(acceptButton);
+        document.getElementById('gameButtons').appendChild(declineButton);
+    }
+
+    function foundEnemy() {
+        event = 'found an enemy';
+        const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
+        addEvent(`${who} ${event} (${enemyType[0]})`);
+        const attackButton = document.createElement('button');
+        attackButton.textContent = 'Attack';
+        attackButton.addEventListener('click', () => {
+            let totalDamage = 0;
+            gameParty.characters.forEach((character) => {
+                const weaponIndex = character.weapon;
+                if (weaponIndex !== null) {
+                    const weaponDamage = weapons[weaponIndex][1];
+                    totalDamage += weaponDamage;
+                }
+            });
+            if (totalDamage >= enemyType[1]) {
+                addEvent(`The enemy has been defeated!`);
+            } else {
+                addEvent(`The enemy has not been defeated.`);
+            }
+            attackButton.remove();
+            defendButton.remove();
+        });
+        const defendButton = document.createElement('button');
+        defendButton.textContent = 'Defend';
+        defendButton.addEventListener('click', () => {
+            addEvent(`The enemy has been defended against.`);
+            attackButton.remove();
+            defendButton.remove();
+        });
+        document.getElementById('gameButtons').appendChild(attackButton);
+        document.getElementById('gameButtons').appendChild(defendButton);
+    }
+
+    function foundWeapon() {
+        const weaponType = weaponArray[Math.floor(Math.random() * (weaponArray.length - 1)) + 1];
+        const weapon = weaponType[0];
+        const damage = weaponType[1];
+        event = `found a ${weapon}`;
+        addEvent(`${who} ${event}`);
+        const weaponDiv = document.getElementById('weaponButtons');
+        for (const character of gameParty.characters) {
+            const button = document.createElement('button');
+            // if character has a weapon, replace it
+            if (character.weapon !== null) {
+                const oldWeapon = weaponArray[character.weapon];
+                const oldWeaponType = oldWeapon[0];
+                const oldDamage = oldWeapon[1];
+                if (oldDamage < damage) {
+                    button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
+                    button.addEventListener('click', () =>
+                    {
+                        character.inventory.push(weaponType);
+                        character.inventory.splice(character.inventory.indexOf(oldWeapon), 1);
+                        character.weapon = weaponArray.indexOf(oldWeapon);
+                        addEvent(`${character.name} replaced the ${oldWeaponType} with the ${weapon}`);
+                        weaponDiv.querySelectorAll('button').forEach(button => button.remove());
+                        character.updateCharacter();
+                    });
+                    weaponDiv.appendChild(button);
+                } 
+            } else {
+                button.innerText = `Give ${weapon} (${damage} damage) to ${character.name}`;
+                button.addEventListener('click', () => 
+                {
+                    character.inventory.push(weaponType);
+                    character.weapon = weaponArray.indexOf(weaponType);
+                    addEvent(`${character.name} picked up the ${weapon}`);
+                    weaponDiv.querySelectorAll('button').forEach(button => button.remove());
+                    character.updateCharacter();
+                });
+                weaponDiv.appendChild(button);
+            }
+        }
+}
+
+    function foundMedical() {
+        event = 'found medical supplies';
+        const medicalType = medical[Math.floor(Math.random() * medical.length)];
+        addEvent(`${who} ${event} (${medicalType[0]})`);
+    }
+
+    function foundFood() {
+        event = 'found food';
+        foodType = food[Math.floor(Math.random() * food.length)];
+        addEvent(`${who} ${event} (${foodType[0]})`);
     }
 
     function checkNegTraitEvents(character) {
@@ -352,15 +426,20 @@ function updateRelationships(party) {
     }
 }
 
-function createCharacterForm() {
+async function createCharacterForm() {
     const formDiv = document.createElement('div');
-  
+    const form = document.createElement('form');  
+    const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+    const data = await response.json();
+    const firstName = getName(data);
+
     const nameLabel = document.createElement('label');
     nameLabel.textContent = 'Name: ';
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
+    nameInput.value = firstName;
     nameLabel.appendChild(nameInput);
-    formDiv.appendChild(nameLabel);
+    form.appendChild(nameLabel);
   
     const ageLabel = document.createElement('label');
     ageLabel.textContent = 'Age: ';
@@ -371,8 +450,9 @@ function createCharacterForm() {
         option.textContent = ageArray[i];
         ageInput.appendChild(option);
       }  
+    ageInput.selectedIndex = Math.floor(Math.random() * ageArray.length);
     ageLabel.appendChild(ageInput);
-    formDiv.appendChild(ageLabel);
+    form.appendChild(ageLabel);
   
     const posTraitsLabel = document.createElement('label');
     posTraitsLabel.textContent = 'Positive Trait: ';
@@ -383,8 +463,9 @@ function createCharacterForm() {
       option.textContent = trait;
       posTraitsSelect.appendChild(option);
     }
+    posTraitsSelect.selectedIndex = Math.floor(Math.random() * posTraits.length);
     posTraitsLabel.appendChild(posTraitsSelect);
-    formDiv.appendChild(posTraitsLabel);
+    form.appendChild(posTraitsLabel);
   
     const negTraitsLabel = document.createElement('label');
     negTraitsLabel.textContent = 'Negative Trait: ';
@@ -395,8 +476,9 @@ function createCharacterForm() {
       option.textContent = trait;
       negTraitsSelect.appendChild(option);
     }
+    negTraitsSelect.selectedIndex = Math.floor(Math.random() * negTraits.length);
     negTraitsLabel.appendChild(negTraitsSelect);
-    formDiv.appendChild(negTraitsLabel);
+    form.appendChild(negTraitsLabel);
 
     const submitButton = document.createElement('button');
     submitButton.textContent = 'Create Character';
@@ -407,22 +489,35 @@ function createCharacterForm() {
         const negTrait = negTraitsSelect.value;
         const character = new Character(name, age, posTrait, negTrait);
         formDiv.remove();
-            startGame().then((gameParty) => {
-                const playTurnButton = document.createElement('button');
-                playTurnButton.id = 'playTurnButton';
-                playTurnButton.textContent = 'Play Turn 1';
-                playTurnButton.addEventListener('click', () => {
-                    playTurn();
-                });
-                document.getElementById('gameButtons').appendChild(playTurnButton);
-                gameParty.addCharacter(character);
-                character.createCharacter();
-                character.updateCharacter();
-
-                addEvent(`${character.name} has started the adventure!`);
+        startGame().then((gameParty) => {
+            const playTurnButton = document.createElement('button');
+            playTurnButton.id = 'playTurnButton';
+            playTurnButton.textContent = 'Play Turn 1';
+            playTurnButton.addEventListener('click', () => {
+                playTurn();
             });
+            document.getElementById('gameButtons').appendChild(playTurnButton);
+            gameParty.addCharacter(character);
+            character.createCharacter();
+            character.updateCharacter();
+
+            addEvent(`${character.name} has started the adventure!`);
+        });
     });
-    formDiv.appendChild(submitButton);
+    form.appendChild(submitButton);
+
+    // Set focus on the name input field
+    nameInput.focus();
+
+    // Submit the form when Enter key is pressed in the name input field
+    nameInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      form.submit();
+    }
+    });
+
+    formDiv.appendChild(form);
     document.body.appendChild(formDiv);
   }
 

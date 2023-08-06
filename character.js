@@ -55,6 +55,7 @@ export class Character {
     this.negTrait = negTrait;
     this.relationships = [];
     this.inventory = [];
+    this.weapon = null;
   }
 
   checkHunger() {
@@ -103,11 +104,11 @@ export class Character {
 
   capAttributes() {
     // Morale can't exceeed excellent
-    if (this.morale > moraleArray.length) {
+    if (this.morale > moraleArray.length - 1) {
       this.morale = moraleArray.length - 1;
     }
     // Hunger can't exceed full
-    if (this.hunger > hungerArray.length) {
+    if (this.hunger > hungerArray.length - 1) {
       this.hunger = hungerArray.length - 1;
     }
     // Injury can't exceed fine
@@ -237,8 +238,12 @@ export class Character {
     inventoryList.appendChild(inventoryElement);
     this.inventory.forEach(item => {
       const itemElement = document.createElement('li');
-      itemElement.textContent = item;
-      inventoryElement.appendChild(itemElement);
+      if (Array.isArray(item)) {
+        itemElement.textContent = item[0];
+      } else {
+        itemElement.textContent = item;
+      }
+        inventoryElement.appendChild(itemElement);
     });
   }
 }
