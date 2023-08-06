@@ -62,12 +62,29 @@ import { Character, ageArray, hungerArray } from './character.js';
 let gameParty = null;
 
 export function playTurn() {
+    // Move current events to turnX div
+    const currentEventsDiv = document.getElementById('currentEvent')
+    const currentEvents = currentEventsDiv.textContent;
+    const eventsDiv = document.getElementById('events');
+    const eventItem = document.createElement('div');
+    eventItem.id = `turn${turnNumber}`;
+    if (turnNumber % 2 === 0) {
+        eventItem.classList.add('even');
+    } else { 
+        eventItem.classList.add('odd');
+    }
+    eventItem.textContent = currentEvents;
+    eventsDiv.insertBefore(eventItem, eventsDiv.children[1]);
+    currentEventsDiv.textContent = '';
+    // Begin new turn
     var who = "The party";
     var foodType = "";
     console.log(`Turn ${turnNumber}`);
     updateParty();
     if (gameParty.characters.length === 0) {
         const playTurnButton = document.getElementById('playTurnButton');
+        const partyInventoryDiv = document.getElementById('partyInventory');
+        partyInventoryDiv.remove();
         // output character is dead to the events div
         addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
         playTurnButton.remove()
@@ -103,7 +120,7 @@ export function playTurn() {
             }
         } else {
             // output the event to the events div
-            addEvent(`${who} ${event}`);
+            addEvent(`${who} ${event}.`);
         }
 
         // Add found items to the party inventory
@@ -132,9 +149,9 @@ export function playTurn() {
                             if (foodItem[0] === 'dessert') {
                                 character.morale += 2;
                                 character.capAttributes();
-                                addEvent(`${character.name} enjoyed the ${item}`);
+                                addEvent(`${character.name} enjoyed the ${item}.`);
                             } else {
-                                addEvent(`${character.name} ate the ${item}`);
+                                addEvent(`${character.name} ate the ${item}.`);
                             }
                           foodDiv.querySelectorAll('button').forEach(button => button.remove());
                           character.updateCharacter();
@@ -153,13 +170,12 @@ export function playTurn() {
             const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
             addEvent(`A ${enemyType[0]} has appeared!`);
         }
-
-    }
-    gameParty.updateInventory();
-    turnNumber += 1;
-    const playTurnButton = document.getElementById('playTurnButton');
-    if (playTurnButton) {
-        playTurnButton.innerText = `Play Turn ${turnNumber}`;
+        gameParty.updateInventory();
+        turnNumber += 1;
+        const playTurnButton = document.getElementById('playTurnButton');
+        if (playTurnButton) {
+            playTurnButton.innerText = `Play Turn ${turnNumber}`;
+        }
     }
 
     function updateParty() {
@@ -171,7 +187,7 @@ export function playTurn() {
                 character.capAttributes();
 
             } else {
-                addEvent(`${character.name} died of hunger`);
+                addEvent(`${character.name} died of hunger.`);
                 checkDeathEffects(character);
                 gameParty.removeCharacter(character);
                 updateRelationships(gameParty);
@@ -209,7 +225,6 @@ export function playTurn() {
     function foundEnemy() {
         event = 'found an enemy';
         const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-        addEvent(`${who} ${event} (${enemyType[0]})`);
         const attackButton = document.createElement('button');
         attackButton.textContent = 'Attack';
         attackButton.addEventListener('click', () => {
@@ -245,7 +260,7 @@ export function playTurn() {
         const weapon = weaponType[0];
         const damage = weaponType[1];
         event = `found a ${weapon}`;
-        addEvent(`${who} ${event}`);
+        addEvent(`${who} ${event}.`);
         const weaponDiv = document.getElementById('weaponButtons');
         for (const character of gameParty.characters) {
             const button = document.createElement('button');
@@ -260,8 +275,8 @@ export function playTurn() {
                     {
                         character.inventory.push(weaponType);
                         character.inventory.splice(character.inventory.indexOf(oldWeapon), 1);
-                        character.weapon = weaponArray.indexOf(oldWeapon);
-                        addEvent(`${character.name} replaced the ${oldWeaponType} with the ${weapon}`);
+                        character.weapon = weaponArray.indexOf(weaponType);
+                        addEvent(`${character.name} replaced the ${oldWeaponType} with the ${weapon}.`);
                         weaponDiv.querySelectorAll('button').forEach(button => button.remove());
                         character.updateCharacter();
                     });
@@ -273,7 +288,7 @@ export function playTurn() {
                 {
                     character.inventory.push(weaponType);
                     character.weapon = weaponArray.indexOf(weaponType);
-                    addEvent(`${character.name} picked up the ${weapon}`);
+                    addEvent(`${character.name} picked up the ${weapon}.`);
                     weaponDiv.querySelectorAll('button').forEach(button => button.remove());
                     character.updateCharacter();
                 });
@@ -285,13 +300,13 @@ export function playTurn() {
     function foundMedical() {
         event = 'found medical supplies';
         const medicalType = medical[Math.floor(Math.random() * medical.length)];
-        addEvent(`${who} ${event} (${medicalType[0]})`);
+        addEvent(`${who} ${event} (${medicalType[0]}).`);
     }
 
     function foundFood() {
         event = 'found food';
         foodType = food[Math.floor(Math.random() * food.length)];
-        addEvent(`${who} ${event} (${foodType[0]})`);
+        addEvent(`${who} ${event} (${foodType[0]}).`);
     }
 
     function checkNegTraitEvents(character) {
@@ -378,14 +393,13 @@ export function playTurn() {
 }
 
 function addEvent(eventText) {
+    let currentEvents = '';
     const currentEventDiv = document.getElementById('currentEvent');
     if (currentEventDiv.textContent !== '') {
-        const eventLogDiv = document.getElementById('eventLog');
-        const eventItem = document.createElement('li');
-        eventItem.textContent = currentEventDiv.textContent;
-        eventLogDiv.insertBefore(eventItem, eventLogDiv.firstChild);
+        currentEvents = currentEventDiv.textContent;
     }
-    currentEventDiv.textContent = eventText;
+    currentEvents += ' ' + eventText;
+    currentEventDiv.textContent = currentEvents.trim();
 }
 
 async function addPlayer(party) {

@@ -1,5 +1,17 @@
-#eventLog {
+#events {
     height: 100px;
     overflow: scroll;
     width: 40%;
+}
+
+div#currentEvent, div#gameButtons div {
+    background-color: #ccc;
+}
+
+#events div.odd {
+    background-color: #eee;
+}
+
+#events div.even {
+    background-color: #fff;
 }
