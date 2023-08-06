@@ -24,7 +24,7 @@ class Party {
                 // add relationship to existing characters
                 for (const existingCharacter of this.characters) {
                     if (existingCharacter !== character) {
-                        const relationshipType = relationships[Math.floor(Math.random() * relationships.length)];
+                        const relationshipType = relationships[1];
                         character.relationships.push({ type: relationshipType, character: existingCharacter });
                         console.log(`${character.name} and ${existingCharacter.name} are ${relationshipType}`);
                         existingCharacter.relationships.push({ type: relationshipType, character: character });
