@@ -57,7 +57,7 @@ const events = [
 ]
 
 import Party from './party.js';
-import { Character, ageArray, hungerArray } from './character.js';
+import { Character, ageArray, hungerArray, moraleArray, injuries } from './character.js';
 
 let gameParty = null;
 
@@ -343,6 +343,7 @@ export function playTurn() {
                 character.injuryLevel += 1;
             }
         }
+        updateStatBars(character);
     }
 
     function checkPosTraitEvents(character) {
@@ -424,6 +425,32 @@ async function addPlayer(party) {
         console.error(error);
     }
 }
+
+function updateStatBars(character) {
+    const moraleStat = document.getElementById('moraleStat');
+    const hungerStat = document.getElementById('hungerStat');
+    const injuryStat = document.getElementById('injuryStat');
+
+    const moraleValue = character.morale;
+    const hungerValue = character.hunger;
+    const injuryValue = character.injuryLevel;
+
+    const moralePercentage = (moraleValue / (moraleArray.length - 1)) * 100;
+    const hungerPercentage = (hungerValue / (hungerArray.length - 1)) * 100;
+    const maxInjuryValue = injuries.length - 1;
+    const injuryPercentage = ((maxInjuryValue - injuryValue) / maxInjuryValue) * 100;
+
+    moraleStat.style.setProperty('--width', `${moralePercentage}%`);
+    hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
+    injuryStat.style.setProperty('--width', `${injuryPercentage}%`);
+}
+
+// Example usage
+const character = {
+    health: 80,
+    strength: 60,
+    agility: 70
+};
 
 function updateRelationships(party) {
     for (const character of party.characters) {

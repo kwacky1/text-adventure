@@ -17,7 +17,7 @@ export const ageArray = [
     'elder'
 ];
 
-const moraleArray = [
+export const moraleArray = [
     'terrible',
     'terrible',
     'bad',
@@ -30,7 +30,7 @@ const moraleArray = [
     'excellent'
 ];
 
-const injuries = [
+export const injuries = [
     'fine',
     'fine',
     'slightly injured',
@@ -181,55 +181,70 @@ export class Character {
     const characterDiv = document.createElement('div');
     characterDiv.id = this.name;
     characterDiv.classList.add('character');
-  
+
     const nameElement = document.createElement('h2');
+    nameElement.classList.add('name');
     nameElement.textContent = this.name;
     characterDiv.appendChild(nameElement);
-  
-    const ageElement = document.createElement('p');
-    ageElement.innerHTML = `Age: <span class="age">${this.age}</span>`;
-    characterDiv.appendChild(ageElement);
-  
-    const posTraitElement = document.createElement('p');
+
+    const statsContainer = document.createElement('div');
+    statsContainer.id = 'playerStats';
+
+    const ageElement = document.createElement('div');
+    ageElement.classList.add('stat');
+    ageElement.classList.add('age');
+    ageElement.innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
+    statsContainer.appendChild(ageElement);
+
+    const posTraitElement = document.createElement('div');
+    posTraitElement.classList.add('stat');
+    posTraitElement.classList.add('pos-trait');
     posTraitElement.innerHTML = `Positive Trait: <span class="pos-trait">${this.posTrait}</span>`;
-    characterDiv.appendChild(posTraitElement);
-  
-    const negTraitElement = document.createElement('p');
+    statsContainer.appendChild(posTraitElement);
+
+    const negTraitElement = document.createElement('div');
+    negTraitElement.classList.add('stat');
+    negTraitElement.classList.add('neg-trait');
     negTraitElement.innerHTML = `Negative Trait: <span class="neg-trait">${this.negTrait}</span>`;
-    characterDiv.appendChild(negTraitElement);
+    statsContainer.appendChild(negTraitElement);
+
+    const moraleStat = document.createElement('div');
+    moraleStat.classList.add('stat');
+    moraleStat.id = 'moraleStat';
+    moraleStat.innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
+    statsContainer.appendChild(moraleStat);
+
+    const hungerStat = document.createElement('div');
+    hungerStat.classList.add('stat');
+    hungerStat.id = 'hungerStat';
+    hungerStat.innerHTML = `Hunger: <span class="statValue">${hungerArray[this.hunger]}</span>`;
+    statsContainer.appendChild(hungerStat);
+
+    const injuryStat = document.createElement('div');
+    injuryStat.classList.add('stat');
+    injuryStat.id = 'injuryStat';
+    injuryStat.innerHTML = `Injury: <span class="statValue">${injuries[this.injuryLevel]}</span>`;
+    statsContainer.appendChild(injuryStat);
   
-    const moraleElement = document.createElement('p');
-    moraleElement.innerHTML = `Morale: <span class="morale">${moraleArray[this.morale]}</span>`;
-    characterDiv.appendChild(moraleElement);
-  
-    const hungerElement = document.createElement('p');
-    hungerElement.innerHTML = `Hunger: <span class="hunger">${hungerArray[this.hunger]}</span>`;
-    characterDiv.appendChild(hungerElement);
-  
-    const injuryElement = document.createElement('p');
-    injuryElement.innerHTML = `Injury: <span class="injury">${injuries[this.injuryLevel]}</span>`;
-    characterDiv.appendChild(injuryElement);
-  
-    const relationshipsList = document.createElement('div');
-    relationshipsList.classList.add('relationships');
-    characterDiv.appendChild(relationshipsList);
-  
-    const inventoryElement = document.createElement('div');
-    inventoryElement.classList.add('inventory');
-    characterDiv.appendChild(inventoryElement);
-  
-    document.getElementById('characterList').appendChild(characterDiv);
+    characterDiv.appendChild(statsContainer);
+
+    const inventoryList = document.createElement('div');
+    inventoryList.classList.add('inventory');
+    inventoryList.innerHTML = `<p>Inventory for ${this.name}</p>`;
+    characterDiv.appendChild(inventoryList);
+
+    document.body.appendChild(characterDiv);
   }
 
   updateCharacter() {
     this.capAttributes();
     const characterDiv = document.getElementById(this.name);
-    characterDiv.querySelector('.age').textContent = ageArray[this.age];
-    characterDiv.querySelector('.pos-trait').textContent = this.posTrait;
-    characterDiv.querySelector('.neg-trait').textContent = this.negTrait;
-    characterDiv.querySelector('.morale').textContent = moraleArray[this.morale];
-    characterDiv.querySelector('.hunger').textContent = hungerArray[Math.round(this.hunger)];
-    characterDiv.querySelector('.injury').textContent = injuries[this.injuryLevel];
+    characterDiv.querySelector('.age').innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
+    characterDiv.querySelector('.pos-trait').innerHTML = `Positive Trait: <span class="statValue">${this.posTrait}</span>`;
+    characterDiv.querySelector('.neg-trait').innerHTML = `Negative Trait: <span class="statValue">${this.negTrait}</span>`;
+    characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
+    characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[this.hunger]}</span>`;
+    characterDiv.querySelector('#injuryStat').innerHTML = `Injury: <span class="statValue">${injuries[this.injuryLevel]}</span>`;
   
     // Update inventory display
     const inventoryList = characterDiv.querySelector('.inventory');
