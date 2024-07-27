@@ -515,6 +515,14 @@ async function createCharacterForm() {
             character.createCharacter();
             character.updateCharacter();
 
+            //unhide the buttons div
+            const buttonsDiv = document.getElementById('buttons');
+            buttonsDiv.style.display = 'block';
+
+            //unhide the events div
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.style.display = 'block';
+
             addEvent(`${character.name} has started the adventure!`);
         });
     });
