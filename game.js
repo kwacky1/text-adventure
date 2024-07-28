@@ -6,7 +6,6 @@ const posTraits = [
     'resilient',
     'satiated',
     'friendly',
-    'healer',
     'scavenger',
     'optimistic',
     'fighter'
@@ -17,7 +16,6 @@ const negTraits = [
     'hungry',
     'disconnected',
     'hypochondriac',
-    'hoarder',
     'depressed',
     'clumsy'
 ];
@@ -25,7 +23,7 @@ const negTraits = [
 const food = [
     ['rations', 0.5],
     ['snack', 1],
-    ['entree', 2],
+    ['dish', 2],
     ['meal', 3],
     ['dessert', 2] // dessert is a treat, so it's worth more also beneficial for morale TODO
  ];
@@ -333,8 +331,6 @@ export function playTurn() {
         if (character.negTrait === 'hypochondriac') {
             // TODO
         }
-        if (character.negTrait === 'hoarder') {
-        }
         if (character.negTrait === 'depressed') {
             // 10% chance of decreasing morale
             if (Math.random() < 0.1) {
@@ -368,18 +364,6 @@ export function playTurn() {
         }
         if (character.posTrait === 'friendly') {
             // TODO
-        }
-        if (character.posTrait === 'healer') {
-            // each turn, heal one other character
-            for (const hungryCharacter of gameParty.characters) {
-                if ((hungryCharacter.hunger > 2 || hungryCharacter.injuryLevel < 8) && hungryCharacter !== character) {
-                    character.hunger -= 1;
-                    character.injuryLevel -= 1;
-                    if (Math.random() < 0.1) {
-                        character.injuryLevel += 1;
-                    }
-                }
-            }
         }
         if (character.posTrait === 'scavenger') {
             // TODO
