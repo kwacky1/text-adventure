@@ -233,6 +233,11 @@ export class Character {
     inventoryList.innerHTML = `<p>Inventory for ${this.name}</p>`;
     characterDiv.appendChild(inventoryList);
 
+    const relationships = document.createElement('div');
+    relationships.classList.add('relationships');
+    relationships.innerHTML = `<p>Relationships for ${this.name}</p>`;
+    characterDiv.appendChild(relationships);
+
     document.body.appendChild(characterDiv);
   }
 
