@@ -15,3 +15,34 @@ div#currentEvent, div#gameButtons div {
 #events div.even {
     background-color: #fff;
 }
+
+#playerStats {
+    width: 300px;
+    margin: 20px;
+}
+
+.stat {
+    position: relative;
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    background-size: 0% 100%; 
+}
+
+.statValue {
+    position: absolute;
+    right: 10px;
+}
+
+.stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    /* background-color: rgba(0, 128, 0, 0.5); /* Green color with transparency */
+    background-color: var(--background-color);
+    background-size: inherit; /* Inherit the background-size from .stat */
+    width: var(--width, 0); /* Use the custom property */
+}
