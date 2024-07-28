@@ -225,32 +225,39 @@ export function playTurn() {
 
     function foundEnemy() {
         event = 'found an enemy';
+        const playTurnButton = document.getElementById('playTurnButton');
+        playTurnButton.style.display = 'none';
         const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
         const attackButton = document.createElement('button');
         attackButton.textContent = 'Attack';
+        let totalDamage = 0;
         attackButton.addEventListener('click', () => {
-            let totalDamage = 0;
             gameParty.characters.forEach((character) => {
                 const weaponIndex = character.weapon;
                 if (weaponIndex !== null) {
-                    const weaponDamage = weapons[weaponIndex][1];
+                    const weaponDamage = weaponArray[weaponIndex][1];
                     totalDamage += weaponDamage;
+                    addEvent(`${character.name} hit the enemy for ${weaponDamage} damage.`);
+                } else {
+                    addEvent(`${character.name} has no weapon.`);
                 }
             });
             if (totalDamage >= enemyType[1]) {
                 addEvent(`The enemy has been defeated!`);
             } else {
+                addEvent('The enemy has taken ' + totalDamage + ' damage.');
                 addEvent(`The enemy has not been defeated.`);
             }
-            attackButton.remove();
-            defendButton.remove();
+            //attackButton.remove();
+            //defendButton.remove();
         });
         const defendButton = document.createElement('button');
         defendButton.textContent = 'Defend';
         defendButton.addEventListener('click', () => {
-            addEvent(`The enemy has been defended against.`);
+            addEvent(`You run away from the enemy.`);
             attackButton.remove();
             defendButton.remove();
+            playTurnButton.style.display = 'inline-block';
         });
         document.getElementById('gameButtons').appendChild(attackButton);
         document.getElementById('gameButtons').appendChild(defendButton);
