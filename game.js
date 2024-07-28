@@ -192,6 +192,7 @@ export function playTurn() {
                 gameParty.removeCharacter(character);
                 updateRelationships(gameParty);
             }
+            updateStatBars(character);
         };
     }
 
@@ -343,7 +344,6 @@ export function playTurn() {
                 character.injuryLevel += 1;
             }
         }
-        updateStatBars(character);
     }
 
     function checkPosTraitEvents(character) {
@@ -427,9 +427,10 @@ async function addPlayer(party) {
 }
 
 function updateStatBars(character) {
-    const moraleStat = document.getElementById('moraleStat');
-    const hungerStat = document.getElementById('hungerStat');
-    const injuryStat = document.getElementById('injuryStat');
+    const characterDiv = document.getElementById(character.name);
+    const moraleStat = characterDiv.querySelector('#moraleStat');
+    const hungerStat = characterDiv.querySelector('#hungerStat');
+    const injuryStat = characterDiv.querySelector('#injuryStat');
 
     const moraleValue = character.morale;
     const hungerValue = character.hunger;
@@ -444,13 +445,6 @@ function updateStatBars(character) {
     hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
     injuryStat.style.setProperty('--width', `${injuryPercentage}%`);
 }
-
-// Example usage
-const character = {
-    health: 80,
-    strength: 60,
-    agility: 70
-};
 
 function updateRelationships(party) {
     for (const character of party.characters) {
