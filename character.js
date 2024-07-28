@@ -217,7 +217,7 @@ export class Character {
     const hungerStat = document.createElement('div');
     hungerStat.classList.add('stat');
     hungerStat.id = 'hungerStat';
-    hungerStat.innerHTML = `Hunger: <span class="statValue">${hungerArray[this.hunger]}</span>`;
+    hungerStat.innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
     statsContainer.appendChild(hungerStat);
 
     const injuryStat = document.createElement('div');
@@ -248,7 +248,7 @@ export class Character {
     characterDiv.querySelector('.pos-trait').innerHTML = `Positive Trait: <span class="statValue">${this.posTrait}</span>`;
     characterDiv.querySelector('.neg-trait').innerHTML = `Negative Trait: <span class="statValue">${this.negTrait}</span>`;
     characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
-    characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[this.hunger]}</span>`;
+    characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
     characterDiv.querySelector('#injuryStat').innerHTML = `Injury: <span class="statValue">${injuries[this.injuryLevel]}</span>`;
   
     // Update inventory display
