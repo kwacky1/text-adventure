@@ -41,7 +41,8 @@ div#currentEvent, div#gameButtons div {
     top: 0;
     left: 0;
     height: 100%;
-    background-color: rgba(0, 128, 0, 0.5); /* Green color with transparency */
+    /* background-color: rgba(0, 128, 0, 0.5); /* Green color with transparency */
+    background-color: var(--background-color);
     background-size: inherit; /* Inherit the background-size from .stat */
     width: var(--width, 0); /* Use the custom property */
 }

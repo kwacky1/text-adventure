@@ -444,6 +444,26 @@ function updateStatBars(character) {
     moraleStat.style.setProperty('--width', `${moralePercentage}%`);
     hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
     injuryStat.style.setProperty('--width', `${injuryPercentage}%`);
+
+    // Define threshold percentages
+    const lowThreshold = 30;
+    const mediumThreshold = 60;
+
+    // Function to determine background color based on percentage
+    function getBackgroundColor(percentage) {
+        if (percentage < lowThreshold) {
+            return "rgba(128, 0, 0, 0.5)";
+        } else if (percentage < mediumThreshold) {
+            return "rgba(128, 128, 0, 0.5)";
+        } else {
+            return "rgba(0, 128, 0, 0.5)";
+        }
+    }
+
+    // Set background color using CSS properties
+    moraleStat.style.setProperty('--background-color', getBackgroundColor(moralePercentage));
+    hungerStat.style.setProperty('--background-color', getBackgroundColor(hungerPercentage));
+    injuryStat.style.setProperty('--background-color', getBackgroundColor(injuryPercentage));
 }
 
 function updateRelationships(party) {
