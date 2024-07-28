@@ -44,7 +44,7 @@ export const injuries = [
 ];
 
 export class Character {
-  constructor(name, age, posTrait, negTrait) { 
+  constructor(name, age, posTrait, negTrait, skin, hair, shirt) { 
     this.id = 0;
     this.name = name;
     this.age = age;
@@ -55,7 +55,10 @@ export class Character {
     this.negTrait = negTrait;
     this.relationships = [];
     this.inventory = [];
-    this.weapon = null;
+    this.weapon = 0;
+    this.skin = skin;
+    this.hair = hair;
+    this.shirt = shirt;
   }
 
   checkHunger() {
@@ -182,6 +185,49 @@ export class Character {
     characterDiv.id = this.name;
     characterDiv.classList.add('character');
 
+    // Avatar preview container
+    const avatarContainer = document.createElement('div');
+    avatarContainer.className = 'avatar';
+    avatarContainer.style.position = 'relative';
+
+    // Skin preview
+    const skinPreview = document.createElement('img');
+    skinPreview.src = this.skin; 
+    skinPreview.alt = 'Skin Preview';
+    skinPreview.style.position = 'absolute';
+    skinPreview.style.top = '0';
+    skinPreview.style.left = '112px';
+    skinPreview.width = 88; // 4x upscale
+    skinPreview.height = 88; // 4x upscale
+    skinPreview.style.imageRendering = 'pixelated';
+    avatarContainer.appendChild(skinPreview);
+
+    // Hair preview
+    const hairPreview = document.createElement('img');
+    hairPreview.src = this.hair;
+    hairPreview.alt = 'Hair Preview';
+    hairPreview.style.position = 'absolute';
+    hairPreview.style.top = '0';
+    hairPreview.style.left = '112px';
+    hairPreview.width = 88; // 4x upscale
+    hairPreview.height = 88; // 4x upscale
+    hairPreview.style.imageRendering = 'pixelated';
+    avatarContainer.appendChild(hairPreview);
+
+    // shirt preview
+    const shirtPreview = document.createElement('img');
+    shirtPreview.src = this.shirt;
+    shirtPreview.alt = 'shirt Preview';
+    shirtPreview.style.position = 'absolute';
+    shirtPreview.style.top = '0';
+    shirtPreview.style.left = '112px';
+    shirtPreview.width = 88; // 4x upscale
+    shirtPreview.height = 88; // 4x upscale
+    shirtPreview.style.imageRendering = 'pixelated';
+    avatarContainer.appendChild(shirtPreview);
+    
+    characterDiv.appendChild(avatarContainer);
+
     const nameElement = document.createElement('h2');
     nameElement.classList.add('name');
     nameElement.textContent = this.name;
@@ -237,7 +283,7 @@ export class Character {
     relationships.classList.add('relationships');
     relationships.innerHTML = `<p>Relationships for ${this.name}</p>`;
     characterDiv.appendChild(relationships);
-
+    
     document.body.appendChild(characterDiv);
   }
 

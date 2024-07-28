@@ -290,7 +290,7 @@ export function playTurn() {
                     weaponDiv.appendChild(button);
                 } 
             } else {
-                button.innerText = `Give ${weapon} (${damage} damage) to ${character.name}`;
+                button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
                 button.addEventListener('click', () => 
                 {
                     character.inventory.push(weaponType);
@@ -406,7 +406,14 @@ async function addPlayer(party) {
             const age = Math.floor(Math.random() * ageArray.length);
             const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
             const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
-            const character = new Character(firstName, age, posTrait, negTrait );
+            const skin = "img/skin" + (Math.floor(Math.random() * 4) + 1) +".png";
+            let hairColour = ['blonde', 'ginger', 'brown', 'red', 'black'];
+            let hairStyle = ['short', 'long'];
+            const hair = "img/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + (Math.floor(Math.random() * 2) + 1) + hairColour[Math.floor(Math.random() * hairColour.length)] + ".png";
+            let shirtColour = ['red', 'yellow', 'green', 'blue'];
+            let shirtStyle = ['shirt1', 'shirt2', 'shirt3', 'shirt4'];
+            const shirt = "img/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + shirtColour[Math.floor(Math.random() * shirtStyle.length)]+ ".png";
+            const character = new Character(firstName, age, posTrait, negTrait, skin, hair, shirt);
             party.addCharacter(character);
             addEvent(`${character.name} has joined the party!`);
             character.createCharacter();
@@ -610,9 +617,8 @@ async function createCharacterForm() {
 
     // Avatar preview container
     const avatarPreviewContainer = document.createElement('div');
+    avatarPreviewContainer.className = 'avatar';
     avatarPreviewContainer.style.position = 'relative';
-    avatarPreviewContainer.style.width = '88px'; // Set the width of the container (4x upscale)
-    avatarPreviewContainer.style.height = '88px'; // Set the height of the container (4x upscale)
 
     // Skin preview
     const skinPreview = document.createElement('img');
@@ -620,7 +626,7 @@ async function createCharacterForm() {
     skinPreview.alt = 'Skin Preview';
     skinPreview.style.position = 'absolute';
     skinPreview.style.top = '0';
-    skinPreview.style.left = '0';
+    skinPreview.style.left = '112px';
     skinPreview.width = 88; // 4x upscale
     skinPreview.height = 88; // 4x upscale
     skinPreview.style.imageRendering = 'pixelated';
@@ -632,7 +638,7 @@ async function createCharacterForm() {
     hairPreview.alt = 'Hair Preview';
     hairPreview.style.position = 'absolute';
     hairPreview.style.top = '0';
-    hairPreview.style.left = '0';
+    hairPreview.style.left = '112px';
     hairPreview.width = 88; // 4x upscale
     hairPreview.height = 88; // 4x upscale
     hairPreview.style.imageRendering = 'pixelated';
@@ -644,7 +650,7 @@ async function createCharacterForm() {
     shirtPreview.alt = 'shirt Preview';
     shirtPreview.style.position = 'absolute';
     shirtPreview.style.top = '0';
-    shirtPreview.style.left = '0';
+    shirtPreview.style.left = '112px';
     shirtPreview.width = 88; // 4x upscale
     shirtPreview.height = 88; // 4x upscale
     shirtPreview.style.imageRendering = 'pixelated';
@@ -682,7 +688,10 @@ async function createCharacterForm() {
         const age = ageInput.value;
         const posTrait = posTraitsSelect.value;
         const negTrait = negTraitsSelect.value;
-        const character = new Character(name, age, posTrait, negTrait);
+        const skin = "img/" + skinSelect.value;
+        const hair = "img/" + hairStyleSelect.value + hairColourSelect.value;
+        const shirt = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+        const character = new Character(name, age, posTrait, negTrait, skin, hair, shirt);
         formDiv.remove();
         startGame().then((gameParty) => {
             const playTurnButton = document.createElement('button');

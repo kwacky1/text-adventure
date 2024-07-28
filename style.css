@@ -65,3 +65,24 @@ form label input, form label select {
 form button {
     width: 312px;
 }
+
+.avatar {
+    width: 310px;
+    height: 100px;
+    margin: 0 0 10px;
+    border: 1px solid #ccc;
+}
+
+.avatar img {
+    width: 88px;
+    height: 88px;
+    left: 112px;
+}
+
+.name {
+    margin: -10px 0 10px;
+    text-align: center;
+    width: 310px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
