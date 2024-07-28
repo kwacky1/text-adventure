@@ -143,9 +143,9 @@ export function playTurn() {
                           const item = gameParty.inventory[itemIndex];
                           gameParty.inventory.splice(itemIndex, 1);
                           character.hunger += foodItem[1];
-                          // if the food is dessert add 2 morale
+                          // if the food is dessert add 1 morale
                             if (foodItem[0] === 'dessert') {
-                                character.morale += 2;
+                                character.morale += 1;
                                 character.capAttributes();
                                 addEvent(`${character.name} enjoyed the ${item}.`);
                             } else {
