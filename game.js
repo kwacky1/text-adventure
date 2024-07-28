@@ -3,7 +3,7 @@
 var turnNumber = 1;
 
 const posTraits = [
-    'resiliant',
+    'resilient',
     'satiated',
     'friendly',
     'healer',
@@ -347,7 +347,7 @@ export function playTurn() {
     }
 
     function checkPosTraitEvents(character) {
-        if (character.posTrait === 'resiliant') {
+        if (character.posTrait === 'resilient') {
             // 10% chance of healing
             if (Math.random() < 0.1) {
                 character.injuryLevel -= 1;
@@ -483,6 +483,11 @@ function updateRelationships(party) {
 
 async function createCharacterForm() {
     const formDiv = document.createElement('div');
+    const precis = document.createElement('p');
+
+    precis.textContent = 'Create a character to start the game.';
+    formDiv.appendChild(precis);
+
     const form = document.createElement('form');  
     const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
     const data = await response.json();
@@ -535,8 +540,150 @@ async function createCharacterForm() {
     negTraitsLabel.appendChild(negTraitsSelect);
     form.appendChild(negTraitsLabel);
 
+    // Avatar creation section
+    const avatarSection = document.createElement('div');
+    avatarSection.textContent = 'Create your avatar:';
+
+    // Skin selection
+    const skinLabel = document.createElement('label');
+    skinLabel.textContent = 'Skin: ';
+    const skinSelect = document.createElement('select');
+    const skinImages = ['skin1.png', 'skin2.png', 'skin3.png', 'skin4.png', 'skin5.png']; // Add your skin image filenames here
+    skinImages.forEach((skin, index) => {
+        const option = document.createElement('option');
+        option.value = skin;
+        option.textContent = `Skin ${index + 1}`;
+        skinSelect.appendChild(option);
+    });
+    skinLabel.appendChild(skinSelect);
+    avatarSection.appendChild(skinLabel);
+
+    // Hair style selection
+    const hairStyleLabel = document.createElement('label');
+    hairStyleLabel.textContent = 'Hairstyle: ';
+    const hairStyleSelect = document.createElement('select');
+    const hairStyleImages = ['short1', 'short2', 'long1', 'long2']; // Add your hairStyle image filenames here
+    hairStyleImages.forEach((hairStyle, index) => {
+        const option = document.createElement('option');
+        option.value = hairStyle;
+        option.textContent = hairStyleImages[index].charAt(0).toUpperCase() + hairStyleImages[index].slice(1);
+        hairStyleSelect.appendChild(option);
+    });
+    hairStyleLabel.appendChild(hairStyleSelect);
+    avatarSection.appendChild(hairStyleLabel);
+
+    // Hair colour selection
+    const hairColourLabel = document.createElement('label');
+    hairColourLabel.textContent = 'Hair Colour: ';
+    const hairColourSelect = document.createElement('select');
+    const hairColourImages = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png']; // Add your hairColour image filenames here
+    hairColourImages.forEach((hairColour, index) => {
+        const option = document.createElement('option');
+        option.value = hairColour;
+        // grab the name of the file before the .png
+        option.textContent = hairColourImages[index].split('.')[0].charAt(0).toUpperCase() + hairColourImages[index].split('.')[0].slice(1);        
+        hairColourSelect.appendChild(option);
+    });
+    hairColourLabel.appendChild(hairColourSelect);
+    avatarSection.appendChild(hairColourLabel);
+
+    // shirt style selection
+    const shirtStyleLabel = document.createElement('label');
+    shirtStyleLabel.textContent = 'Shirt Style: ';
+    const shirtStyleSelect = document.createElement('select');
+    const shirtStyleImages = ['shirt1', 'shirt2', 'shirt3', 'shirt4']; // Add your shirtStyle image filenames here
+    shirtStyleImages.forEach((shirtStyle, index) => {
+        const option = document.createElement('option');
+        option.value = shirtStyle;
+        option.textContent = shirtStyleImages[index].charAt(0).toUpperCase() + shirtStyleImages[index].slice(1);
+        shirtStyleSelect.appendChild(option);
+    });
+    shirtStyleLabel.appendChild(shirtStyleSelect);
+    avatarSection.appendChild(shirtStyleLabel);
+
+    // shirt colour selection
+    const shirtColourLabel = document.createElement('label');
+    shirtColourLabel.textContent = 'Shirt Colour: ';
+    const shirtColourSelect = document.createElement('select');
+    const shirtColourImages = ['red.png', 'yellow.png', 'green.png', 'blue.png']; // Add your shirtColour image filenames here
+    shirtColourImages.forEach((shirtColour, index) => {
+        const option = document.createElement('option');
+        option.value = shirtColour;
+        option.textContent = shirtColourImages[index].split('.')[0].charAt(0).toUpperCase() + shirtColourImages[index].split('.')[0].slice(1);
+        shirtColourSelect.appendChild(option);
+    });
+    shirtColourLabel.appendChild(shirtColourSelect);
+    avatarSection.appendChild(shirtColourLabel);
+
+    // Avatar preview container
+    const avatarPreviewContainer = document.createElement('div');
+    avatarPreviewContainer.style.position = 'relative';
+    avatarPreviewContainer.style.width = '88px'; // Set the width of the container (4x upscale)
+    avatarPreviewContainer.style.height = '88px'; // Set the height of the container (4x upscale)
+
+    // Skin preview
+    const skinPreview = document.createElement('img');
+    skinPreview.src = "img/" + skinImages[0]; // Default to the first skin image
+    skinPreview.alt = 'Skin Preview';
+    skinPreview.style.position = 'absolute';
+    skinPreview.style.top = '0';
+    skinPreview.style.left = '0';
+    skinPreview.width = 88; // 4x upscale
+    skinPreview.height = 88; // 4x upscale
+    skinPreview.style.imageRendering = 'pixelated';
+    avatarPreviewContainer.appendChild(skinPreview);
+
+    // Hair preview
+    const hairPreview = document.createElement('img');
+    hairPreview.src = "img/" + hairStyleImages[0] + hairColourImages[0]; // Default to the first hair image
+    hairPreview.alt = 'Hair Preview';
+    hairPreview.style.position = 'absolute';
+    hairPreview.style.top = '0';
+    hairPreview.style.left = '0';
+    hairPreview.width = 88; // 4x upscale
+    hairPreview.height = 88; // 4x upscale
+    hairPreview.style.imageRendering = 'pixelated';
+    avatarPreviewContainer.appendChild(hairPreview);
+
+    // shirt preview
+    const shirtPreview = document.createElement('img');
+    shirtPreview.src = "img/" + shirtStyleImages[0] + shirtColourImages[0]; // Default to the first shirt image
+    shirtPreview.alt = 'shirt Preview';
+    shirtPreview.style.position = 'absolute';
+    shirtPreview.style.top = '0';
+    shirtPreview.style.left = '0';
+    shirtPreview.width = 88; // 4x upscale
+    shirtPreview.height = 88; // 4x upscale
+    shirtPreview.style.imageRendering = 'pixelated';
+    avatarPreviewContainer.appendChild(shirtPreview);
+    
+    avatarSection.appendChild(avatarPreviewContainer);
+
+    // Event listeners to update previews
+    skinSelect.addEventListener('change', () => {
+        skinPreview.src = "img/" + skinSelect.value;
+    });
+
+    hairStyleSelect.addEventListener('change', () => {
+        hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
+    });
+
+    hairColourSelect.addEventListener('change', () => {
+        hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
+    });
+
+    shirtStyleSelect.addEventListener('change', () => {
+        shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+    });
+
+    shirtColourSelect.addEventListener('change', () => {
+        shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+    });
+
+    form.appendChild(avatarSection);
+
     const submitButton = document.createElement('button');
-    submitButton.textContent = 'Create Character';
+    submitButton.textContent = 'Start Game';
     submitButton.addEventListener('click', () => {
         const name = nameInput.value;
         const age = ageInput.value;

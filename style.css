@@ -46,3 +46,22 @@ div#currentEvent, div#gameButtons div {
     background-size: inherit; /* Inherit the background-size from .stat */
     width: var(--width, 0); /* Use the custom property */
 }
+
+form label {
+    display: block;
+    margin-bottom: 10px;
+    width: 300px;
+    position: relative;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+}
+
+form label input, form label select {
+    right: 10px;
+    position: absolute;
+}
+
+form button {
+    width: 312px;
+}
