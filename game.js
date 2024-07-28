@@ -242,12 +242,13 @@ export function playTurn() {
             });
             if (totalDamage >= enemyType[1]) {
                 addEvent(`The enemy has been defeated!`);
+                attackButton.remove();
+                defendButton.remove();
+                playTurnButton.style.display = 'inline-block';
             } else {
                 addEvent('The enemy has taken ' + totalDamage + ' damage.');
                 addEvent(`The enemy has not been defeated.`);
             }
-            //attackButton.remove();
-            //defendButton.remove();
         });
         const defendButton = document.createElement('button');
         defendButton.textContent = 'Defend';
@@ -425,6 +426,7 @@ function updateStatBars(character) {
 
     const moraleValue = character.morale;
     const hungerValue = character.hunger;
+    console.log("hunger value: " + character.hunger);
     const injuryValue = character.injuryLevel;
 
     const moralePercentage = (moraleValue / (moraleArray.length - 1)) * 100;
