@@ -290,7 +290,7 @@ export function playTurn() {
                     weaponDiv.appendChild(button);
                 } 
             } else {
-                button.innerText = `Give ${weapon} (${damage} damage) to ${character.name}`;
+                button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
                 button.addEventListener('click', () => 
                 {
                     character.inventory.push(weaponType);
