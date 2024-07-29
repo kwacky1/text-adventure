@@ -376,7 +376,7 @@ export function playTurn() {
             // 10% chance of increasing own morale
             if (Math.random() < 0.1) {
             character.morale += 1;
-            console.log(`${this.name} still thinks everything will be okay`);
+            console.log(`${character.name} still thinks everything will be okay`);
             }
             // Can't go below bad
             if (character.morale < 2) {
