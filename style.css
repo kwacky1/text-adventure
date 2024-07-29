@@ -76,7 +76,7 @@ form label input, form label select {
 }
 
 form button {
-    width: 312px;
+    width: 412px;
 }
 
 form select {
@@ -85,16 +85,19 @@ form select {
 }
 
 .avatar {
-    width: 310px;
+    width: 412px;
     height: 100px;
     margin: 0 0 10px;
     border: 1px solid #ccc;
 }
 
 .avatar img {
+    position: absolute;
+    top: 0;
     width: 88px;
     height: 88px;
-    left: 112px;
+    left: 162px;
+    image-rendering: pixelated;
 }
 
 .name {
