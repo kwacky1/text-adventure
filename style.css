@@ -1,3 +1,16 @@
+body, input, select, button {
+    font-family: "Sanchez", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 20px;
+  }
+  
+  .sanchez-regular-italic {
+    font-family: "Sanchez", serif;
+    font-weight: 400;
+    font-style: italic;
+  }
+
 #events {
     height: 300px;
     overflow: scroll;
@@ -50,7 +63,7 @@ div#currentEvent, div#gameButtons div {
 form label {
     display: block;
     margin-bottom: 10px;
-    width: 300px;
+    width: 400px;
     position: relative;
     padding: 5px;
     background-color: #f0f0f0;
@@ -64,6 +77,11 @@ form label input, form label select {
 
 form button {
     width: 312px;
+}
+
+form select {
+    width: 170px;
+    text-align: center;
 }
 
 .avatar {
@@ -86,3 +104,10 @@ form button {
     border: 1px solid #ccc;
     border-top: none;
 }
+
+#events div {
+    margin: 0 0 10px;
+    padding: 5px;
+}
+
+  
