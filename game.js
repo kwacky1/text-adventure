@@ -376,7 +376,7 @@ export function playTurn() {
             console.log(`${this.name} still thinks everything will be okay`);
             }
             // Can't go below bad
-            f (this.morale < 2) {
+            if (this.morale < 2) {
             this.morale += 2;
             console.log(`${this.name} clings on to hope`);
             }
