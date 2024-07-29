@@ -183,14 +183,13 @@ export function playTurn() {
                 checkNegTraitEvents(character);
                 // Make sure attributes are within bounds
                 character.capAttributes();
-
+                updateStatBars(character);
             } else {
                 addEvent(`${character.name} died of hunger.`);
                 checkDeathEffects(character);
                 gameParty.removeCharacter(character);
                 updateRelationships(gameParty);
             }
-            updateStatBars(character);
         };
     }
 
