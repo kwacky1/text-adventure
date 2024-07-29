@@ -375,13 +375,13 @@ export function playTurn() {
         if (character.posTrait === 'optimistic') {
             // 10% chance of increasing own morale
             if (Math.random() < 0.1) {
-            this.morale += 1;
+            character.morale += 1;
             console.log(`${this.name} still thinks everything will be okay`);
             }
             // Can't go below bad
-            if (this.morale < 2) {
-            this.morale += 2;
-            console.log(`${this.name} clings on to hope`);
+            if (character.morale < 2) {
+            character.morale += 2;
+            console.log(`${character.name} clings on to hope`);
             }
         }
         if (character.posTrait === 'fighter') {
