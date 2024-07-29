@@ -25,7 +25,7 @@ const food = [
     ['snack', 1],
     ['dish', 2],
     ['meal', 3],
-    ['dessert', 2] // dessert is a treat, so it's worth more also beneficial for morale TODO
+    ['dessert', 2] // dessert is a treat, so it's worth more also beneficial for morale
  ];
 
  const medical = [
@@ -323,7 +323,7 @@ export function playTurn() {
         if (character.negTrait === 'hungry') {
             // every other turn, hunger goes up
             if (turnNumber % 2 === 0) {
-                character.hunger -= 1;
+                character.hunger -= 0.5;
             }
         }
         if (character.negTrait === 'disconnected') {
@@ -335,7 +335,7 @@ export function playTurn() {
         if (character.negTrait === 'depressed') {
             // 10% chance of decreasing morale
             if (Math.random() < 0.1) {
-                gameParty.characters[Math.floor(Math.random() * gameParty.characters.length)].morale -= 1;
+                character.morale -= 1;
             }
             // Can't go above good
             if (character.morale > 7) {
@@ -360,7 +360,7 @@ export function playTurn() {
         if (character.posTrait === 'satiated') {
             // every other turn, hunger goes down
             if (turnNumber % 2 === 0) {
-                character.hunger += 1;
+                character.hunger += 0.5;
             }
         }
         if (character.posTrait === 'friendly') {
@@ -370,13 +370,15 @@ export function playTurn() {
             // TODO
         }
         if (character.posTrait === 'optimistic') {
-            // 10% chance of increasing morale
+            // 10% chance of increasing own morale
             if (Math.random() < 0.1) {
-                gameParty.characters[Math.floor(Math.random() * gameParty.characters.length)].morale += 1;
+            this.morale += 1;
+            console.log(`${this.name} still thinks everything will be okay`);
             }
             // Can't go below bad
-            if (character.morale < 2) {
-                character.morale += 2;
+            f (this.morale < 2) {
+            this.morale += 2;
+            console.log(`${this.name} clings on to hope`);
             }
         }
         if (character.posTrait === 'fighter') {

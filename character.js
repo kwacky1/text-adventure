@@ -48,9 +48,9 @@ export class Character {
     this.id = 0;
     this.name = name;
     this.age = age;
-    this.morale = Math.floor(Math.random() * moraleArray.length);
-    this.hunger = 7;
-    this.injuryLevel = 1;
+    this.morale = 6;
+    this.hunger = 9;
+    this.injuryLevel = 0;
     this.posTrait = posTrait;
     this.negTrait = negTrait;
     this.relationships = [];
@@ -62,7 +62,7 @@ export class Character {
   }
 
   checkHunger() {
-    this.hunger -= 1;
+    this.hunger -= 0.5;
     // Check if character died from hunger
     if (this.hunger < 0) {
       return false;
@@ -72,7 +72,7 @@ export class Character {
     }
   }
 
-  heal(otherCharacter) {
+/*  heal(otherCharacter) {
     if ((otherCharacter.hunger > 2 || otherCharacter.injuryLevel > 2) && otherCharacter !== this) {
       this.hunger -= 1;
       otherCharacter.injuryLevel -= 1;
@@ -81,23 +81,22 @@ export class Character {
       }
     }
     console.log(`${this.name} healed ${otherCharacter.name}`);
-  }
+  }*/
 
   scavenger() {
     // TODO
   }
 
   optimistic() {
-    // 10% chance of increasing morale
+    // 10% chance of increasing own morale
     if (Math.random() < 0.1) {
-      const otherCharacter = gameParty.characters[Math.floor(Math.random() * gameParty.characters.length)];
-      otherCharacter.morale += 1;
-      console.log(`${this.name} increased ${otherCharacter.name}'s morale`);
+      this.morale += 1;
+      console.log(`${this.name} still thinks everything will be okay`);
     }
     // Can't go below bad
     if (this.morale < 2) {
       this.morale += 2;
-      console.log(`${this.name} increased their own morale`);
+      console.log(`${this.name} clings on to hope`);
     }
   }
 
