@@ -480,7 +480,7 @@ function updateRelationships(party) {
         relationshipsDiv.appendChild(relationshipsList);
         for (const relationship of character.relationships) {
             const relationshipItem = document.createElement('li');
-            relationshipItem.textContent = `${relationship.type[0]} with ${relationship.character.name}`;
+            relationshipItem.textContent = `${character.name} and ${relationship.character.name} are ${relationship.type[0]}`;
             relationshipsList.appendChild(relationshipItem);
         }
     }
