@@ -103,7 +103,7 @@ form select {
 .name {
     margin: -10px 0 10px;
     text-align: center;
-    width: 310px;
+    width: 412px;
     border: 1px solid #ccc;
     border-top: none;
 }
@@ -111,6 +111,10 @@ form select {
 #events div {
     margin: 0 0 10px;
     padding: 5px;
+}
+
+#gameButtons {
+    margin: 20px;
 }
 
   

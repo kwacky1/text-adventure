@@ -193,36 +193,18 @@ export class Character {
     const skinPreview = document.createElement('img');
     skinPreview.src = this.skin; 
     skinPreview.alt = 'Skin Preview';
-    skinPreview.style.position = 'absolute';
-    skinPreview.style.top = '0';
-    skinPreview.style.left = '112px';
-    skinPreview.width = 88; // 4x upscale
-    skinPreview.height = 88; // 4x upscale
-    skinPreview.style.imageRendering = 'pixelated';
     avatarContainer.appendChild(skinPreview);
 
     // Hair preview
     const hairPreview = document.createElement('img');
     hairPreview.src = this.hair;
     hairPreview.alt = 'Hair Preview';
-    hairPreview.style.position = 'absolute';
-    hairPreview.style.top = '0';
-    hairPreview.style.left = '112px';
-    hairPreview.width = 88; // 4x upscale
-    hairPreview.height = 88; // 4x upscale
-    hairPreview.style.imageRendering = 'pixelated';
     avatarContainer.appendChild(hairPreview);
 
     // shirt preview
     const shirtPreview = document.createElement('img');
     shirtPreview.src = this.shirt;
     shirtPreview.alt = 'shirt Preview';
-    shirtPreview.style.position = 'absolute';
-    shirtPreview.style.top = '0';
-    shirtPreview.style.left = '112px';
-    shirtPreview.width = 88; // 4x upscale
-    shirtPreview.height = 88; // 4x upscale
-    shirtPreview.style.imageRendering = 'pixelated';
     avatarContainer.appendChild(shirtPreview);
     
     characterDiv.appendChild(avatarContainer);
