@@ -151,6 +151,10 @@ export function playTurn() {
                             } else {
                                 addEvent(`${character.name} ate the ${item}.`);
                             }
+                            // if the character is satiated, they get an extra 0.5 hunger
+                            if (character.posTrait === 'satiated') {
+                                character.hunger += 0.5;
+                            }
                           foodDiv.querySelectorAll('button').forEach(button => button.remove());
                           character.updateCharacter();
                         }
@@ -543,7 +547,7 @@ async function createCharacterForm() {
 
     // Avatar creation section
     const avatarSection = document.createElement('div');
-    avatarSection.textContent = 'Create your avatar:';
+    avatarSection.innerHTML = '<p>Create your avatar:</p>';
 
     // Skin selection
     const skinLabel = document.createElement('label');
@@ -625,36 +629,18 @@ async function createCharacterForm() {
     const skinPreview = document.createElement('img');
     skinPreview.src = "img/" + skinImages[0]; // Default to the first skin image
     skinPreview.alt = 'Skin Preview';
-    skinPreview.style.position = 'absolute';
-    skinPreview.style.top = '0';
-    skinPreview.style.left = '112px';
-    skinPreview.width = 88; // 4x upscale
-    skinPreview.height = 88; // 4x upscale
-    skinPreview.style.imageRendering = 'pixelated';
     avatarPreviewContainer.appendChild(skinPreview);
 
     // Hair preview
     const hairPreview = document.createElement('img');
     hairPreview.src = "img/" + hairStyleImages[0] + hairColourImages[0]; // Default to the first hair image
     hairPreview.alt = 'Hair Preview';
-    hairPreview.style.position = 'absolute';
-    hairPreview.style.top = '0';
-    hairPreview.style.left = '112px';
-    hairPreview.width = 88; // 4x upscale
-    hairPreview.height = 88; // 4x upscale
-    hairPreview.style.imageRendering = 'pixelated';
     avatarPreviewContainer.appendChild(hairPreview);
 
     // shirt preview
     const shirtPreview = document.createElement('img');
     shirtPreview.src = "img/" + shirtStyleImages[0] + shirtColourImages[0]; // Default to the first shirt image
     shirtPreview.alt = 'shirt Preview';
-    shirtPreview.style.position = 'absolute';
-    shirtPreview.style.top = '0';
-    shirtPreview.style.left = '112px';
-    shirtPreview.width = 88; // 4x upscale
-    shirtPreview.height = 88; // 4x upscale
-    shirtPreview.style.imageRendering = 'pixelated';
     avatarPreviewContainer.appendChild(shirtPreview);
     
     avatarSection.appendChild(avatarPreviewContainer);
@@ -735,9 +721,8 @@ async function createCharacterForm() {
   }
 
 function checkDeathEffects(character) {
-// when a character dies check the relationships of the other characters and set moreale accordingly
+// when a character dies check the relationships of the other characters and set morale accordingly
 /*
-    ['enemies'], + 1
     ['strangers'], no change
     ['acquaintances'], - 1
     ['friends'], - 2
@@ -755,9 +740,6 @@ function checkDeathEffects(character) {
             }
             if (relationship === 'acquaintances') {
                 remainingCharacter.morale -= 1;
-            }
-            if (relationship === 'enemies') {
-                remainingCharacter.morale += 1;
             }
             remainingCharacter.capAttributes();
         }
