@@ -92,29 +92,48 @@ export function playTurn() {
         } else {
             who = gameParty.characters[0].name;
         }
-        var event = `looks around`;
-        // 90% chance of an event happening
-        if (Math.random() < 0.9) {
-            const chance = Math.random();
-            // 40% chance to find food
-            if (chance <= 0.4) {
-                foundFood();
-            } 
-            // 20% chance to find medical supplies
-            if (chance > 0.4 && chance <= 0.6) {
-                foundMedical();
-            } 
-            // 10% chance to find a weapon
-            if (chance > 0.6 && chance <= 0.7) {
-                foundWeapon();
-            } 
-            // 20% chance to find an enemy
-            if (chance > 0.7 && chance <= 0.9) {
-                foundEnemy();
-            } 
-            // 10% chance to find a friend
-            if ((chance > 0.9 && chance <= 1) && gameParty.characters.length < 4) {
-                foundFriend();
+        var event = `moves on`;
+        const chance = Math.random();
+        var friendChance = 0.2;
+        var enemyChance = 0.1 + friendChance;
+        var itemChance = 0.4 + enemyChance;
+        var secondItem = 0 + itemChance;
+        if (gameParty.characters.length == 2) {
+            friendChance = 0.15;
+            enemyChance = 0.15 + friendChance;
+            itemChance = 0.45 + enemyChance;
+            secondItem = 0.05 + itemChance;
+        }
+        if (gameParty.characters.length == 3) {
+            friendChance = 0.1;
+            enemyChance = 0.2 + friendChance;
+            itemChance = 0.5 + enemyChance;
+            secondItem = 0.1 + itemChance;
+        }
+        if (gameParty.characters.length == 4) {
+            friendChance = 0.1;
+            enemyChance = 0.2 + friendChance;
+            itemChance = 0.55 + enemyChance;
+            secondItem = 0.15 + itemChance;
+        }
+        if ((chance <= friendChance) && gameParty.characters.length < 4) {
+            foundFriend();
+        } else if (chance > friendChance && chance <= enemyChance) {
+            foundEnemy();
+        } else if (chance > enemyChance && chance <= secondItem) {
+            var items = 1;
+            if (chance > itemChance && chance <= secondItem) {
+                items = 2;
+            }
+            for (var i = 0; i < items; i++) {
+                var whichItem = Math.random();
+                if (whichItem <= 0.33) {
+                    foundFood();
+                } else if (whichItem <= 0.67) {
+                    foundMedical();
+                } else {
+                    foundWeapon()
+                }
             }
         } else {
             // output the event to the events div
@@ -198,7 +217,7 @@ export function playTurn() {
     }
 
     function foundFriend() {
-        event = 'You are approached by an adventurer who wants to join your party.';
+        event = 'is approached by an adventurer who wants to join your party';
         const friendDiv = document.createElement('div');
         friendDiv.textContent = event;
         const acceptButton = document.createElement('button');
@@ -375,13 +394,13 @@ export function playTurn() {
         if (character.posTrait === 'optimistic') {
             // 10% chance of increasing own morale
             if (Math.random() < 0.1) {
-            this.morale += 1;
-            console.log(`${this.name} still thinks everything will be okay`);
+            character.morale += 1;
+            console.log(`${character.name} still thinks everything will be okay`);
             }
             // Can't go below bad
-            if (this.morale < 2) {
-            this.morale += 2;
-            console.log(`${this.name} clings on to hope`);
+            if (character.morale < 2) {
+            character.morale += 2;
+            console.log(`${character.name} clings on to hope`);
             }
         }
         if (character.posTrait === 'fighter') {
