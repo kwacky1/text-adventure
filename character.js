@@ -30,17 +30,17 @@ export const moraleArray = [
     'excellent'
 ];
 
-export const injuries = [
-    'fine',
-    'fine',
-    'slightly injured',
-    'slightly injured',
-    'badly injured',
-    'badly injured',
-    'gravely injured',
-    'gravely injured',
-    'near death',
-    'near death'
+export const healthArray = [
+  'near death',
+  'near death',
+  'gravely injured',
+  'gravely injured',
+  'badly injured',
+  'badly injured',
+  'slightly injured',
+  'slightly injured',
+  'fine',
+  'fine'
 ];
 
 export class Character {
@@ -50,7 +50,7 @@ export class Character {
     this.age = age;
     this.morale = 6;
     this.hunger = 9;
-    this.injuryLevel = 0;
+    this.health = 9;
     this.posTrait = posTrait;
     this.negTrait = negTrait;
     this.relationships = [];
@@ -71,17 +71,6 @@ export class Character {
       return true;
     }
   }
-
-/*  heal(otherCharacter) {
-    if ((otherCharacter.hunger > 2 || otherCharacter.injuryLevel > 2) && otherCharacter !== this) {
-      this.hunger -= 1;
-      otherCharacter.injuryLevel -= 1;
-      if (Math.random() < 0.1) {
-        otherCharacter.injuryLevel += 1;
-      }
-    }
-    console.log(`${this.name} healed ${otherCharacter.name}`);
-  }*/
 
   scavenger() {
     // TODO
@@ -113,9 +102,9 @@ export class Character {
     if (this.hunger > hungerArray.length - 1) {
       this.hunger = hungerArray.length - 1;
     }
-    // Injury can't exceed fine
-    if (this.injuryLevel < 0) {
-      this.injuryLevel = 0;
+    // Health can't exceed fine
+    if (this.health > 9) {
+      this.health = 9;
     }
     // Morale can't go below terrible
     if (this.morale < 0) {
@@ -123,36 +112,6 @@ export class Character {
     }
   }
 
-  /* update() {
-    const characterList = document.getElementById('characterList');
-    let characterItem = document.getElementById(`character-${this.id}`);
-    console.log(characterItem);
-    const html = `Name: ${this.name}, Age: ${ageArray[this.age]}, Morale: ${moraleArray[this.morale]}, Hunger: ${hungerArray[this.hunger]}, Injury Level: ${injuries[this.injuryLevel]}, Pos Trait: ${this.posTrait}, Neg Trait: ${this.negTrait}`;
-    if (characterItem) {
-        characterItem.innerHTML = html;
-          // Add item buttons for each item in inventory
-        this.inventory.forEach(item => {
-        const button = document.createElement('button');
-        button.classList.add('item-button');
-        button.innerText = `Use ${item}`;
-        button.addEventListener('click', () => {
-        this.useItem(item);
-    });
-    characterItem.appendChild(button);
-  });
-
-    } else {
-        const newCharacterItem = document.createElement('div');
-        newCharacterItem.id = `character-${this.id}`;
-        newCharacterItem.innerHTML = html;
-        const relationshipsList = document.createElement('ul');
-        relationshipsList.classList.add('relationships');
-        newCharacterItem.appendChild(relationshipsList);
-        characterList.appendChild(newCharacterItem);
-    }
-
-  }
- */
   useItem(itemName) {
     const index = this.inventory.indexOf(itemName);
     if (index === -1) {
@@ -165,7 +124,7 @@ export class Character {
         console.log(`${this.name} ate ${itemName}`);
         break;
       case 'medical':
-        this.injuryLevel -= 1;
+        this.health += 1;
         console.log(`${this.name} used ${itemName}`);
         break;
       case 'weapon':
@@ -247,11 +206,11 @@ export class Character {
     hungerStat.innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
     statsContainer.appendChild(hungerStat);
 
-    const injuryStat = document.createElement('div');
-    injuryStat.classList.add('stat');
-    injuryStat.id = 'injuryStat';
-    injuryStat.innerHTML = `Injury: <span class="statValue">${injuries[this.injuryLevel]}</span>`;
-    statsContainer.appendChild(injuryStat);
+    const healthStat = document.createElement('div');
+    healthStat.classList.add('stat');
+    healthStat.id = 'healthStat';
+    healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
+    statsContainer.appendChild(healthStat);
   
     characterDiv.appendChild(statsContainer);
 
@@ -276,7 +235,7 @@ export class Character {
     characterDiv.querySelector('.neg-trait').innerHTML = `Negative Trait: <span class="statValue">${this.negTrait}</span>`;
     characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
     characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
-    characterDiv.querySelector('#injuryStat').innerHTML = `Injury: <span class="statValue">${injuries[this.injuryLevel]}</span>`;
+    characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
   
     // Update inventory display
     const inventoryList = characterDiv.querySelector('.inventory');

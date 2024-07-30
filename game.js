@@ -55,7 +55,7 @@ const events = [
 ]
 
 import Party from './party.js';
-import { Character, ageArray, hungerArray, moraleArray, injuries } from './character.js';
+import { Character, ageArray, hungerArray, moraleArray, healthArray } from './character.js';
 
 let gameParty = null;
 
@@ -184,13 +184,6 @@ export function playTurn() {
                 }
               }
         }
-        if (event === 'found a weapon') {
-        }
-        if (event == 'found an enemy') {
-            // select a random enemy from the enemy array
-            const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-            addEvent(`A ${enemyType[0]} has appeared!`);
-        }
         gameParty.updateInventory();
         turnNumber += 1;
         const playTurnButton = document.getElementById('playTurnButton');
@@ -213,7 +206,7 @@ export function playTurn() {
                 gameParty.removeCharacter(character);
                 updateRelationships(gameParty);
             }
-            if (character.morale == 0 && gameParty.Party.characters.length > 1) {
+            if (character.morale == 0 && gameParty.characters.length > 1) {
                 addEvent(`${character.name} has lost all hope. They have left the party.`);
                 checkDeathEffects(character);
                 gameParty.removeCharacter(character);
@@ -254,8 +247,8 @@ export function playTurn() {
         const playTurnButton = document.getElementById('playTurnButton');
         playTurnButton.style.display = 'none';
         const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-        const attackButton = document.createElement('button');
-        attackButton.textContent = 'Attack';
+            const attackButton = document.createElement('button');
+            attackButton.textContent = 'Attack';
         let totalDamage = 0;
         attackButton.addEventListener('click', () => {
             gameParty.characters.forEach((character) => {
@@ -371,9 +364,9 @@ export function playTurn() {
             }
         }
         if (character.negTrait === 'clumsy') {
-            // 10% chance of increasing injury
+            // 10% chance of getting hurt
             if (Math.random() < 0.1) {
-                character.injuryLevel += 1;
+                character.healthLevel -= 1;
             }
         }
     }
@@ -382,7 +375,7 @@ export function playTurn() {
         if (character.posTrait === 'resilient') {
             // 10% chance of healing
             if (Math.random() < 0.1) {
-                character.injuryLevel -= 1;
+                character.healthLevel += 1;
             }
         }
         if (character.posTrait === 'satiated') {
@@ -459,21 +452,19 @@ function updateStatBars(character) {
     const characterDiv = document.getElementById(character.name);
     const moraleStat = characterDiv.querySelector('#moraleStat');
     const hungerStat = characterDiv.querySelector('#hungerStat');
-    const injuryStat = characterDiv.querySelector('#injuryStat');
+    const healthStat = characterDiv.querySelector('#healthStat');
 
     const moraleValue = character.morale;
     const hungerValue = character.hunger;
-    console.log("hunger value: " + character.hunger);
-    const injuryValue = character.injuryLevel;
+    const healthValue = character.health;
 
     const moralePercentage = (moraleValue / (moraleArray.length - 1)) * 100;
     const hungerPercentage = (hungerValue / (hungerArray.length - 1)) * 100;
-    const maxInjuryValue = injuries.length - 1;
-    const injuryPercentage = ((maxInjuryValue - injuryValue) / maxInjuryValue) * 100;
+    const healthPercentage = (healthValue / (healthArray.length - 1)) * 100;
 
     moraleStat.style.setProperty('--width', `${moralePercentage}%`);
     hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
-    injuryStat.style.setProperty('--width', `${injuryPercentage}%`);
+    healthStat.style.setProperty('--width', `${healthPercentage}%`);
 
     // Define threshold percentages
     const lowThreshold = 30;
@@ -493,7 +484,7 @@ function updateStatBars(character) {
     // Set background color using CSS properties
     moraleStat.style.setProperty('--background-color', getBackgroundColor(moralePercentage));
     hungerStat.style.setProperty('--background-color', getBackgroundColor(hungerPercentage));
-    injuryStat.style.setProperty('--background-color', getBackgroundColor(injuryPercentage));
+    healthStat.style.setProperty('--background-color', getBackgroundColor(healthPercentage));
 }
 
 function updateRelationships(party) {
