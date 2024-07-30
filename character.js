@@ -114,8 +114,8 @@ export class Character {
       this.hunger = hungerArray.length - 1;
     }
     // Injury can't exceed fine
-    if (this.injuryLevel < 1) {
-      this.injuryLevel = 1;
+    if (this.injuryLevel < 0) {
+      this.injuryLevel = 0;
     }
     // Morale can't go below terrible
     if (this.morale < 0) {
