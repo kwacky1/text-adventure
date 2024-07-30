@@ -194,6 +194,12 @@ export function playTurn() {
                 gameParty.removeCharacter(character);
                 updateRelationships(gameParty);
             }
+            if (character.morale == 0 && gameParty.Party.characters.length > 1) {
+                addEvent(`${character.name} has lost all hope. They have left the party.`);
+                checkDeathEffects(character);
+                gameParty.removeCharacter(character);
+                updateRelationships(gameParty);
+            }
         };
     }
 
