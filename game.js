@@ -576,6 +576,7 @@ async function createCharacterForm() {
         option.textContent = `Skin ${index + 1}`;
         skinSelect.appendChild(option);
     });
+    skinSelect.selectedIndex = Math.floor(Math.random() * skinImages.length);
     skinLabel.appendChild(skinSelect);
     avatarSection.appendChild(skinLabel);
 
@@ -590,6 +591,7 @@ async function createCharacterForm() {
         option.textContent = hairStyleImages[index].charAt(0).toUpperCase() + hairStyleImages[index].slice(1);
         hairStyleSelect.appendChild(option);
     });
+    hairStyleSelect.selectedIndex = Math.floor(Math.random() * hairStyleImages.length);
     hairStyleLabel.appendChild(hairStyleSelect);
     avatarSection.appendChild(hairStyleLabel);
 
@@ -605,6 +607,7 @@ async function createCharacterForm() {
         option.textContent = hairColourImages[index].split('.')[0].charAt(0).toUpperCase() + hairColourImages[index].split('.')[0].slice(1);        
         hairColourSelect.appendChild(option);
     });
+    hairColourSelect.selectedIndex = Math.floor(Math.random() * hairColourImages.length);
     hairColourLabel.appendChild(hairColourSelect);
     avatarSection.appendChild(hairColourLabel);
 
@@ -619,6 +622,7 @@ async function createCharacterForm() {
         option.textContent = shirtStyleImages[index].charAt(0).toUpperCase() + shirtStyleImages[index].slice(1);
         shirtStyleSelect.appendChild(option);
     });
+    shirtStyleSelect.selectedIndex = Math.floor(Math.random() * shirtStyleImages.length);
     shirtStyleLabel.appendChild(shirtStyleSelect);
     avatarSection.appendChild(shirtStyleLabel);
 
@@ -633,6 +637,7 @@ async function createCharacterForm() {
         option.textContent = shirtColourImages[index].split('.')[0].charAt(0).toUpperCase() + shirtColourImages[index].split('.')[0].slice(1);
         shirtColourSelect.appendChild(option);
     });
+    shirtColourSelect.selectedIndex = Math.floor(Math.random() * shirtColourImages.length);
     shirtColourLabel.appendChild(shirtColourSelect);
     avatarSection.appendChild(shirtColourLabel);
 
@@ -643,19 +648,19 @@ async function createCharacterForm() {
 
     // Skin preview
     const skinPreview = document.createElement('img');
-    skinPreview.src = "img/" + skinImages[0]; // Default to the first skin image
+    skinPreview.src = "img/" + skinSelect.value;
     skinPreview.alt = 'Skin Preview';
     avatarPreviewContainer.appendChild(skinPreview);
 
     // Hair preview
     const hairPreview = document.createElement('img');
-    hairPreview.src = "img/" + hairStyleImages[0] + hairColourImages[0]; // Default to the first hair image
+    hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
     hairPreview.alt = 'Hair Preview';
     avatarPreviewContainer.appendChild(hairPreview);
 
     // shirt preview
     const shirtPreview = document.createElement('img');
-    shirtPreview.src = "img/" + shirtStyleImages[0] + shirtColourImages[0]; // Default to the first shirt image
+    shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
     shirtPreview.alt = 'shirt Preview';
     avatarPreviewContainer.appendChild(shirtPreview);
     
