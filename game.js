@@ -246,41 +246,94 @@ export function playTurn() {
         event = 'found an enemy';
         const playTurnButton = document.getElementById('playTurnButton');
         playTurnButton.style.display = 'none';
-        const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-            const attackButton = document.createElement('button');
-            attackButton.textContent = 'Attack';
-        let totalDamage = 0;
-        attackButton.addEventListener('click', () => {
-            gameParty.characters.forEach((character) => {
-                const weaponIndex = character.weapon;
-                if (weaponIndex !== null) {
-                    const weaponDamage = weaponArray[weaponIndex][1];
-                    totalDamage += weaponDamage;
-                    addEvent(`${character.name} hit the enemy for ${weaponDamage} damage.`);
-                } else {
-                    addEvent(`${character.name} has no weapon.`);
-                }
+        var numberOfEnemies = Math.floor(Math.random() * gameParty.characters.length) + 1;
+        if (numberOfEnemies == 1) {
+            addEvent(`An enemy has appeared!`);
+        } else {
+            addEvent(`${numberOfEnemies} enemies have appeared!`);
+        }
+        // create array of enemies with random morale from 0 to 9
+        var enemies = [];
+        for (var i = 0; i < numberOfEnemies; i++) {
+            var enemyType = enemy[Math.floor(Math.random() * enemy.length)];
+            var enemyHP = enemyType[1];
+            var enemyMorale = Math.floor(Math.random() * 10);
+            console.log("Enemy: " + enemyType + " HP:" + enemyHP + " Morale:" + enemyMorale);
+            enemies.push({
+                type: enemyType[0],
+                hp: enemyHP,
+                morale: enemyMorale,
+                attack: 1 // Set attack to 1 for now
             });
-            if (totalDamage >= enemyType[1]) {
-                addEvent(`The enemy has been defeated!`);
-                attackButton.remove();
-                defendButton.remove();
-                playTurnButton.style.display = 'inline-block';
-            } else {
-                addEvent('The enemy has taken ' + totalDamage + ' damage.');
-                addEvent(`The enemy has not been defeated.`);
+        }
+        var players = gameParty.characters.map(character => ({
+            type: character.name,
+            hp: character.health,
+            morale: character.morale,
+            attack: weaponArray[character.weapon][1] 
+        }));
+
+        // Combine enemies and players into a single array
+        var combatants = players.concat(enemies.map(enemy => ({
+            type: 'enemy',
+            hp: enemy.hp,
+            morale: enemy.morale,
+            attack: enemy.attack
+        })));
+
+        // Sort the combined array by morale
+        combatants.sort((a, b) => b.morale - a.morale);
+
+        // print the array for debugging
+        console.log(combatants);
+
+            // Function to handle the turn-based logic
+        function handleTurn(index) {
+
+
+            if (index >= combatants.length) {
+                // All turns are done, start over
+                handleTurn(0);
+                return;
             }
-        });
-        const defendButton = document.createElement('button');
-        defendButton.textContent = 'Defend';
-        defendButton.addEventListener('click', () => {
-            addEvent(`You run away from the enemy.`);
-            attackButton.remove();
-            defendButton.remove();
-            playTurnButton.style.display = 'inline-block';
-        });
-        document.getElementById('gameButtons').appendChild(attackButton);
-        document.getElementById('gameButtons').appendChild(defendButton);
+
+        const combatant = combatants[index];
+        if (combatant.type === 'enemy') {
+            // Enemy's turn to attack
+            // Add enemy attack logic here
+            addEvent(`The ${combatant.type} attacks!`);
+            handleTurn(index + 1);
+        } else {
+            // Show attack buttons for each enemy
+            combatants.forEach((enemy, enemyIndex) => {
+                if (enemy.type === 'enemy') {
+                    const weaponButtons = document.getElementById('weaponButtons');
+                    const attackButton = document.createElement('button');
+                    attackButton.textContent = `Attack ${enemy.type}`;
+                    attackButton.addEventListener('click', () => {
+                        enemy.hp -= combatant.attack;
+                        addEvent(`${combatant.type} hit ${enemy.type} for ${combatant.attack} damage.`);
+                        if (enemy.hp <= 0) {
+                            addEvent(`The ${enemy.type} has been defeated!`);
+                            // Remove defeated enemy from combatants array
+                            combatants.splice(enemyIndex, 1);
+                            // Check if all enemies are defeated
+                            if (combatants.filter(c => c.type === 'enemy').length === 0) {
+                                // Unhide the playTurnButton
+                                const playTurnButton = document.getElementById('playTurnButton');
+                                playTurnButton.style.display = 'block';
+                            }
+                        }
+                        weaponButtons.querySelectorAll('button').forEach(button => button.remove());
+                        handleTurn(index + 1);
+                    });
+                    weaponButtons.appendChild(attackButton);
+                } 
+            });
+        }}
+
+        // Start the turn-based combat
+        handleTurn(0);
     }
 
     function foundWeapon() {
