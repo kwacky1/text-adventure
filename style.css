@@ -30,8 +30,8 @@ div#currentEvent, div#gameButtons div {
 }
 
 #playerStats {
-    width: 300px;
-    margin: 20px;
+    width: 412px;
+    margin: 20px 0;
 }
 
 .stat {

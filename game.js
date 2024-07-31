@@ -35,13 +35,6 @@ const food = [
     ['first aid kit', 4]
  ];
 
- const weaponArray = [
-    ['fist', 1],
-    ['stick', 2],
-    ['knife', 3],
-    ['pistol', 4]   
- ];
-
 const enemy = [
     ['zombie']
 ];
@@ -55,7 +48,7 @@ const events = [
 ]
 
 import Party from './party.js';
-import { Character, ageArray, hungerArray, moraleArray, healthArray } from './character.js';
+import { Character, ageArray, hungerArray, moraleArray, healthArray, weaponArray } from './character.js';
 
 let gameParty = null;
 
@@ -351,6 +344,8 @@ export function playTurn() {
         const weaponType = weaponArray[Math.floor(Math.random() * (weaponArray.length - 1)) + 1];
         const weapon = weaponType[0];
         const damage = weaponType[1];
+        const playTurnButton = document.getElementById('playTurnButton');
+        playTurnButton.style.display = 'none';
         event = `found a ${weapon}`;
         addEvent(`${who} ${event}.`);
         const weaponDiv = document.getElementById('weaponButtons');
@@ -368,9 +363,10 @@ export function playTurn() {
                         character.inventory.push(weaponType);
                         character.inventory.splice(character.inventory.indexOf(oldWeapon), 1);
                         character.weapon = weaponArray.indexOf(weaponType);
-                        addEvent(`${character.name} replaced the ${oldWeaponType} with the ${weapon}.`);
+                        addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
                         weaponDiv.querySelectorAll('button').forEach(button => button.remove());
                         character.updateCharacter();
+                        playTurnButton.style.display = 'block';
                     });
                     weaponDiv.appendChild(button);
                 } 
@@ -383,6 +379,7 @@ export function playTurn() {
                     addEvent(`${character.name} picked up the ${weapon}.`);
                     weaponDiv.querySelectorAll('button').forEach(button => button.remove());
                     character.updateCharacter();
+                    playTurnButton.style.display = 'block';
                 });
                 weaponDiv.appendChild(button);
             }

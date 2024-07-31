@@ -43,6 +43,13 @@ export const healthArray = [
   'fine'
 ];
 
+export const weaponArray = [
+  ['fist', 1],
+  ['stick', 2],
+  ['knife', 3],
+  ['pistol', 4]   
+];
+
 export class Character {
   constructor(name, age, posTrait, negTrait, skin, hair, shirt) { 
     this.id = 0;
@@ -212,6 +219,12 @@ export class Character {
     healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
     statsContainer.appendChild(healthStat);
   
+    const weapon = document.createElement('div');
+    weapon.classList.add('stat');
+    weapon.id = 'weapon';
+    weapon.innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
+    statsContainer.appendChild(weapon);
+
     characterDiv.appendChild(statsContainer);
 
     const inventoryList = document.createElement('div');
@@ -236,6 +249,7 @@ export class Character {
     characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
     characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
     characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
+    characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
   
     // Update inventory display
     const inventoryList = characterDiv.querySelector('.inventory');
