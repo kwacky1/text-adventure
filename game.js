@@ -43,7 +43,7 @@ const food = [
  ];
 
 const enemy = [
-    ['zombie', 4 + Math.floor(Math.random() * 4)]
+    ['zombie']
 ];
 
 const events = [
@@ -55,7 +55,7 @@ const events = [
 ]
 
 import Party from './party.js';
-import { Character, ageArray, hungerArray, moraleArray, injuries } from './character.js';
+import { Character, ageArray, hungerArray, moraleArray, healthArray } from './character.js';
 
 let gameParty = null;
 
@@ -184,13 +184,6 @@ export function playTurn() {
                 }
               }
         }
-        if (event === 'found a weapon') {
-        }
-        if (event == 'found an enemy') {
-            // select a random enemy from the enemy array
-            const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-            addEvent(`A ${enemyType[0]} has appeared!`);
-        }
         gameParty.updateInventory();
         turnNumber += 1;
         const playTurnButton = document.getElementById('playTurnButton');
@@ -213,7 +206,7 @@ export function playTurn() {
                 gameParty.removeCharacter(character);
                 updateRelationships(gameParty);
             }
-            if (character.morale == 0 && gameParty.Party.characters.length > 1) {
+            if (character.morale == 0 && gameParty.characters.length > 1) {
                 addEvent(`${character.name} has lost all hope. They have left the party.`);
                 checkDeathEffects(character);
                 gameParty.removeCharacter(character);
@@ -253,41 +246,105 @@ export function playTurn() {
         event = 'found an enemy';
         const playTurnButton = document.getElementById('playTurnButton');
         playTurnButton.style.display = 'none';
-        const enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-        const attackButton = document.createElement('button');
-        attackButton.textContent = 'Attack';
-        let totalDamage = 0;
-        attackButton.addEventListener('click', () => {
-            gameParty.characters.forEach((character) => {
-                const weaponIndex = character.weapon;
-                if (weaponIndex !== null) {
-                    const weaponDamage = weaponArray[weaponIndex][1];
-                    totalDamage += weaponDamage;
-                    addEvent(`${character.name} hit the enemy for ${weaponDamage} damage.`);
-                } else {
-                    addEvent(`${character.name} has no weapon.`);
-                }
+        var numberOfEnemies = Math.floor(Math.random() * gameParty.characters.length) + 1;
+        if (numberOfEnemies == 1) {
+            addEvent(`An enemy has appeared!`);
+        } else {
+            addEvent(`${numberOfEnemies} enemies have appeared!`);
+        }
+        // create array of enemies with random morale from 0 to 9
+        var enemies = [];
+        for (var i = 0; i < numberOfEnemies; i++) {
+            var enemyType = enemy[Math.floor(Math.random() * enemy.length)];
+            var enemyHP = 4 + Math.floor(Math.random() * 4);
+            var enemyMorale = Math.floor(Math.random() * 10);
+            console.log("Enemy: " + enemyType + " HP:" + enemyHP + " Morale:" + enemyMorale);
+            enemies.push({
+                type: enemyType[0],
+                hp: enemyHP,
+                morale: enemyMorale,
+                attack: 1 // Set attack to 1 for now
             });
-            if (totalDamage >= enemyType[1]) {
-                addEvent(`The enemy has been defeated!`);
-                attackButton.remove();
-                defendButton.remove();
-                playTurnButton.style.display = 'inline-block';
-            } else {
-                addEvent('The enemy has taken ' + totalDamage + ' damage.');
-                addEvent(`The enemy has not been defeated.`);
+        }
+        var players = gameParty.characters.map(character => ({
+            type: character.name,
+            hp: character.health,
+            morale: character.morale,
+            attack: weaponArray[character.weapon][1] 
+        }));
+
+        // Combine enemies and players into a single array
+        var combatants = players.concat(enemies.map(enemy => ({
+            type: 'enemy',
+            hp: enemy.hp,
+            morale: enemy.morale,
+            attack: enemy.attack
+        })));
+
+        // Sort the combined array by morale
+        combatants.sort((a, b) => b.morale - a.morale);
+
+        // print the array for debugging
+        console.log(combatants);
+
+            // Function to handle the turn-based logic
+        function handleTurn(index) {
+
+
+            if (index >= combatants.length) {
+                // All turns are done, start over
+                handleTurn(0);
+                return;
             }
-        });
-        const defendButton = document.createElement('button');
-        defendButton.textContent = 'Defend';
-        defendButton.addEventListener('click', () => {
-            addEvent(`You run away from the enemy.`);
-            attackButton.remove();
-            defendButton.remove();
-            playTurnButton.style.display = 'inline-block';
-        });
-        document.getElementById('gameButtons').appendChild(attackButton);
-        document.getElementById('gameButtons').appendChild(defendButton);
+
+        const combatant = combatants[index];
+        if (combatant.type === 'enemy') {
+            // Enemy's turn to attack
+            // Add a button to commence the attack
+            const attackButton = document.createElement('button');
+            attackButton.textContent = `The ${combatant.type} attacks!`;
+            attackButton.addEventListener('click', () => {
+                // choose target to attack
+                const target = players[Math.floor(Math.random() * players.length)];
+                // attack the target
+                target.hp -= combatant.attack;
+                addEvent(`The ${combatant.type} attacks ${target.type} for ${combatant.attack} damage.`);
+                handleTurn(index + 1);
+                attackButton.remove();
+            });
+            const weaponButtons = document.getElementById('weaponButtons');
+            weaponButtons.appendChild(attackButton);
+        } else {
+            // Show attack buttons for each enemy
+            combatants.forEach((enemy, enemyIndex) => {
+                if (enemy.type === 'enemy') {
+                    const weaponButtons = document.getElementById('weaponButtons');
+                    const attackButton = document.createElement('button');
+                    attackButton.textContent = `${combatant.type} attacks ${enemy.type} (${enemy.hp} HP)`;
+                    attackButton.addEventListener('click', () => {
+                        enemy.hp -= combatant.attack;
+                        addEvent(`${combatant.type} hit ${enemy.type} for ${combatant.attack} damage.`);
+                        if (enemy.hp <= 0) {
+                            addEvent(`The ${enemy.type} has been defeated!`);
+                            // Remove defeated enemy from combatants array
+                            combatants.splice(enemyIndex, 1);
+                            // Check if all enemies are defeated
+                            if (combatants.filter(c => c.type === 'enemy').length === 0) {
+                                // Unhide the playTurnButton
+                                const playTurnButton = document.getElementById('playTurnButton');
+                                playTurnButton.style.display = 'block';
+                            }
+                        }
+                        weaponButtons.querySelectorAll('button').forEach(button => button.remove());
+                        handleTurn(index + 1);
+                    });
+                    weaponButtons.appendChild(attackButton);
+                } 
+            });
+        }}
+
+        // Start the turn-based combat
+        handleTurn(0);
     }
 
     function foundWeapon() {
@@ -371,9 +428,9 @@ export function playTurn() {
             }
         }
         if (character.negTrait === 'clumsy') {
-            // 10% chance of increasing injury
+            // 10% chance of getting hurt
             if (Math.random() < 0.1) {
-                character.injuryLevel += 1;
+                character.healthLevel -= 1;
             }
         }
     }
@@ -382,7 +439,7 @@ export function playTurn() {
         if (character.posTrait === 'resilient') {
             // 10% chance of healing
             if (Math.random() < 0.1) {
-                character.injuryLevel -= 1;
+                character.healthLevel += 1;
             }
         }
         if (character.posTrait === 'satiated') {
@@ -459,21 +516,19 @@ function updateStatBars(character) {
     const characterDiv = document.getElementById(character.name);
     const moraleStat = characterDiv.querySelector('#moraleStat');
     const hungerStat = characterDiv.querySelector('#hungerStat');
-    const injuryStat = characterDiv.querySelector('#injuryStat');
+    const healthStat = characterDiv.querySelector('#healthStat');
 
     const moraleValue = character.morale;
     const hungerValue = character.hunger;
-    console.log("hunger value: " + character.hunger);
-    const injuryValue = character.injuryLevel;
+    const healthValue = character.health;
 
     const moralePercentage = (moraleValue / (moraleArray.length - 1)) * 100;
     const hungerPercentage = (hungerValue / (hungerArray.length - 1)) * 100;
-    const maxInjuryValue = injuries.length - 1;
-    const injuryPercentage = ((maxInjuryValue - injuryValue) / maxInjuryValue) * 100;
+    const healthPercentage = (healthValue / (healthArray.length - 1)) * 100;
 
     moraleStat.style.setProperty('--width', `${moralePercentage}%`);
     hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
-    injuryStat.style.setProperty('--width', `${injuryPercentage}%`);
+    healthStat.style.setProperty('--width', `${healthPercentage}%`);
 
     // Define threshold percentages
     const lowThreshold = 30;
@@ -493,7 +548,7 @@ function updateStatBars(character) {
     // Set background color using CSS properties
     moraleStat.style.setProperty('--background-color', getBackgroundColor(moralePercentage));
     hungerStat.style.setProperty('--background-color', getBackgroundColor(hungerPercentage));
-    injuryStat.style.setProperty('--background-color', getBackgroundColor(injuryPercentage));
+    healthStat.style.setProperty('--background-color', getBackgroundColor(healthPercentage));
 }
 
 function updateRelationships(party) {
