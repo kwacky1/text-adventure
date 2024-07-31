@@ -43,7 +43,7 @@ const food = [
  ];
 
 const enemy = [
-    ['zombie', 4 + Math.floor(Math.random() * 4)]
+    ['zombie']
 ];
 
 const events = [
@@ -256,7 +256,7 @@ export function playTurn() {
         var enemies = [];
         for (var i = 0; i < numberOfEnemies; i++) {
             var enemyType = enemy[Math.floor(Math.random() * enemy.length)];
-            var enemyHP = enemyType[1];
+            var enemyHP = 4 + Math.floor(Math.random() * 4);
             var enemyMorale = Math.floor(Math.random() * 10);
             console.log("Enemy: " + enemyType + " HP:" + enemyHP + " Morale:" + enemyMorale);
             enemies.push({
@@ -300,16 +300,27 @@ export function playTurn() {
         const combatant = combatants[index];
         if (combatant.type === 'enemy') {
             // Enemy's turn to attack
-            // Add enemy attack logic here
-            addEvent(`The ${combatant.type} attacks!`);
-            handleTurn(index + 1);
+            // Add a button to commence the attack
+            const attackButton = document.createElement('button');
+            attackButton.textContent = `The ${combatant.type} attacks!`;
+            attackButton.addEventListener('click', () => {
+                // choose target to attack
+                const target = players[Math.floor(Math.random() * players.length)];
+                // attack the target
+                target.hp -= combatant.attack;
+                addEvent(`The ${combatant.type} attacks ${target.type} for ${combatant.attack} damage.`);
+                handleTurn(index + 1);
+                attackButton.remove();
+            });
+            const weaponButtons = document.getElementById('weaponButtons');
+            weaponButtons.appendChild(attackButton);
         } else {
             // Show attack buttons for each enemy
             combatants.forEach((enemy, enemyIndex) => {
                 if (enemy.type === 'enemy') {
                     const weaponButtons = document.getElementById('weaponButtons');
                     const attackButton = document.createElement('button');
-                    attackButton.textContent = `Attack ${enemy.type}`;
+                    attackButton.textContent = `${combatant.type} attacks ${enemy.type} (${enemy.hp} HP)`;
                     attackButton.addEventListener('click', () => {
                         enemy.hp -= combatant.attack;
                         addEvent(`${combatant.type} hit ${enemy.type} for ${combatant.attack} damage.`);
