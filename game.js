@@ -70,6 +70,7 @@ export function playTurn() {
     // Begin new turn
     var who = "The party";
     var foodType = "";
+    var medicalType = "";
     console.log(`Turn ${turnNumber}`);
     updateParty();
     if (gameParty.characters.length === 0) {
@@ -134,8 +135,12 @@ export function playTurn() {
         }
 
         // Add found items to the party inventory
-        if (event === 'found food' || event === 'found medical') {
+        if (event === 'found food') {
             const item = foodType[0];
+            gameParty.inventory.push(item);
+        }
+        if (event === 'found medical supplies') {
+            const item = medicalType[0];
             gameParty.inventory.push(item);
         }
         if (gameParty.inventory.some(item => food.some(foodItem => foodItem.includes(item)))) {
@@ -394,7 +399,7 @@ export function playTurn() {
 
     function foundMedical() {
         event = 'found medical supplies';
-        const medicalType = medical[Math.floor(Math.random() * medical.length)];
+        medicalType = medical[Math.floor(Math.random() * medical.length)];
         addEvent(`${who} ${event} (${medicalType[0]}).`);
     }
 
