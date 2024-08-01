@@ -172,11 +172,42 @@ export function playTurn() {
                             if (character.posTrait === 'satiated') {
                                 character.hunger += 0.5;
                             }
-                          foodDiv.querySelectorAll('button').forEach(button => button.remove());
+                          button.remove();
                           character.updateCharacter();
+                          updateStatBars(character);
+          
                         }
                       });
                       foodDiv.appendChild(button);
+                    }
+                  }
+                }
+              }
+        }
+        if (gameParty.inventory.some(item => medical.some(medicalItem => medicalItem.includes(item)))) {
+            const medicalDiv = document.getElementById('medicalButtons');
+            medicalDiv.querySelectorAll('button').forEach(button => button.remove());
+            if (medical.length > 0) {
+                const medicalDiv = document.getElementById('medicalButtons');
+                medicalDiv.querySelectorAll('button').forEach(button => button.remove());
+                for (const medicalItem of medical) {
+                  if (gameParty.inventory.some(item => medicalItem.includes(item))) {
+                    for (const character of gameParty.characters) {
+                      const button = document.createElement('button');
+                      button.innerText = `Use ${medicalItem[0]} on ${character.name} (${healthArray[Math.round(character.health)]}) `;
+                      button.addEventListener('click', () => {
+                        const itemIndex = gameParty.inventory.findIndex(item => medicalItem.includes(item));
+                        if (itemIndex !== -1) {
+                          const item = gameParty.inventory[itemIndex];
+                          gameParty.inventory.splice(itemIndex, 1);
+                          character.health += medicalItem[1];
+                            addEvent(`${character.name} used the ${item}.`);
+                          button.remove();
+                          character.updateCharacter();
+                          updateStatBars(character);
+                        }
+                      });
+                      medicalDiv.appendChild(button);
                     }
                   }
                 }
@@ -306,11 +337,13 @@ export function playTurn() {
             const attackButton = document.createElement('button');
             attackButton.textContent = `The ${combatant.type} attacks!`;
             attackButton.addEventListener('click', () => {
-                // choose target to attack
                 const target = players[Math.floor(Math.random() * players.length)];
-                // attack the target
+                const character = gameParty.characters.find(c => c.name === target.type);
                 target.hp -= combatant.attack;
+                character.health = target.hp;
                 addEvent(`The ${combatant.type} attacks ${target.type} for ${combatant.attack} damage.`);
+                character.updateCharacter();
+                updateStatBars(character);
                 handleTurn(index + 1);
                 attackButton.remove();
             });
