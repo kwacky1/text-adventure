@@ -209,7 +209,7 @@ export function playTurn() {
     }
 
     function foundFriend() {
-        event = 'is approached by an adventurer who wants to join your party';
+        event = 'You are approached by an adventurer who wants to join your party';
         const friendDiv = document.createElement('div');
         friendDiv.textContent = event;
         const acceptButton = document.createElement('button');
