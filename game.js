@@ -110,7 +110,7 @@ export function playTurn() {
             secondItem = 0.15 + itemChance;
         }
         if ((chance <= friendChance) && gameParty.characters.length < 4) {
-            foundFriend();
+            foundFriend(who);
         } else if (chance > friendChance && chance <= enemyChance) {
             foundEnemy();
         } else if (chance > enemyChance && chance <= secondItem) {
@@ -208,8 +208,10 @@ export function playTurn() {
         };
     }
 
-    function foundFriend() {
-        event = 'is approached by an adventurer who wants to join your party';
+    function foundFriend(who) {
+        event = who + ' is approached by an adventurer who wants to join your party';
+        const playTurnButton = document.getElementById('playTurnButton');
+        playTurnButton.style.display = 'none';
         const friendDiv = document.createElement('div');
         friendDiv.textContent = event;
         const acceptButton = document.createElement('button');
@@ -221,6 +223,7 @@ export function playTurn() {
             friendDiv.remove();
             acceptButton.remove();
             declineButton.remove();
+            playTurnButton.style.display = 'block';
         });
         const declineButton = document.createElement('button');
         declineButton.textContent = 'Decline';
@@ -229,6 +232,7 @@ export function playTurn() {
             friendDiv.remove();
             acceptButton.remove();
             declineButton.remove();
+            playTurnButton.style.display = 'block';
         });
         document.getElementById('gameButtons').appendChild(friendDiv);
         document.getElementById('gameButtons').appendChild(acceptButton);
@@ -369,7 +373,9 @@ export function playTurn() {
                         playTurnButton.style.display = 'block';
                     });
                     weaponDiv.appendChild(button);
-                } 
+                } else {
+                    playTurnButton.style.display = 'block';
+                }
             } else {
                 button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
                 button.addEventListener('click', () => 
