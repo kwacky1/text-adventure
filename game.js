@@ -328,7 +328,7 @@ export function playTurn() {
             type: character.name,
             hp: character.health,
             morale: character.morale,
-            attack: weaponArray[character.weapon][1] 
+            attack: character.posTrait === 'fighter' ? weaponArray[character.weapon][1] + 1 : weaponArray[character.weapon][1]
         }));
 
         // Combine enemies and players into a single array
