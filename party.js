@@ -1,9 +1,9 @@
 const relationships = [
-    ['enemies'],
-    ['strangers'],
-    ['acquaintances'],
-    ['friends'],
-    ['family']
+    'cold',
+    'strangers',
+    'acquaintances',
+    'friends',
+    'family'
 ];
 
 class Party {

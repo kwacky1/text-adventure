@@ -113,6 +113,14 @@ export class Character {
     if (this.health > 9) {
       this.health = 9;
     }
+    // Friendly relationships can't be cold
+    if (this.relationships.length > 0) {
+      for (const relationship of this.relationships) {
+        if (this.posTrait === 'friendly' && relationship.type === 'cold') {
+          relationship.type = 'strangers';
+        }
+      }
+    }
     // Morale can't go below terrible
     if (this.morale < 0) {
       this.morale = 0;

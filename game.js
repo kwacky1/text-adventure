@@ -628,7 +628,7 @@ function updateRelationships(party) {
         relationshipsDiv.appendChild(relationshipsList);
         for (const relationship of character.relationships) {
             const relationshipItem = document.createElement('li');
-            relationshipItem.textContent = `${character.name} and ${relationship.character.name} are ${relationship.type[0]}`;
+            relationshipItem.textContent = `${character.name} and ${relationship.character.name} are ${relationship.type}`;
             relationshipsList.appendChild(relationshipItem);
         }
     }
@@ -884,7 +884,7 @@ function checkDeathEffects(character) {
     for (const remainingCharacter of gameParty.characters) {
         if (remainingCharacter !== character) {
             const relationshipIndex = remainingCharacter.relationships.findIndex(rel => rel.character == character)
-            const relationship = character.relationships[relationshipIndex].type[0];
+            const relationship = character.relationships[relationshipIndex].type;
             if (relationship === 'friends') {
                 remainingCharacter.morale -= 2;
             }
