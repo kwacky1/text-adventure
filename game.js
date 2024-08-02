@@ -217,6 +217,11 @@ export function playTurn() {
         const acceptButton = document.createElement('button');
         acceptButton.textContent = 'Accept';
         acceptButton.addEventListener('click', () => {
+            // make morale of party members go up when a new member joins
+            for (const character of gameParty.characters) {
+                character.morale += 1;
+                character.capAttributes();
+            }
             if (gameParty.characters.length < 4) {
                 addPlayer(gameParty);
             }
