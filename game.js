@@ -210,6 +210,9 @@ export function playTurn() {
                                     const item = gameParty.inventory[itemIndex];
                                     gameParty.inventory.splice(itemIndex, 1);
                                     character.hunger += foodItem[1];
+                                    if (character.posTrait === 'satiated') {
+                                        character.hunger += 0.5;
+                                    }
                                     // if the food is dessert add 1 morale
                                     if (foodItem[0] === 'dessert') {
                                         character.morale += 1;
