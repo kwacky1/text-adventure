@@ -389,6 +389,14 @@ export function playTurn() {
                             addEvent(`The ${enemy.type} has been defeated!`);
                             // Remove defeated enemy from combatants array
                             combatants.splice(enemyIndex, 1);
+                            // Scavengers get a random food item
+                            const character = gameParty.characters.find(c => c.name === combatant.type);
+                            if (character.posTrait === 'scavenger') {
+                                const foodItem = food[Math.floor(Math.random() * food.length)];
+                                gameParty.inventory.push(foodItem[0]);
+                                addEvent(`${combatant.type} made food with some... questionable meat.`);
+                                gameParty.updateInventory();
+                            }
                             // Check if all enemies are defeated
                             if (combatants.filter(c => c.type === 'enemy').length === 0) {
                                 // Unhide the playTurnButton
