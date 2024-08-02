@@ -70,10 +70,12 @@ export function playTurn() {
     // Begin new turn
     var who = "The party";
     var foodType = "";
+    var medicalType = "";
     console.log(`Turn ${turnNumber}`);
     updateParty();
     if (gameParty.characters.length === 0) {
-        const playTurnButton = document.getElementById('playTurnButton');
+        const allButtons = document.getElementById('buttons');
+        allButtons.remove();
         const partyInventoryDiv = document.getElementById('partyInventory');
         partyInventoryDiv.remove();
         // output character is dead to the events div
@@ -134,10 +136,62 @@ export function playTurn() {
         }
 
         // Add found items to the party inventory
-        if (event === 'found food' || event === 'found medical') {
+        if (event === 'found food') {
             const item = foodType[0];
             gameParty.inventory.push(item);
         }
+        if (event === 'found medical supplies') {
+            const item = medicalType[0];
+            gameParty.inventory.push(item);
+        }
+        updateFoodButtons();
+        updateMedicalButtons();
+        gameParty.updateInventory();
+        turnNumber += 1;
+        const playTurnButton = document.getElementById('playTurnButton');
+        if (playTurnButton) {
+            playTurnButton.innerText = `Play Turn ${turnNumber}`;
+        }
+    }
+
+    function updateMedicalButtons() {
+        if (gameParty.inventory.some(item => medical.some(medicalItem => medicalItem.includes(item)))) {
+            const medicalDiv = document.getElementById('medicalButtons');
+            medicalDiv.querySelectorAll('button').forEach(button => button.remove());
+            if (medical.length > 0) {
+                const medicalDiv = document.getElementById('medicalButtons');
+                medicalDiv.querySelectorAll('button').forEach(button => button.remove());
+                for (const medicalItem of medical) {
+                    if (gameParty.inventory.some(item => medicalItem.includes(item))) {
+                        for (const character of gameParty.characters) {
+                            const button = document.createElement('button');
+                            button.innerText = `Use ${medicalItem[0]} on ${character.name} (${healthArray[Math.round(character.health)]}) `;
+                            const normalizedClassName = medicalItem[0].replace(/\s+/g, '_');
+                            button.classList.add(normalizedClassName);
+                            button.addEventListener('click', () => {
+                                const itemIndex = gameParty.inventory.findIndex(item => medicalItem.includes(item));
+                                if (itemIndex !== -1) {
+                                    const item = gameParty.inventory[itemIndex];
+                                    gameParty.inventory.splice(itemIndex, 1);
+                                    character.health += medicalItem[1];
+                                    addEvent(`${character.name} used the ${item}.`);
+                                    medicalDiv.querySelectorAll('.' + normalizedClassName).forEach(button => button.remove());
+                                    character.capAttributes();
+                                    updateMedicalButtons();
+                                    character.updateCharacter();
+                                    updateStatBars(character);
+                                    gameParty.updateInventory();
+                                }
+                            });
+                            medicalDiv.appendChild(button);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function updateFoodButtons() {
         if (gameParty.inventory.some(item => food.some(foodItem => foodItem.includes(item)))) {
             const foodDiv = document.getElementById('foodButtons');
             foodDiv.querySelectorAll('button').forEach(button => button.remove());
@@ -145,43 +199,42 @@ export function playTurn() {
                 const foodDiv = document.getElementById('foodButtons');
                 foodDiv.querySelectorAll('button').forEach(button => button.remove());
                 for (const foodItem of food) {
-                  if (gameParty.inventory.some(item => foodItem.includes(item))) {
-                    for (const character of gameParty.characters) {
-                      const button = document.createElement('button');
-                      button.innerText = `Feed ${character.name} (${hungerArray[Math.round(character.hunger)]}) ${foodItem[0]}`;
-                      button.addEventListener('click', () => {
-                        const itemIndex = gameParty.inventory.findIndex(item => foodItem.includes(item));
-                        if (itemIndex !== -1) {
-                          const item = gameParty.inventory[itemIndex];
-                          gameParty.inventory.splice(itemIndex, 1);
-                          character.hunger += foodItem[1];
-                          // if the food is dessert add 1 morale
-                            if (foodItem[0] === 'dessert') {
-                                character.morale += 1;
-                                character.capAttributes();
-                                addEvent(`${character.name} enjoyed the ${item}.`);
-                            } else {
-                                addEvent(`${character.name} ate the ${item}.`);
-                            }
-                            // if the character is satiated, they get an extra 0.5 hunger
-                            if (character.posTrait === 'satiated') {
-                                character.hunger += 0.5;
-                            }
-                          foodDiv.querySelectorAll('button').forEach(button => button.remove());
-                          character.updateCharacter();
+                    if (gameParty.inventory.some(item => foodItem.includes(item))) {
+                        for (const character of gameParty.characters) {
+                            const button = document.createElement('button');
+                            button.innerText = `Feed ${character.name} (${hungerArray[Math.round(character.hunger)]}) ${foodItem[0]}`;
+                            button.classList.add(foodItem[0]);
+                            button.addEventListener('click', () => {
+                                const itemIndex = gameParty.inventory.findIndex(item => foodItem.includes(item));
+                                if (itemIndex !== -1) {
+                                    const item = gameParty.inventory[itemIndex];
+                                    gameParty.inventory.splice(itemIndex, 1);
+                                    character.hunger += foodItem[1];
+                                    // if the food is dessert add 1 morale
+                                    if (foodItem[0] === 'dessert') {
+                                        character.morale += 1;
+                                        character.capAttributes();
+                                        addEvent(`${character.name} enjoyed the ${item}.`);
+                                    } else {
+                                        addEvent(`${character.name} ate the ${item}.`);
+                                    }
+                                    // if the character is satiated, they get an extra 0.5 hunger
+                                    if (character.posTrait === 'satiated') {
+                                        character.hunger += 0.5;
+                                    }
+                                    foodDiv.querySelectorAll('.' + foodItem[0]).forEach(button => button.remove());
+                                    character.capAttributes();
+                                    updateFoodButtons();
+                                    character.updateCharacter();
+                                    updateStatBars(character);
+                                    gameParty.updateInventory();
+                                }
+                            });
+                            foodDiv.appendChild(button);
                         }
-                      });
-                      foodDiv.appendChild(button);
                     }
-                  }
                 }
-              }
-        }
-        gameParty.updateInventory();
-        turnNumber += 1;
-        const playTurnButton = document.getElementById('playTurnButton');
-        if (playTurnButton) {
-            playTurnButton.innerText = `Play Turn ${turnNumber}`;
+            }
         }
     }
 
@@ -306,23 +359,26 @@ export function playTurn() {
             const attackButton = document.createElement('button');
             attackButton.textContent = `The ${combatant.type} attacks!`;
             attackButton.addEventListener('click', () => {
-                // choose target to attack
                 const target = players[Math.floor(Math.random() * players.length)];
-                // attack the target
+                const character = gameParty.characters.find(c => c.name === target.type);
                 target.hp -= combatant.attack;
+                character.health = target.hp;
                 addEvent(`The ${combatant.type} attacks ${target.type} for ${combatant.attack} damage.`);
+                character.updateCharacter();
+                updateStatBars(character);
                 handleTurn(index + 1);
                 attackButton.remove();
             });
-            const weaponButtons = document.getElementById('weaponButtons');
+            const weaponButtons = document.getElementById('gameButtons');
             weaponButtons.appendChild(attackButton);
         } else {
             // Show attack buttons for each enemy
             combatants.forEach((enemy, enemyIndex) => {
                 if (enemy.type === 'enemy') {
-                    const weaponButtons = document.getElementById('weaponButtons');
+                    const weaponButtons = document.getElementById('gameButtons');
                     const attackButton = document.createElement('button');
                     attackButton.textContent = `${combatant.type} attacks ${enemy.type} (${enemy.hp} HP)`;
+                    attackButton.classList.add('attack');
                     attackButton.addEventListener('click', () => {
                         enemy.hp -= combatant.attack;
                         addEvent(`${combatant.type} hit ${enemy.type} for ${combatant.attack} damage.`);
@@ -337,7 +393,7 @@ export function playTurn() {
                                 playTurnButton.style.display = 'block';
                             }
                         }
-                        weaponButtons.querySelectorAll('button').forEach(button => button.remove());
+                        weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
                         handleTurn(index + 1);
                     });
                     weaponButtons.appendChild(attackButton);
@@ -357,7 +413,7 @@ export function playTurn() {
         playTurnButton.style.display = 'none';
         event = `found a ${weapon}`;
         addEvent(`${who} ${event}.`);
-        const weaponDiv = document.getElementById('weaponButtons');
+        const weaponDiv = document.getElementById('gameButtons');
         for (const character of gameParty.characters) {
             const button = document.createElement('button');
             // if character has a weapon, replace it
@@ -367,13 +423,14 @@ export function playTurn() {
                 const oldDamage = oldWeapon[1];
                 if (oldDamage < damage) {
                     button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
+                    button.classList.add('weapon');
                     button.addEventListener('click', () =>
                     {
                         character.inventory.push(weaponType);
                         character.inventory.splice(character.inventory.indexOf(oldWeapon), 1);
                         character.weapon = weaponArray.indexOf(weaponType);
                         addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
-                        weaponDiv.querySelectorAll('button').forEach(button => button.remove());
+                        weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
                         character.updateCharacter();
                         playTurnButton.style.display = 'block';
                     });
@@ -388,7 +445,7 @@ export function playTurn() {
                     character.inventory.push(weaponType);
                     character.weapon = weaponArray.indexOf(weaponType);
                     addEvent(`${character.name} picked up the ${weapon}.`);
-                    weaponDiv.querySelectorAll('button').forEach(button => button.remove());
+                    weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
                     character.updateCharacter();
                     playTurnButton.style.display = 'block';
                 });
@@ -399,7 +456,7 @@ export function playTurn() {
 
     function foundMedical() {
         event = 'found medical supplies';
-        const medicalType = medical[Math.floor(Math.random() * medical.length)];
+        medicalType = medical[Math.floor(Math.random() * medical.length)];
         addEvent(`${who} ${event} (${medicalType[0]}).`);
     }
 
