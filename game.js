@@ -355,8 +355,8 @@ export function playTurn() {
                 return;
             }
 
-        const combatant = combatants[index];
-        if (combatant.type === 'enemy') {
+            const combatant = combatants[index];
+            if (combatant.type === 'enemy') {
             // Enemy's turn to attack
             // Add a button to commence the attack
             const attackButton = document.createElement('button');
@@ -378,30 +378,52 @@ export function playTurn() {
             // Show attack buttons for each enemy
             combatants.forEach((enemy, enemyIndex) => {
                 if (enemy.type === 'enemy') {
+                    const character = gameParty.characters.find(c => c.name === combatant.type);
                     const weaponButtons = document.getElementById('gameButtons');
                     const attackButton = document.createElement('button');
                     attackButton.textContent = `${combatant.type} attacks ${enemy.type} (${enemy.hp} HP)`;
                     attackButton.classList.add('attack');
                     attackButton.addEventListener('click', () => {
-                        enemy.hp -= combatant.attack;
-                        addEvent(`${combatant.type} hit ${enemy.type} for ${combatant.attack} damage.`);
-                        if (enemy.hp <= 0) {
-                            addEvent(`The ${enemy.type} has been defeated!`);
-                            // Remove defeated enemy from combatants array
-                            combatants.splice(enemyIndex, 1);
-                            // Scavengers get a random food item
-                            const character = gameParty.characters.find(c => c.name === combatant.type);
-                            if (character.posTrait === 'scavenger') {
-                                const foodItem = food[Math.floor(Math.random() * food.length)];
-                                gameParty.inventory.push(foodItem[0]);
-                                addEvent(`${combatant.type} made food with some... questionable meat.`);
-                                gameParty.updateInventory();
+                        var nothingHappened = 0;
+                        var attacks = 1;
+                        if (character.posTrait === 'fighter' && Math.floor(Math.random() * 10) >= 5) {
+                            attacks = 2;
+                        }
+                        for (var i = 0; i < attacks; i++) {
+                            if (i == 1) {
+                                const allEnemies = combatants.filter(c => c.type === 'enemy' && c.hp > 0 && c !== enemy);
+                                if (allEnemies.length > 0) {
+                                    enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
+                                    enemyIndex = combatants.indexOf(enemy); 
+                                    addEvent(`${combatant.type} hits another ${enemy.type} for ${combatant.attack} damage.`);
+                                } else {
+                                    nothingHappened = 1;
+                                }
+                            } else {
+                                addEvent(`${combatant.type} hit the ${enemy.type} for ${combatant.attack} damage.`);
                             }
-                            // Check if all enemies are defeated
-                            if (combatants.filter(c => c.type === 'enemy').length === 0) {
-                                // Unhide the playTurnButton
-                                const playTurnButton = document.getElementById('playTurnButton');
-                                playTurnButton.style.display = 'block';
+                            if (nothingHappened == 0) {
+                                enemy.hp -= combatant.attack;                            
+                            }
+                            if (enemy.hp <= 0) {
+                                addEvent(`The ${enemy.type} has been defeated!`);
+                                // Remove defeated enemy from combatants array
+                                combatants.splice(enemyIndex, 1);
+                                // Scavengers get a random food item
+                                const character = gameParty.characters.find(c => c.name === combatant.type);
+                                if (character.posTrait === 'scavenger') {
+                                    const foodItem = food[Math.floor(Math.random() * food.length)];
+                                    gameParty.inventory.push(foodItem[0]);
+                                    addEvent(`${combatant.type} made food with some... questionable meat.`);
+                                    gameParty.updateInventory();
+                                    updateFoodButtons();
+                                }
+                                // Check if all enemies are defeated
+                                if (combatants.filter(c => c.type === 'enemy').length === 0) {
+                                    // Unhide the playTurnButton
+                                    const playTurnButton = document.getElementById('playTurnButton');
+                                    playTurnButton.style.display = 'block';
+                                }
                             }
                         }
                         weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
