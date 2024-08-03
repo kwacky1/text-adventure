@@ -82,17 +82,6 @@ export function playTurn() {
         addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
         playTurnButton.remove()
     } else {
-        // check if the party contains a scavenger
-        if (gameParty.characters.some(character => character.posTrait === 'scavenger')) {
-            // 10% chance of finding an extra food item
-            if (Math.random() < 0.1) {
-                const scavengers = gameParty.characters.filter(character => character.posTrait === 'scavenger');
-                const character = scavengers[Math.floor(Math.random() * scavengers.length)];
-                addEvent(`${character.name} was able to scavenge some extra food.`);
-                foodType = food[Math.floor(Math.random() * food.length)];
-                gameParty.inventory.push(foodType[0]);    
-            }
-        }
         if (gameParty.characters.length > 1) {
             who = "The party"
         } else {
@@ -566,7 +555,12 @@ export function playTurn() {
             // TODO
         }
         if (character.posTrait === 'scavenger') {
-            // TODO
+            // 10% chance of finding an extra food item
+            if (Math.random() < 0.1) {
+                addEvent(`${character.name} was able to scavenge some extra food.`);
+                foodType = food[Math.floor(Math.random() * food.length)];
+                gameParty.inventory.push(foodType[0]);    
+            }
         }
         if (character.posTrait === 'optimistic') {
             // 10% chance of increasing own morale
