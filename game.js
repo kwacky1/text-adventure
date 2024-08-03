@@ -375,9 +375,14 @@ export function playTurn() {
             attackButton.addEventListener('click', () => {
                 const target = players[Math.floor(Math.random() * players.length)];
                 const character = gameParty.characters.find(c => c.name === target.type);
-                target.hp -= combatant.attack;
+                let damage = combatant.attack
+                target.hp -= damage;
+                if (character.negTrait === 'vulnerable') {
+                    target.hp -= 1;
+                    damage += 1;
+                }
                 character.health = target.hp;
-                addEvent(`The ${combatant.type} attacks ${target.type} for ${combatant.attack} damage.`);
+                addEvent(`The ${combatant.type} attacks ${target.type} for ${damage} damage.`);
                 character.updateCharacter();
                 updateStatBars(character);
                 handleTurn(index + 1);
