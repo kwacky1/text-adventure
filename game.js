@@ -558,6 +558,8 @@ export function playTurn() {
             // 10% chance of getting hurt
             if (Math.random() < 0.1) {
                 character.healthLevel -= 1;
+                addEvent(`${character.name} tripped and hurt themself.`);
+
             }
         }
     }
