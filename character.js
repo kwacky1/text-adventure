@@ -121,6 +121,14 @@ export class Character {
         }
       }
     }
+    // Disconnected relationships can't be family
+    if (this.relationships.length > 0) {
+      for (const relationship of this.relationships) {
+        if (this.negTrait === 'disconnected' && relationship.type === 'family') {
+          relationship.type = 'friends';
+        }
+      }
+    }
     // Morale can't go below terrible
     if (this.morale < 0) {
       this.morale = 0;

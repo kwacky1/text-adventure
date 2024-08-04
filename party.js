@@ -27,7 +27,10 @@ class Party {
                         let relationshipType = relationships[1];
                         if (existingCharacter.posTrait == 'friendly') {
                             relationshipType = relationships[2];
-                        } 
+                        }
+                        if (existingCharacter.negTrait == 'disconnected') {
+                            relationshipType = relationships[0];
+                        }
                         character.relationships.push({ type: relationshipType, character: existingCharacter });
                         console.log(`${character.name} and ${existingCharacter.name} are ${relationshipType}`);
                         existingCharacter.relationships.push({ type: relationshipType, character: character });
