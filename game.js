@@ -201,6 +201,9 @@ export function playTurn() {
                 for (const foodItem of food) {
                     if (gameParty.inventory.some(item => foodItem.includes(item))) {
                         for (const character of gameParty.characters) {
+                            if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
+                                    continue;
+                            }
                             const button = document.createElement('button');
                             button.innerText = `Feed ${character.name} (${hungerArray[Math.round(character.hunger)]}) ${foodItem[0]}`;
                             button.classList.add(foodItem[0]);
