@@ -201,9 +201,6 @@ export function playTurn() {
                 for (const foodItem of food) {
                     if (gameParty.inventory.some(item => foodItem.includes(item))) {
                         for (const character of gameParty.characters) {
-                            if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
-                                    continue;
-                            }
                             const button = document.createElement('button');
                             button.innerText = `Feed ${character.name} (${hungerArray[Math.round(character.hunger)]}) ${foodItem[0]}`;
                             button.classList.add(foodItem[0]);
@@ -222,7 +219,12 @@ export function playTurn() {
                                         character.capAttributes();
                                         addEvent(`${character.name} enjoyed the ${item}.`);
                                     } else {
-                                        addEvent(`${character.name} ate the ${item}.`);
+                                        if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
+                                            character.hunger -= foodItem[1];
+                                            addEvent(`That food didn't make ${character.name} feel much better.`);
+                                        } else {
+                                            addEvent(`${character.name} ate the ${item}.`);
+                                        }
                                     }
                                     // if the character is satiated, they get an extra 0.5 hunger
                                     if (character.posTrait === 'satiated') {
@@ -545,6 +547,7 @@ export function playTurn() {
             // 10% chance of decreasing morale
             if (Math.random() < 0.1) {
                 character.morale -= 1;
+                addEvent(`${character.name} has been crying.`);
             }
             // Can't go above good
             if (character.morale > 7) {
@@ -564,6 +567,7 @@ export function playTurn() {
             // 10% chance of healing
             if (Math.random() < 0.1) {
                 character.healthLevel += 1;
+                addEvent(`${character.name} is feeling a bit better.`);
             }
         }
         if (character.posTrait === 'satiated') {
@@ -587,7 +591,7 @@ export function playTurn() {
             // 10% chance of increasing own morale
             if (Math.random() < 0.1) {
             character.morale += 1;
-            console.log(`${character.name} still thinks everything will be okay`);
+            console.log(`${character.name} looks happy today.`);
             }
             // Can't go below bad
             if (character.morale < 2) {
