@@ -625,6 +625,7 @@ async function addPlayer(party) {
             addEvent(`${character.name} has joined the party!`);
             character.createCharacter();
             character.updateCharacter();
+            updateStatBars(character);
         }
         updateRelationships(party);
     } catch (error) {
@@ -896,6 +897,7 @@ async function createCharacterForm() {
             gameParty.addCharacter(character);
             character.createCharacter();
             character.updateCharacter();
+            updateStatBars(character);
 
             //unhide the buttons div
             const buttonsDiv = document.getElementById('buttons');
