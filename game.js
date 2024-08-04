@@ -327,13 +327,22 @@ export function playTurn() {
                 attack: 1 // Set attack to 1 for now
             });
         }
-        var players = gameParty.characters.map(character => ({
-            type: character.name,
-            hp: character.health,
-            morale: character.morale,
-            attack: character.posTrait === 'fighter' ? weaponArray[character.weapon][1] + 1 : weaponArray[character.weapon][1]
-        }));
-
+        var players = gameParty.characters.map(character => {
+            let baseAttack = weaponArray[character.weapon][1];
+            if (character.posTrait === 'fighter') {
+                baseAttack += 1;
+            }
+            if (character.negTrait === 'clumsy') {
+                baseAttack -= 1;
+            }
+            return {
+                type: character.name,
+                hp: character.health,
+                morale: character.morale,
+                attack: baseAttack
+            };
+        });
+        
         // Combine enemies and players into a single array
         var combatants = players.concat(enemies.map(enemy => ({
             type: 'enemy',
