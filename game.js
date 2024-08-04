@@ -521,7 +521,16 @@ export function playTurn() {
             // TODO
         }
         if (character.negTrait === 'hypochondriac') {
-            // TODO
+            // 10% chance of using a medical item without benefit
+            if (Math.random() < 0.1) {
+                // get all medical items from the party inventory
+                const medicalitems = gameParty.inventory.filter(item => medical.some(medicalItem => medicalItem.includes(item)));
+                if (medicalitems.length > 0) {
+                    const item = medicalitems[Math.floor(Math.random() * medicalitems.length)];
+                    gameParty.inventory.splice(gameParty.inventory.indexOf(item), 1);
+                    addEvent(`${character.name} used the ${item} but it had no effect.`);
+                }
+            }
         }
         if (character.negTrait === 'depressed') {
             // 10% chance of decreasing morale
