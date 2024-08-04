@@ -25,10 +25,10 @@ class Party {
                 for (const existingCharacter of this.characters) {
                     if (existingCharacter !== character) {
                         let relationshipType = relationships[1];
-                        if (existingCharacter.posTrait == 'friendly') {
+                        if (existingCharacter.posTrait === 'friendly' && existingCharacter.negTrait !== 'disconnected') {
                             relationshipType = relationships[2];
                         }
-                        if (existingCharacter.negTrait == 'disconnected') {
+                        if (existingCharacter.negTrait == 'disconnected' && existingCharacter.posTrait !== 'friendly') {
                             relationshipType = relationships[0];
                         }
                         character.relationships.push({ type: relationshipType, character: existingCharacter });
