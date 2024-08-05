@@ -1,9 +1,9 @@
 const relationships = [
-    ['enemies'],
-    ['strangers'],
-    ['acquaintances'],
-    ['friends'],
-    ['family']
+    'cold',
+    'strangers',
+    'acquaintances',
+    'friends',
+    'family'
 ];
 
 class Party {
@@ -25,9 +25,12 @@ class Party {
                 for (const existingCharacter of this.characters) {
                     if (existingCharacter !== character) {
                         let relationshipType = relationships[1];
-                        if (existingCharacter.posTrait == 'friendly') {
+                        if (existingCharacter.posTrait === 'friendly' && existingCharacter.negTrait !== 'disconnected') {
                             relationshipType = relationships[2];
-                        } 
+                        }
+                        if (existingCharacter.negTrait == 'disconnected' && existingCharacter.posTrait !== 'friendly') {
+                            relationshipType = relationships[0];
+                        }
                         character.relationships.push({ type: relationshipType, character: existingCharacter });
                         console.log(`${character.name} and ${existingCharacter.name} are ${relationshipType}`);
                         existingCharacter.relationships.push({ type: relationshipType, character: character });
