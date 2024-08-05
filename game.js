@@ -134,18 +134,6 @@ export function playTurn() {
             // output the event to the events div
             addEvent(`${who} ${event}.`);
         }
-
-        // Add found items to the party inventory
-        if (event === 'found food') {
-            const item = foodType[0];
-            gameParty.inventory.push(item);
-        }
-        if (event === 'found medical supplies') {
-            const item = medicalType[0];
-            gameParty.inventory.push(item);
-        }
-        updateFoodButtons();
-        updateMedicalButtons();
         gameParty.updateInventory();
         turnNumber += 1;
         const playTurnButton = document.getElementById('playTurnButton');
@@ -153,93 +141,7 @@ export function playTurn() {
             playTurnButton.innerText = `Play Turn ${turnNumber}`;
         }
     }
-
-    function updateMedicalButtons() {
-        if (gameParty.inventory.some(item => medical.some(medicalItem => medicalItem.includes(item)))) {
-            document.querySelectorAll('.medical').forEach(button => button.remove());
-            for (const medicalItem of medical) {
-                if (gameParty.inventory.some(item => medicalItem.includes(item))) {
-                    for (const character of gameParty.characters) {
-                        const characterOptions = document.querySelector(`#${character.name} #options`);
-                        const button = document.createElement('button');
-                        button.innerText = `Use ${medicalItem[0]} on ${character.name})`;
-                        const normalizedClassName = medicalItem[0].replace(/\s+/g, '_');
-                        button.id = normalizedClassName;
-                        button.classList.add('medical');
-                        button.addEventListener('click', () => {
-                            const itemIndex = gameParty.inventory.findIndex(item => medicalItem.includes(item));
-                            if (itemIndex !== -1) {
-                                const item = gameParty.inventory[itemIndex];
-                                gameParty.inventory.splice(itemIndex, 1);
-                                character.health += medicalItem[1];
-                                addEvent(`${character.name} used the ${item}.`);
-                                document.querySelectorAll('#' + normalizedClassName).forEach(button => button.remove());
-                                character.capAttributes();
-                                character.updateCharacter();
-                                updateStatBars(character);
-                                gameParty.updateInventory();
-                            }
-                        });
-                        characterOptions.appendChild(button);
-                    }
-                }
-            }
-        }
-    }
-
-    function updateFoodButtons() {
-        if (gameParty.inventory.some(item => food.some(foodItem => foodItem.includes(item)))) {
-            document.querySelectorAll('.food').forEach(button => button.remove());
-            for (const foodItem of food) {
-                if (gameParty.inventory.some(item => foodItem.includes(item))) {
-                    for (const character of gameParty.characters) {
-                        const characterOptions = document.querySelector(`#${character.name} #options`);
-                        const button = document.createElement('button');
-                        button.innerText = `Feed ${character.name} the ${foodItem[0]}`;
-                        button.id = (foodItem[0]);
-                        button.classList.add('food');
-                        button.addEventListener('click', () => {
-                            const itemIndex = gameParty.inventory.findIndex(item => foodItem.includes(item));
-                            if (itemIndex !== -1) {
-                                const item = gameParty.inventory[itemIndex];
-                                gameParty.inventory.splice(itemIndex, 1);
-                                character.hunger += foodItem[1];
-                                if (character.posTrait === 'satiated') {
-                                    character.hunger += 0.5;
-                                }
-                                // if the food is dessert add 1 morale
-                                if (foodItem[0] === 'dessert') {
-                                    character.morale += 1;
-                                    character.capAttributes();
-                                    addEvent(`${character.name} enjoyed the ${item}.`);
-                                } else {
-                                    if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
-                                        character.hunger -= foodItem[1];
-                                        addEvent(`That food didn't make ${character.name} feel much better.`);
-                                    } else {
-                                        addEvent(`${character.name} ate the ${item}.`);
-                                    }
-                                }
-                                // if the character is satiated, they get an extra 0.5 hunger
-                                if (character.posTrait === 'satiated') {
-                                    character.hunger += 0.5;
-                                }
-                                document.querySelectorAll('#' + foodItem[0]).forEach(button => button.remove());
-                                character.capAttributes();
-                                //updateFoodButtons();
-                                character.updateCharacter();
-                                updateStatBars(character);
-                                gameParty.updateInventory();
-                            }
-                        });
-                        characterOptions.appendChild(button);
-                    }
-                }
-            }
-            
-        }
-    }
-
+    
     function updateParty() {
         for (const character of gameParty.characters) {
             if (character.checkHunger()) {
@@ -498,18 +400,22 @@ export function playTurn() {
                 weaponDiv.appendChild(button);
             }
         }
-}
+    }
 
     function foundMedical() {
         event = 'found medical supplies';
         medicalType = medical[Math.floor(Math.random() * medical.length)];
         addEvent(`${who} ${event} (${medicalType[0]}).`);
+        gameParty.inventory.push(medicalType[0]);
+        updateMedicalButtons();
     }
 
     function foundFood() {
         event = 'found food';
         foodType = food[Math.floor(Math.random() * food.length)];
         addEvent(`${who} ${event} (${foodType[0]}).`);
+        gameParty.inventory.push(foodType[0]);
+        updateFoodButtons();
     }
 
     function checkNegTraitEvents(character) {
@@ -601,6 +507,92 @@ export function playTurn() {
     }
 }
 
+function updateFoodButtons() {
+    for (const character of gameParty.characters) {
+        const foodSelect = document.querySelector(`#${character.name} #options #foodSelect`);
+        while (foodSelect.firstChild) {
+            foodSelect.removeChild(foodSelect.firstChild);
+        }
+        foodSelect.innerHTML = `<option value="food">Feed ${character.name}</option>`;
+        for (const foodItem of food) {
+            if (gameParty.inventory.some(item => foodItem.includes(item))) {
+                const option = document.createElement('option');
+                option.innerText = foodItem[0];
+                option.value = foodItem[0];
+                foodSelect.appendChild(option);
+            }
+        }
+        // Add change event listener to the select element
+        foodSelect.addEventListener('change', (event) => {
+            const selectedFood = event.target.value;
+            const foodItem = food.find(item => item[0] === selectedFood);
+            if (foodItem) {
+                const itemIndex = gameParty.inventory.findIndex(item => foodItem.includes(item));
+                if (itemIndex !== -1) {
+                    const item = gameParty.inventory[itemIndex];
+                    gameParty.inventory.splice(itemIndex, 1);
+                    character.hunger += foodItem[1];
+                    if (character.posTrait === 'satiated') {
+                        character.hunger += 0.5;
+                    }
+                    if (foodItem[0] === 'dessert') {
+                        character.morale += 1;
+                        character.capAttributes();
+                        addEvent(`${character.name} enjoyed the ${item}.`);
+                    } else {
+                        if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
+                            character.hunger -= foodItem[1];
+                            addEvent(`That food didn't make ${character.name} feel much better.`);
+                        } else {
+                            addEvent(`${character.name} ate the ${item}.`);
+                        }
+                    }
+                    if (character.posTrait === 'satiated') {
+                        character.hunger += 0.5;
+                    }
+                    updateStatBars(character);
+                    gameParty.characters.forEach(c => { c.updateCharacter(); });
+                    updateFoodButtons();
+                }
+            }
+        });
+    }
+}
+
+function updateMedicalButtons() {
+    for (const character of gameParty.characters) {
+        const medicalSelect = document.querySelector(`#${character.name} #options #medicalSelect`);
+        while (medicalSelect.firstChild) {
+            medicalSelect.removeChild(medicalSelect.firstChild);
+        }
+        medicalSelect.innerHTML = `<option value="medical">Heal ${character.name}</option>`;
+        for (const medicalItem of medical) {
+            if (gameParty.inventory.some(item => medicalItem.includes(item))) {
+                const option = document.createElement('option');
+                option.innerText = medicalItem[0];
+                option.value = medicalItem[0];
+                medicalSelect.appendChild(option);
+            }
+        }
+        medicalSelect.addEventListener('change', (event) => {
+            const selectedmedical = event.target.value;
+            const medicalItem = medical.find(item => item[0] === selectedmedical);
+            if (medicalItem) {
+                const itemIndex = gameParty.inventory.findIndex(item => medicalItem.includes(item));
+                if (itemIndex !== -1) {
+                    const item = gameParty.inventory[itemIndex];
+                    gameParty.inventory.splice(itemIndex, 1);
+                    character.health += medicalItem[1];
+                    addEvent(`${character.name} used the ${item}.`);
+                    updateStatBars(character);
+                    gameParty.characters.forEach(c => { c.updateCharacter(); })
+                    updateMedicalButtons();
+                    }
+            }
+        });
+    }
+}
+
 function addEvent(eventText) {
     let currentEvents = '';
     const currentEventDiv = document.getElementById('currentEvent');
@@ -635,6 +627,8 @@ async function addPlayer(party) {
             character.createCharacter();
             character.updateCharacter();
             updateStatBars(character);
+            updateFoodButtons();
+            updateMedicalButtons();
         }
         updateRelationships(party);
     } catch (error) {

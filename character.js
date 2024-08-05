@@ -248,6 +248,16 @@ export class Character {
     inventoryList.innerHTML = `<p>Options for ${this.name}</p>`;
     characterDiv.appendChild(inventoryList);
 
+    const foodSelect = document.createElement('select');
+    foodSelect.id = 'foodSelect';
+    foodSelect.innerHTML = `<option value="food">Feed ${this.name}</option>`;
+    inventoryList.appendChild(foodSelect);
+
+    const medicalSelect = document.createElement('select');
+    medicalSelect.id = 'medicalSelect';
+    medicalSelect.innerHTML = `<option value="medical">Heal ${this.name}</option>`;
+    inventoryList.appendChild(medicalSelect);
+
     const relationships = document.createElement('div');
     relationships.classList.add('relationships');
     relationships.innerHTML = `<p>Relationships for ${this.name}</p>`;
@@ -266,20 +276,5 @@ export class Character {
     characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
     characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
     characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
-  
-    // Update inventory display
-    const inventoryList = characterDiv.querySelector('#options');
-    inventoryList.innerHTML = `<p>Options for ${this.name}</p>`;
-    const inventoryElement = document.createElement('ul');
-    inventoryList.appendChild(inventoryElement);
-    this.inventory.forEach(item => {
-      const itemElement = document.createElement('li');
-      if (Array.isArray(item)) {
-        itemElement.textContent = item[0];
-      } else {
-        itemElement.textContent = item;
-      }
-        inventoryElement.appendChild(itemElement);
-    });
   }
 }
