@@ -156,35 +156,31 @@ export function playTurn() {
 
     function updateMedicalButtons() {
         if (gameParty.inventory.some(item => medical.some(medicalItem => medicalItem.includes(item)))) {
-            const medicalDiv = document.getElementById('medicalButtons');
-            medicalDiv.querySelectorAll('button').forEach(button => button.remove());
-            if (medical.length > 0) {
-                const medicalDiv = document.getElementById('medicalButtons');
-                medicalDiv.querySelectorAll('button').forEach(button => button.remove());
-                for (const medicalItem of medical) {
-                    if (gameParty.inventory.some(item => medicalItem.includes(item))) {
-                        for (const character of gameParty.characters) {
-                            const button = document.createElement('button');
-                            button.innerText = `Use ${medicalItem[0]} on ${character.name} (${healthArray[Math.round(character.health)]}) `;
-                            const normalizedClassName = medicalItem[0].replace(/\s+/g, '_');
-                            button.classList.add(normalizedClassName);
-                            button.addEventListener('click', () => {
-                                const itemIndex = gameParty.inventory.findIndex(item => medicalItem.includes(item));
-                                if (itemIndex !== -1) {
-                                    const item = gameParty.inventory[itemIndex];
-                                    gameParty.inventory.splice(itemIndex, 1);
-                                    character.health += medicalItem[1];
-                                    addEvent(`${character.name} used the ${item}.`);
-                                    medicalDiv.querySelectorAll('.' + normalizedClassName).forEach(button => button.remove());
-                                    character.capAttributes();
-                                    updateMedicalButtons();
-                                    character.updateCharacter();
-                                    updateStatBars(character);
-                                    gameParty.updateInventory();
-                                }
-                            });
-                            medicalDiv.appendChild(button);
-                        }
+            document.querySelectorAll('.medical').forEach(button => button.remove());
+            for (const medicalItem of medical) {
+                if (gameParty.inventory.some(item => medicalItem.includes(item))) {
+                    for (const character of gameParty.characters) {
+                        const characterOptions = document.querySelector(`#${character.name} #options`);
+                        const button = document.createElement('button');
+                        button.innerText = `Use ${medicalItem[0]} on ${character.name})`;
+                        const normalizedClassName = medicalItem[0].replace(/\s+/g, '_');
+                        button.id = normalizedClassName;
+                        button.classList.add('medical');
+                        button.addEventListener('click', () => {
+                            const itemIndex = gameParty.inventory.findIndex(item => medicalItem.includes(item));
+                            if (itemIndex !== -1) {
+                                const item = gameParty.inventory[itemIndex];
+                                gameParty.inventory.splice(itemIndex, 1);
+                                character.health += medicalItem[1];
+                                addEvent(`${character.name} used the ${item}.`);
+                                document.querySelectorAll('#' + normalizedClassName).forEach(button => button.remove());
+                                character.capAttributes();
+                                character.updateCharacter();
+                                updateStatBars(character);
+                                gameParty.updateInventory();
+                            }
+                        });
+                        characterOptions.appendChild(button);
                     }
                 }
             }
@@ -193,56 +189,54 @@ export function playTurn() {
 
     function updateFoodButtons() {
         if (gameParty.inventory.some(item => food.some(foodItem => foodItem.includes(item)))) {
-            const foodDiv = document.getElementById('foodButtons');
-            foodDiv.querySelectorAll('button').forEach(button => button.remove());
-            if (food.length > 0) {
-                const foodDiv = document.getElementById('foodButtons');
-                foodDiv.querySelectorAll('button').forEach(button => button.remove());
-                for (const foodItem of food) {
-                    if (gameParty.inventory.some(item => foodItem.includes(item))) {
-                        for (const character of gameParty.characters) {
-                            const button = document.createElement('button');
-                            button.innerText = `Feed ${character.name} (${hungerArray[Math.round(character.hunger)]}) ${foodItem[0]}`;
-                            button.classList.add(foodItem[0]);
-                            button.addEventListener('click', () => {
-                                const itemIndex = gameParty.inventory.findIndex(item => foodItem.includes(item));
-                                if (itemIndex !== -1) {
-                                    const item = gameParty.inventory[itemIndex];
-                                    gameParty.inventory.splice(itemIndex, 1);
-                                    character.hunger += foodItem[1];
-                                    if (character.posTrait === 'satiated') {
-                                        character.hunger += 0.5;
-                                    }
-                                    // if the food is dessert add 1 morale
-                                    if (foodItem[0] === 'dessert') {
-                                        character.morale += 1;
-                                        character.capAttributes();
-                                        addEvent(`${character.name} enjoyed the ${item}.`);
-                                    } else {
-                                        if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
-                                            character.hunger -= foodItem[1];
-                                            addEvent(`That food didn't make ${character.name} feel much better.`);
-                                        } else {
-                                            addEvent(`${character.name} ate the ${item}.`);
-                                        }
-                                    }
-                                    // if the character is satiated, they get an extra 0.5 hunger
-                                    if (character.posTrait === 'satiated') {
-                                        character.hunger += 0.5;
-                                    }
-                                    foodDiv.querySelectorAll('.' + foodItem[0]).forEach(button => button.remove());
-                                    character.capAttributes();
-                                    updateFoodButtons();
-                                    character.updateCharacter();
-                                    updateStatBars(character);
-                                    gameParty.updateInventory();
+            document.querySelectorAll('.food').forEach(button => button.remove());
+            for (const foodItem of food) {
+                if (gameParty.inventory.some(item => foodItem.includes(item))) {
+                    for (const character of gameParty.characters) {
+                        const characterOptions = document.querySelector(`#${character.name} #options`);
+                        const button = document.createElement('button');
+                        button.innerText = `Feed ${character.name} the ${foodItem[0]}`;
+                        button.id = (foodItem[0]);
+                        button.classList.add('food');
+                        button.addEventListener('click', () => {
+                            const itemIndex = gameParty.inventory.findIndex(item => foodItem.includes(item));
+                            if (itemIndex !== -1) {
+                                const item = gameParty.inventory[itemIndex];
+                                gameParty.inventory.splice(itemIndex, 1);
+                                character.hunger += foodItem[1];
+                                if (character.posTrait === 'satiated') {
+                                    character.hunger += 0.5;
                                 }
-                            });
-                            foodDiv.appendChild(button);
-                        }
+                                // if the food is dessert add 1 morale
+                                if (foodItem[0] === 'dessert') {
+                                    character.morale += 1;
+                                    character.capAttributes();
+                                    addEvent(`${character.name} enjoyed the ${item}.`);
+                                } else {
+                                    if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
+                                        character.hunger -= foodItem[1];
+                                        addEvent(`That food didn't make ${character.name} feel much better.`);
+                                    } else {
+                                        addEvent(`${character.name} ate the ${item}.`);
+                                    }
+                                }
+                                // if the character is satiated, they get an extra 0.5 hunger
+                                if (character.posTrait === 'satiated') {
+                                    character.hunger += 0.5;
+                                }
+                                document.querySelectorAll('#' + foodItem[0]).forEach(button => button.remove());
+                                character.capAttributes();
+                                //updateFoodButtons();
+                                character.updateCharacter();
+                                updateStatBars(character);
+                                gameParty.updateInventory();
+                            }
+                        });
+                        characterOptions.appendChild(button);
                     }
                 }
             }
+            
         }
     }
 
