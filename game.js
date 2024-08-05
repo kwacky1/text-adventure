@@ -1,5 +1,3 @@
-
-
 var turnNumber = 1;
 
 const posTraits = [
