@@ -61,7 +61,7 @@ export class Character {
     this.posTrait = posTrait;
     this.negTrait = negTrait;
     this.relationships = [];
-    this.inventory = [];
+    this.inventoryMap = new Map();
     this.weapon = 0;
     this.skin = skin;
     this.hair = hair;
@@ -133,32 +133,6 @@ export class Character {
     if (this.morale < 0) {
       this.morale = 0;
     }
-  }
-
-  useItem(itemName) {
-    const index = this.inventory.indexOf(itemName);
-    if (index === -1) {
-      console.log(`${this.name} does not have ${itemName}`);
-      return;
-    }
-    switch (itemName) {
-      case 'food':
-        this.hunger += 2;
-        console.log(`${this.name} ate ${itemName}`);
-        break;
-      case 'medical':
-        this.health += 1;
-        console.log(`${this.name} used ${itemName}`);
-        break;
-      case 'weapon':
-        console.log(`${this.name} used ${itemName}`);
-        break;
-      default:
-        console.log(`Unknown item: ${itemName}`);
-        break;
-    }
-    this.inventory.splice(index, 1);
-    this.update();
   }
 
   createCharacter() {
@@ -244,9 +218,19 @@ export class Character {
     characterDiv.appendChild(statsContainer);
 
     const inventoryList = document.createElement('div');
-    inventoryList.classList.add('inventory');
-    inventoryList.innerHTML = `<p>Inventory for ${this.name}</p>`;
+    inventoryList.id = 'options';
+    inventoryList.innerHTML = `<p>Options for ${this.name}</p>`;
     characterDiv.appendChild(inventoryList);
+
+    const foodSelect = document.createElement('select');
+    foodSelect.id = 'foodSelect';
+    foodSelect.innerHTML = `<option value="food">Feed ${this.name}</option>`;
+    inventoryList.appendChild(foodSelect);
+
+    const medicalSelect = document.createElement('select');
+    medicalSelect.id = 'medicalSelect';
+    medicalSelect.innerHTML = `<option value="medical">Heal ${this.name}</option>`;
+    inventoryList.appendChild(medicalSelect);
 
     const relationships = document.createElement('div');
     relationships.classList.add('relationships');
@@ -266,20 +250,5 @@ export class Character {
     characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
     characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
     characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
-  
-    // Update inventory display
-    const inventoryList = characterDiv.querySelector('.inventory');
-    inventoryList.innerHTML = `<p>Inventory for ${this.name}</p>`;
-    const inventoryElement = document.createElement('ul');
-    inventoryList.appendChild(inventoryElement);
-    this.inventory.forEach(item => {
-      const itemElement = document.createElement('li');
-      if (Array.isArray(item)) {
-        itemElement.textContent = item[0];
-      } else {
-        itemElement.textContent = item;
-      }
-        inventoryElement.appendChild(itemElement);
-    });
   }
 }
