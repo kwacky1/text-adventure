@@ -10,7 +10,7 @@ class Party {
     constructor() {
         this.characters = [];
         this.nextId = 1;
-        this.inventory = [];
+        this.inventoryMap = new Map();
     }
 
     addCharacter(character) {
@@ -71,12 +71,12 @@ class Party {
       
         // Update inventory display
         partyInventoryDiv.innerHTML = '<p>Party Inventory</p>';
-        this.inventory.forEach(item => {
-          const itemElement = document.createElement('li');
-          itemElement.textContent = item;
-          partyInventoryDiv.appendChild(itemElement);
+        this.inventoryMap.forEach((value, key) => {
+            const itemElement = document.createElement('li');
+            itemElement.textContent = `${value}`;
+            partyInventoryDiv.appendChild(itemElement);
         });
-      }
     }
+}
 
 export default Party;

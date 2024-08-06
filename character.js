@@ -61,7 +61,7 @@ export class Character {
     this.posTrait = posTrait;
     this.negTrait = negTrait;
     this.relationships = [];
-    this.inventory = [];
+    this.inventoryMap = new Map();
     this.weapon = 0;
     this.skin = skin;
     this.hair = hair;
@@ -133,32 +133,6 @@ export class Character {
     if (this.morale < 0) {
       this.morale = 0;
     }
-  }
-
-  useItem(itemName) {
-    const index = this.inventory.indexOf(itemName);
-    if (index === -1) {
-      console.log(`${this.name} does not have ${itemName}`);
-      return;
-    }
-    switch (itemName) {
-      case 'food':
-        this.hunger += 2;
-        console.log(`${this.name} ate ${itemName}`);
-        break;
-      case 'medical':
-        this.health += 1;
-        console.log(`${this.name} used ${itemName}`);
-        break;
-      case 'weapon':
-        console.log(`${this.name} used ${itemName}`);
-        break;
-      default:
-        console.log(`Unknown item: ${itemName}`);
-        break;
-    }
-    this.inventory.splice(index, 1);
-    this.update();
   }
 
   createCharacter() {
