@@ -61,7 +61,6 @@ export class Character {
     this.posTrait = posTrait;
     this.negTrait = negTrait;
     this.relationships = [];
-    this.inventoryMap = new Map();
     this.weapon = 0;
     this.skin = skin;
     this.hair = hair;
@@ -77,27 +76,6 @@ export class Character {
       this.updateCharacter();
       return true;
     }
-  }
-
-  scavenger() {
-    // TODO
-  }
-
-  optimistic() {
-    // 10% chance of increasing own morale
-    if (Math.random() < 0.1) {
-      this.morale += 1;
-      console.log(`${this.name} still thinks everything will be okay`);
-    }
-    // Can't go below bad
-    if (this.morale < 2) {
-      this.morale += 2;
-      console.log(`${this.name} clings on to hope`);
-    }
-  }
-
-  fighter() {
-    // TODO
   }
 
   capAttributes() {

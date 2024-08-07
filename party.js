@@ -73,7 +73,7 @@ class Party {
         partyInventoryDiv.innerHTML = '<p>Party Inventory</p>';
         this.inventoryMap.forEach((value, key) => {
             const itemElement = document.createElement('li');
-            itemElement.textContent = `${value}`;
+            itemElement.textContent = `${key}`;
             partyInventoryDiv.appendChild(itemElement);
         });
     }

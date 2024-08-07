@@ -269,6 +269,7 @@ export function playTurn() {
             // Add a button to commence the attack
             const attackButton = document.createElement('button');
             attackButton.textContent = `The ${combatant.type} attacks!`;
+            attackButton.id = 'attackButton';
             attackButton.addEventListener('click', () => {
                 const target = players[Math.floor(Math.random() * players.length)];
                 const character = gameParty.characters.find(c => c.name === target.type);
@@ -280,6 +281,21 @@ export function playTurn() {
                 }
                 character.health = target.hp;
                 addEvent(`The ${combatant.type} attacks ${target.type} for ${damage} damage.`);
+                if (target.hp <= 0) {
+                    addEvent(`${target.type} has been defeated!`);
+                    // Remove defeated player from combatants array
+                    combatants.splice(combatants.indexOf(target), 1);
+                    checkDeathEffects(character);
+                    gameParty.removeCharacter(character);
+                    updateRelationships(gameParty);
+                    // Check if all players are defeated
+                    if (combatants.filter(c => c.type !== 'enemy').length === 0) {
+                        // Unhide the playTurnButton
+                        const playTurnButton = document.getElementById('playTurnButton');
+                        playTurnButton.style.display = 'block'; 
+                        document.getElementById('attackButton').remove();
+                    }
+                }
                 character.updateCharacter();
                 updateStatBars(character);
                 handleTurn(index + 1);
@@ -372,9 +388,7 @@ export function playTurn() {
                     button.classList.add('weapon');
                     button.addEventListener('click', () =>
                     {
-                        character.inventoryMap.set(weaponType[0], weaponType[1]);
-                        character.inventoryMap.delete(oldWeapon);
-                        character.weapon = weaponArray.indexOf(weaponType); // TODO check if I need this
+                        character.weapon = weaponArray.indexOf(weaponType); 
                         addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
                         weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
                         character.updateCharacter();
@@ -388,8 +402,7 @@ export function playTurn() {
                 button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
                 button.addEventListener('click', () => 
                 {
-                    character.inventoryMap.set(weaponType[0], weapon[1]);
-                    character.weapon = weaponArray.indexOf(weaponType); // TODO check if I need this
+                    character.weapon = weaponArray.indexOf(weaponType); 
                     addEvent(`${character.name} picked up the ${weapon}.`);
                     weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
                     character.updateCharacter();
@@ -430,14 +443,14 @@ export function playTurn() {
                 const medicalitems = [];
                 gameParty.inventoryMap.forEach((value, key) => {
                     if (medical.some(medicalItem => medicalItem.includes(value))) {
-                        medicalitems.push(value);
+                        medicalitems.push(key);
                     }
                 });
 
                 if (medicalitems.length > 0) {
                     const item = medicalitems[Math.floor(Math.random() * medicalitems.length)];
                     gameParty.inventoryMap.delete(item);
-                    addEvent(`${character.name} used the ${item} but it had no effect.`);
+                    addEvent(`${character.name} used the ${item} but it had no effect.`); 
                 }
             }
         }
@@ -455,9 +468,10 @@ export function playTurn() {
         if (character.negTrait === 'clumsy') {
             // 10% chance of getting hurt
             if (Math.random() < 0.1) {
-                character.healthLevel -= 1;
+                character.health -= 1;
                 addEvent(`${character.name} tripped and hurt themself.`);
-
+                character.updateCharacter();
+                updateStatBars(character);
             }
         }
     }
@@ -481,7 +495,8 @@ export function playTurn() {
             if (Math.random() < 0.1) {
                 addEvent(`${character.name} was able to scavenge some extra food.`);
                 foodType = food[Math.floor(Math.random() * food.length)];
-                gameParty.inventoryMap.set(foodType[0], foodType[1]);    
+                gameParty.inventoryMap.set(foodType[0], foodType[1]);   
+                updateFoodButtons(); 
             }
         }
         if (character.posTrait === 'optimistic') {
