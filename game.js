@@ -1,21 +1,21 @@
 var turnNumber = 1;
 
 const posTraits = [
-    'resilient',
-    'satiated',
-    'friendly',
-    'scavenger',
-    'optimistic',
-    'fighter'
+    ['resilient', 'Every turn has a 10% chance to heal', 'Has a higher chance of being cured of illness and infection'],
+    ['satiated', 'Every other turn, hunger does not go down', 'Food items are more effective by 0.5 points'],
+    ['friendly', 'Starts with higher relationships with other party members', 'Can never become cold with other party members'],
+    ['scavenger', 'Every turn has a 10% chance to gain a random food item', 'Gets a food item from every zombie killed'],
+    ['optimistic', 'Every turn has a 10% chance to raise morale', 'Morale can’t fall below bad'],
+    ['fighter', 'Does an extra 1 damage for each attack', 'Has a 50% chance to damage two zombies at once']
 ];
 
 const negTraits = [
-    'vulnerable',
-    'hungry',
-    'disconnected',
-    'hypochondriac',
-    'depressed',
-    'clumsy'
+    ['vulnerable', 'Takes an extra 1 damage from each attack', 'Has a lower chance of curing illness and infection'],
+    ['hungry', 'Every other turn, extra hunger is depleted', 'Rations and snacks have no effect '],
+    ['disconnected', 'Starts with lower relationships with other party members', 'Can never become family with other party members'],
+    ['hypochondriac', 'Every turn has a 10% chance to use a medical item without benefit', 'Every turn has a 10% chance to display symptoms of illness despite not being sick'],
+    ['depressed', 'Every turn has a 10% chance to lower morale', 'Morale can’t rise above good'],
+    ['clumsy', 'Every turn has a 10% chance to get hurt', 'Does 1 less damage for each attack']
 ];
 
 const food = [
@@ -654,7 +654,7 @@ async function addPlayer(party) {
             let shirtColour = ['red', 'yellow', 'green', 'blue'];
             let shirtStyle = ['shirt1', 'shirt2', 'shirt3', 'shirt4'];
             const shirt = "img/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + shirtColour[Math.floor(Math.random() * shirtStyle.length)]+ ".png";
-            const character = new Character(firstName, age, posTrait, negTrait, skin, hair, shirt);
+            const character = new Character(firstName, age, posTrait[0], negTrait[0], skin, hair, shirt);
             party.addCharacter(character);
             addEvent(`${character.name} has joined the party!`);
             character.createCharacter();
@@ -761,8 +761,8 @@ async function createCharacterForm() {
     const posTraitsSelect = document.createElement('select');
     for (const trait of posTraits) {
       const option = document.createElement('option');
-      option.value = trait;
-      option.textContent = trait;
+      option.value = trait[0];
+      option.textContent = trait[0];
       posTraitsSelect.appendChild(option);
     }
     posTraitsSelect.selectedIndex = Math.floor(Math.random() * posTraits.length);
@@ -774,8 +774,8 @@ async function createCharacterForm() {
     const negTraitsSelect = document.createElement('select');
     for (const trait of negTraits) {
       const option = document.createElement('option');
-      option.value = trait;
-      option.textContent = trait;
+      option.value = trait[0];
+      option.textContent = trait[0];
       negTraitsSelect.appendChild(option);
     }
     negTraitsSelect.selectedIndex = Math.floor(Math.random() * negTraits.length);
