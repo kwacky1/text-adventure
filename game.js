@@ -768,6 +768,17 @@ async function createCharacterForm() {
     posTraitsSelect.selectedIndex = Math.floor(Math.random() * posTraits.length);
     posTraitsLabel.appendChild(posTraitsSelect);
     form.appendChild(posTraitsLabel);
+
+    const posTraitsDescription = document.createElement('p');
+    const posEffectsList = document.createElement('ul');
+    let posEffect1 = document.createElement('li');
+    posEffect1.textContent = posTraits[posTraitsSelect.selectedIndex][1];
+    posEffectsList.appendChild(posEffect1);
+    let posEffect2 = document.createElement('li');
+    posEffect2.textContent = posTraits[posTraitsSelect.selectedIndex][2];
+    posEffectsList.appendChild(posEffect2);
+    posTraitsDescription.appendChild(posEffectsList);
+    form.appendChild(posTraitsDescription);
   
     const negTraitsLabel = document.createElement('label');
     negTraitsLabel.textContent = 'Negative Trait: ';
@@ -781,6 +792,17 @@ async function createCharacterForm() {
     negTraitsSelect.selectedIndex = Math.floor(Math.random() * negTraits.length);
     negTraitsLabel.appendChild(negTraitsSelect);
     form.appendChild(negTraitsLabel);
+
+    const negTraitsDescription = document.createElement('p');
+    const negEffectsList = document.createElement('ul');
+    let negEffect1 = document.createElement('li');
+    negEffect1.textContent = negTraits[negTraitsSelect.selectedIndex][1];
+    negEffectsList.appendChild(negEffect1);
+    let negEffect2 = document.createElement('li');
+    negEffect2.textContent = negTraits[negTraitsSelect.selectedIndex][2];
+    negEffectsList.appendChild(negEffect2);
+    negTraitsDescription.appendChild(negEffectsList);
+    form.appendChild(negTraitsDescription);
 
     // Avatar creation section
     const avatarSection = document.createElement('div');
@@ -888,6 +910,32 @@ async function createCharacterForm() {
     avatarSection.appendChild(avatarPreviewContainer);
 
     // Event listeners to update previews
+    posTraitsSelect.addEventListener('change', () => {
+        const posTraitIndex = posTraits.findIndex(trait => trait[0] === posTraitsSelect.value);
+        const effectsList = document.createElement('ul');
+        let effect1 = document.createElement('li');
+        effect1.textContent = posTraits[posTraitIndex][1];
+        effectsList.appendChild(effect1);
+        let effect2 = document.createElement('li');
+        effect2.textContent = posTraits[posTraitIndex][2];
+        effectsList.appendChild(effect2);
+        posTraitsDescription.innerHTML = '';
+        posTraitsDescription.appendChild(effectsList);
+    });
+
+    negTraitsSelect.addEventListener('change', () => {
+        const negTraitIndex = negTraits.findIndex(trait => trait[0] === negTraitsSelect.value);
+        const effectsList = document.createElement('ul');
+        let effect1 = document.createElement('li');
+        effect1.textContent = negTraits[negTraitIndex][1];
+        effectsList.appendChild(effect1);
+        let effect2 = document.createElement('li');
+        effect2.textContent = negTraits[negTraitIndex][2];
+        effectsList.appendChild(effect2);
+        negTraitsDescription.innerHTML = '';
+        negTraitsDescription.appendChild(effectsList);
+    });
+
     skinSelect.addEventListener('change', () => {
         skinPreview.src = "img/" + skinSelect.value;
     });
