@@ -78,7 +78,10 @@ export function playTurn() {
         partyInventoryDiv.remove();
         // output character is dead to the events div
         addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
-        playTurnButton.remove()
+        const playTurnButton = document.getElementById('playTurnButton');
+        if (playTurnButton) {        
+            playTurnButton.remove()
+        }
     } else {
         if (gameParty.characters.length > 1) {
             who = "The party"
@@ -223,6 +226,8 @@ export function playTurn() {
                 attack: 1 // Set attack to 1 for now
             });
         }
+        var criticalHit = 0;
+        var criticalMiss = 0;
         var players = gameParty.characters.map(character => {
             let baseAttack = weaponArray[character.weapon][1];
             if (character.posTrait === 'fighter') {
@@ -230,6 +235,29 @@ export function playTurn() {
             }
             if (character.negTrait === 'clumsy') {
                 baseAttack -= 1;
+                if (baseAttack < 0) {
+                    baseAttack = 0;
+                }
+            }
+            if (character.morale === 6 || character.morale === 7) {
+                if (Math.random() < 0.1) {
+                    criticalHit = 1;
+                }
+            }
+            if (character.morale === 8 || character.morale === 9) {
+                if (Math.random() < 0.2) {
+                    criticalHit = 1;
+                }
+            }
+            if (character.morale === 0 || character.morale === 1) {
+                if (Math.random() < 0.2) {
+                    criticalMiss = 1;
+                }
+            }
+            if (character.morale === 2 || character.morale === 3) {
+                if (Math.random() < 0.1) {
+                    criticalMiss = 1;
+                }
             }
             return {
                 type: character.name,
@@ -282,7 +310,7 @@ export function playTurn() {
                 character.health = target.hp;
                 addEvent(`The ${combatant.type} attacks ${target.type} for ${damage} damage.`);
                 if (target.hp <= 0) {
-                    addEvent(`${target.type} has been defeated!`);
+                    addEvent(`${target.type} has succumbed to their wounds!`);
                     // Remove defeated player from combatants array
                     combatants.splice(combatants.indexOf(target), 1);
                     checkDeathEffects(character);
@@ -329,7 +357,15 @@ export function playTurn() {
                                     nothingHappened = 1;
                                 }
                             } else {
-                                addEvent(`${combatant.type} hit the ${enemy.type} for ${combatant.attack} damage.`);
+                                if (criticalHit == 1) {
+                                    combatant.attack += 1;
+                                    addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${combatant.attack} damage.`);
+                                } else if (criticalMiss == 1) {
+                                    combatant.attack = 0;
+                                    addEvent(`${combatant.type} misses!`);
+                                } else {
+                                    addEvent(`${combatant.type} hit the ${enemy.type} for ${combatant.attack} damage.`);
+                                }
                             }
                             if (nothingHappened == 0) {
                                 enemy.hp -= combatant.attack;                            
@@ -480,7 +516,7 @@ export function playTurn() {
         if (character.posTrait === 'resilient') {
             // 10% chance of healing
             if (Math.random() < 0.1) {
-                character.healthLevel += 1;
+                character.health += 1;
                 addEvent(`${character.name} is feeling a bit better.`);
             }
         }
@@ -671,41 +707,43 @@ async function addPlayer(party) {
 
 function updateStatBars(character) {
     const characterDiv = document.getElementById(character.name);
-    const moraleStat = characterDiv.querySelector('#moraleStat');
-    const hungerStat = characterDiv.querySelector('#hungerStat');
-    const healthStat = characterDiv.querySelector('#healthStat');
+    if (characterDiv) {
+        const moraleStat = characterDiv.querySelector('#moraleStat');
+        const hungerStat = characterDiv.querySelector('#hungerStat');
+        const healthStat = characterDiv.querySelector('#healthStat');
 
-    const moraleValue = character.morale;
-    const hungerValue = character.hunger;
-    const healthValue = character.health;
+        const moraleValue = character.morale;
+        const hungerValue = character.hunger;
+        const healthValue = character.health;
 
-    const moralePercentage = (moraleValue / (moraleArray.length - 1)) * 100;
-    const hungerPercentage = (hungerValue / (hungerArray.length - 1)) * 100;
-    const healthPercentage = (healthValue / (healthArray.length - 1)) * 100;
+        const moralePercentage = (moraleValue / (moraleArray.length - 1)) * 100;
+        const hungerPercentage = (hungerValue / (hungerArray.length - 1)) * 100;
+        const healthPercentage = (healthValue / (healthArray.length - 1)) * 100;
 
-    moraleStat.style.setProperty('--width', `${moralePercentage}%`);
-    hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
-    healthStat.style.setProperty('--width', `${healthPercentage}%`);
+        moraleStat.style.setProperty('--width', `${moralePercentage}%`);
+        hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
+        healthStat.style.setProperty('--width', `${healthPercentage}%`);
 
-    // Define threshold percentages
-    const lowThreshold = 30;
-    const mediumThreshold = 60;
+        // Define threshold percentages
+        const lowThreshold = 30;
+        const mediumThreshold = 60;
 
-    // Function to determine background color based on percentage
-    function getBackgroundColor(percentage) {
-        if (percentage < lowThreshold) {
-            return "rgba(128, 0, 0, 0.5)";
-        } else if (percentage < mediumThreshold) {
-            return "rgba(128, 128, 0, 0.5)";
-        } else {
-            return "rgba(0, 128, 0, 0.5)";
+        // Function to determine background color based on percentage
+        function getBackgroundColor(percentage) {
+            if (percentage < lowThreshold) {
+                return "rgba(128, 0, 0, 0.5)";
+            } else if (percentage < mediumThreshold) {
+                return "rgba(128, 128, 0, 0.5)";
+            } else {
+                return "rgba(0, 128, 0, 0.5)";
+            }
         }
-    }
 
-    // Set background color using CSS properties
-    moraleStat.style.setProperty('--background-color', getBackgroundColor(moralePercentage));
-    hungerStat.style.setProperty('--background-color', getBackgroundColor(hungerPercentage));
-    healthStat.style.setProperty('--background-color', getBackgroundColor(healthPercentage));
+        // Set background color using CSS properties
+        moraleStat.style.setProperty('--background-color', getBackgroundColor(moralePercentage));
+        hungerStat.style.setProperty('--background-color', getBackgroundColor(hungerPercentage));
+        healthStat.style.setProperty('--background-color', getBackgroundColor(healthPercentage));
+    }
 }
 
 function updateRelationships(party) {

@@ -117,4 +117,6 @@ form select {
     margin: 20px;
 }
 
-  
+#options select{
+    min-width: 206px;
+}
