@@ -347,28 +347,29 @@ export function playTurn() {
                             attacks = 2;
                         }
                         for (var i = 0; i < attacks; i++) {
+                            let damage = combatant.attack;
                             if (i == 1) {
                                 const allEnemies = combatants.filter(c => c.type === 'enemy' && c.hp > 0 && c !== enemy);
                                 if (allEnemies.length > 0) {
                                     enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
                                     enemyIndex = combatants.indexOf(enemy); 
-                                    addEvent(`${combatant.type} hits another ${enemy.type} for ${combatant.attack} damage.`);
+                                    addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`);
                                 } else {
                                     nothingHappened = 1;
                                 }
                             } else {
                                 if (criticalHit == 1) {
-                                    combatant.attack += 1;
-                                    addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${combatant.attack} damage.`);
+                                    damage += 1;
+                                    addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${damage} damage.`);
                                 } else if (criticalMiss == 1) {
-                                    combatant.attack = 0;
+                                    damage = 0;
                                     addEvent(`${combatant.type} misses!`);
                                 } else {
-                                    addEvent(`${combatant.type} hit the ${enemy.type} for ${combatant.attack} damage.`);
+                                    addEvent(`${combatant.type} hit the ${enemy.type} for ${damage} damage.`);
                                 }
                             }
                             if (nothingHappened == 0) {
-                                enemy.hp -= combatant.attack;                            
+                                enemy.hp -= damage;                            
                             }
                             if (enemy.hp <= 0) {
                                 addEvent(`The ${enemy.type} has been defeated!`);
@@ -478,7 +479,7 @@ export function playTurn() {
                 // Collect medical items from the inventory Map
                 const medicalitems = [];
                 gameParty.inventoryMap.forEach((value, key) => {
-                    if (medical.some(medicalItem => medicalItem.includes(value))) {
+                    if (medical.some(medicalItem => medicalItem.includes(key))) {
                         medicalitems.push(key);
                     }
                 });
@@ -565,7 +566,7 @@ function clearAndPopulateOptions(selectElement, character, items, itemType, defa
     for (const item of items) {
         if (gameParty.inventoryMap.has(item[0])) {
             const option = document.createElement('option');
-            option.textContent = `${defaultOptionText} ${character.name} with ${item[0]}`;
+            option.textContent = `${item[0]} (+${item[1]})`;
             option.value = item[0];
             option.dataset.characterName = character.name; // Store character name in data attribute
             fragment.appendChild(option);
