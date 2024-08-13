@@ -88,7 +88,26 @@ export function playTurn() {
         } else {
             who = gameParty.characters[0].name;
         }
-        var event = `moves on`;
+        const singlePlayerEvents = [
+            `${who} watches the clouds go by.`, 
+            `${who} stays in bed all day.`
+        ];
+        if (gameParty.characters.length > 1) {
+            //choose a random character for the event
+            let pone = gameParty.characters[Math.floor(Math.random() * gameParty.characters.length)].name
+            //choose a second player who is not pone
+            let ptwo;
+            do {
+                ptwo = gameParty.characters[Math.floor(Math.random() * gameParty.characters.length)].name;
+            } while (ptwo === pone);
+            const multiPlayerEvents = [
+                `${pone} spots a rabbit in a clearing and calls ${ptwo} to hunt for it, but it turns out to be a white bag rolling in the wind.`,
+                `A zombie approaches the party but immediately collapses.`
+            ]
+            var event = multiPlayerEvents[Math.floor(Math.random() * multiPlayerEvents.length)];
+        } else {
+            var event = singlePlayerEvents[Math.floor(Math.random() * singlePlayerEvents.length)];
+        }
         const chance = Math.random();
         var friendChance = 0.2;
         var enemyChance = 0.1 + friendChance;
@@ -133,7 +152,7 @@ export function playTurn() {
             }
         } else {
             // output the event to the events div
-            addEvent(`${who} ${event}.`);
+            addEvent(event);
         }
         gameParty.updateInventory();
         turnNumber += 1;
@@ -203,7 +222,7 @@ export function playTurn() {
     }
 
     function foundEnemy() {
-        event = 'found an enemy';
+        event = `${who} found an enemy`;
         const playTurnButton = document.getElementById('playTurnButton');
         playTurnButton.style.display = 'none';
         var numberOfEnemies = Math.floor(Math.random() * gameParty.characters.length) + 1;
@@ -389,6 +408,7 @@ export function playTurn() {
                                     // Unhide the playTurnButton
                                     const playTurnButton = document.getElementById('playTurnButton');
                                     playTurnButton.style.display = 'block';
+                                    break;
                                 }
                             }
                         }
@@ -488,6 +508,7 @@ export function playTurn() {
                     const item = medicalitems[Math.floor(Math.random() * medicalitems.length)];
                     gameParty.inventoryMap.delete(item);
                     addEvent(`${character.name} used the ${item} but it had no effect.`); 
+                    updateMedicalButtons();
                 }
             }
         }
@@ -1030,7 +1051,7 @@ async function createCharacterForm() {
             const eventsDiv = document.getElementById('events');
             eventsDiv.style.display = 'block';
 
-            addEvent(`${character.name} has started the adventure!`);
+            addEvent(`A new illness has swept the world and the infected have begun to rise from the dead. The world is ending, but ${character.name}'s life doesn't have to just yet.`)
         });
     });
     form.appendChild(submitButton);
