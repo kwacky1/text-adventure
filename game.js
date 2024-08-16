@@ -1074,26 +1074,30 @@ async function createCharacterForm() {
 function checkDeathEffects(character) {
 // when a character dies check the relationships of the other characters and set morale accordingly
 /*
-    ['strangers'], no change
-    ['acquaintances'], - 1
-    ['friends'], - 2
-    ['family'] - 3
+Family -3
+Friends -2
+Acquaintances -1
+Strangers +0
+Cold +1
 */
     for (const remainingCharacter of gameParty.characters) {
         if (remainingCharacter !== character) {
             const relationshipIndex = remainingCharacter.relationships.findIndex(rel => rel.character == character)
             const relationship = character.relationships[relationshipIndex].type;
-            if (relationship === 'friends') {
-                remainingCharacter.morale -= 2;
-            }
             if (relationship === 'family') {
                 remainingCharacter.morale -= 3;
+            }
+            if (relationship === 'friends') {
+                remainingCharacter.morale -= 2;
             }
             if (relationship === 'acquaintances') {
                 remainingCharacter.morale -= 1;
             }
+            if (relationship === 'cold') {
+                remainingCharacter.morale += 1;
+            }
             remainingCharacter.capAttributes();
-        }
+            updateStatBars(remainingCharacter);        }
     }
 }
 
