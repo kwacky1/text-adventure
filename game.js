@@ -548,8 +548,14 @@ export function playTurn() {
             if (Math.random() < 0.1) {
                 character.health -= 1;
                 addEvent(`${character.name} tripped and hurt themself.`);
-                character.updateCharacter();
-                updateStatBars(character);
+                if (character.health <= 0) {
+                    checkDeathEffects(character);
+                    gameParty.removeCharacter(character);
+                    updateRelationships(gameParty);
+                } else {
+                    character.updateCharacter();
+                    updateStatBars(character);
+                }
             }
         }
     }
@@ -581,12 +587,12 @@ export function playTurn() {
             // 10% chance of increasing own morale
             if (Math.random() < 0.1) {
             character.morale += 1;
-            console.log(`${character.name} looks happy today.`);
+            addEvent(`${character.name} looks happy today.`);
             }
             // Can't go below bad
             if (character.morale < 2) {
             character.morale += 2;
-            console.log(`${character.name} clings on to hope`);
+            addEvent(`${character.name} clings on to hope`);
             }
         }
     }
