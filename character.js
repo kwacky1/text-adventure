@@ -58,6 +58,7 @@ export class Character {
     this.morale = 6;
     this.hunger = 9;
     this.health = 9;
+    this.sick = false;
     this.posTrait = posTrait;
     this.negTrait = negTrait;
     this.relationships = [];

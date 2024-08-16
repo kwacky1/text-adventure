@@ -131,6 +131,7 @@ export function playTurn() {
             itemChance = 0.55 + enemyChance;
             secondItem = 0.15 + itemChance;
         }
+        var illnessChance = secondItem + 0.05;
         if ((chance <= friendChance) && gameParty.characters.length < 4) {
             foundFriend(who);
         } else if (chance > friendChance && chance <= enemyChance) {
@@ -150,6 +151,14 @@ export function playTurn() {
                     foundWeapon()
                 }
             }
+        } else if (chance > secondItem && chance <= illnessChance) {
+            do {
+                var sickCharacter = gameParty.characters[Math.floor(Math.random() * gameParty.characters.length)];
+            } while (sickCharacter != sickCharacter.sick);
+        sickCharacter.health -= 1;
+            sickCharacter.sick = true;
+            addEvent(`${sickCharacter.name} is feeling ill.`);
+            updateStatBars(sickCharacter);
         } else {
             // output the event to the events div
             addEvent(event);
@@ -176,7 +185,19 @@ export function playTurn() {
                 gameParty.removeCharacter(character);
                 updateRelationships(gameParty);
             }
-            if (character.morale == 0 && gameParty.characters.length > 1) {
+            if (character.sick) {
+                if (Math.random() < 0.1) {
+                    character.morale -= 1;
+                    addEvent(`${character.name} is not feeling very well.`);
+                    updateStatBars(character);
+                }
+                if (Math.random() < 0.1) {
+                    character.health -= 1;
+                    addEvent(`${character.name} is feeling worse.`);
+                    updateStatBars(character);
+                }
+            }
+            if (character.morale <= 0 && gameParty.characters.length > 1) {
                 addEvent(`${character.name} has lost all hope. They have left the party.`);
                 checkDeathEffects(character);
                 gameParty.removeCharacter(character);
@@ -247,44 +268,47 @@ export function playTurn() {
         }
         var criticalHit = 0;
         var criticalMiss = 0;
-        var players = gameParty.characters.map(character => {
-            let baseAttack = weaponArray[character.weapon][1];
-            if (character.posTrait === 'fighter') {
-                baseAttack += 1;
-            }
-            if (character.negTrait === 'clumsy') {
-                baseAttack -= 1;
-                if (baseAttack < 0) {
-                    baseAttack = 0;
+        var players = gameParty.characters
+            .filter(character => !character.sick) // Exclude characters where sick is true
+            .map(character => {
+                let baseAttack = weaponArray[character.weapon][1];
+                if (character.posTrait === 'fighter') {
+                    baseAttack += 1;
                 }
-            }
-            if (character.morale === 6 || character.morale === 7) {
-                if (Math.random() < 0.1) {
-                    criticalHit = 1;
+                if (character.negTrait === 'clumsy') {
+                    baseAttack -= 1;
+                    if (baseAttack < 0) {
+                        baseAttack = 0;
+                    }
                 }
-            }
-            if (character.morale === 8 || character.morale === 9) {
-                if (Math.random() < 0.2) {
-                    criticalHit = 1;
+                if (character.morale === 6 || character.morale === 7) {
+                    if (Math.random() < 0.1) {
+                        criticalHit = 1;
+                    }
                 }
-            }
-            if (character.morale === 0 || character.morale === 1) {
-                if (Math.random() < 0.2) {
-                    criticalMiss = 1;
+                if (character.morale === 8 || character.morale === 9) {
+                    if (Math.random() < 0.2) {
+                        criticalHit = 1;
+                    }
                 }
-            }
-            if (character.morale === 2 || character.morale === 3) {
-                if (Math.random() < 0.1) {
-                    criticalMiss = 1;
+                if (character.morale === 0 || character.morale === 1) {
+                    if (Math.random() < 0.2) {
+                        criticalMiss = 1;
+                    }
                 }
+                if (character.morale === 2 || character.morale === 3) {
+                    if (Math.random() < 0.1) {
+                        criticalMiss = 1;
+                    }
+                }
+                return {
+                    type: character.name,
+                    hp: character.health,
+                    morale: character.morale,
+                    attack: baseAttack
+                };
             }
-            return {
-                type: character.name,
-                hp: character.health,
-                morale: character.morale,
-                attack: baseAttack
-            };
-        });
+        );
         
         // Combine enemies and players into a single array
         var combatants = players.concat(enemies.map(enemy => ({
@@ -332,6 +356,7 @@ export function playTurn() {
                     addEvent(`${target.type} has succumbed to their wounds!`);
                     // Remove defeated player from combatants array
                     combatants.splice(combatants.indexOf(target), 1);
+                    players = players.filter(p => p !== target);
                     checkDeathEffects(character);
                     gameParty.removeCharacter(character);
                     updateRelationships(gameParty);
