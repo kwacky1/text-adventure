@@ -207,11 +207,10 @@ export function playTurn() {
     }
 
     function foundFriend() {
-        event = 'You are approached by an adventurer who wants to join your party';
         const playTurnButton = document.getElementById('playTurnButton');
         playTurnButton.style.display = 'none';
         const friendDiv = document.createElement('div');
-        friendDiv.textContent = event;
+        friendDiv.textContent = 'You are approached by an adventurer who wants to join your party';
         const acceptButton = document.createElement('button');
         acceptButton.textContent = 'Accept';
         acceptButton.addEventListener('click', () => {
@@ -243,7 +242,6 @@ export function playTurn() {
     }
 
     function foundEnemy() {
-        event = `${who} found an enemy`;
         const playTurnButton = document.getElementById('playTurnButton');
         playTurnButton.style.display = 'none';
         var numberOfEnemies = Math.floor(Math.random() * gameParty.characters.length) + 1;
@@ -455,8 +453,7 @@ export function playTurn() {
         const damage = weaponType[1];
         const playTurnButton = document.getElementById('playTurnButton');
         playTurnButton.style.display = 'none';
-        event = `found a ${weapon}`;
-        addEvent(`${who} ${event}.`);
+        addEvent(`${who} found a ${weapon}`);
         const weaponDiv = document.getElementById('gameButtons');
         for (const character of gameParty.characters) {
             const button = document.createElement('button');
@@ -496,17 +493,15 @@ export function playTurn() {
     }
 
     function foundMedical() {
-        event = 'found medical supplies';
         medicalType = medical[Math.floor(Math.random() * medical.length)];
-        addEvent(`${who} ${event} (${medicalType[0]}).`);
+        addEvent(`${who} found medical supplies (${medicalType[0]}).`);
         gameParty.inventoryMap.set(medicalType[0], medicalType[1]);
         updateMedicalButtons();
     }
 
     function foundFood() {
-        event = 'found food';
         foodType = food[Math.floor(Math.random() * food.length)];
-        addEvent(`${who} ${event} (${foodType[0]}).`);
+        addEvent(`${who} found food (${foodType[0]}).`);
         gameParty.inventoryMap.set(foodType[0], foodType[1]);
         updateFoodButtons();
     }
