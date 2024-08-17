@@ -69,7 +69,6 @@ export function playTurn() {
     var who = "The party";
     var foodType = "";
     var medicalType = "";
-    console.log(`Turn ${turnNumber}`);
     updateParty();
     if (gameParty.characters.length === 0) {
         const allButtons = document.getElementById('buttons');
@@ -157,9 +156,7 @@ export function playTurn() {
                 var sickCharacter = healthyCharacters[Math.floor(Math.random() * healthyCharacters.length)];
                 sickCharacter.health -= 1;
                 sickCharacter.sick = true;
-                addEvent(`${sickCharacter.name} is feeling ill.`);
                 updateStatBars(sickCharacter);
-            } else {
                 addEvent(event);
             }
         } else {
@@ -182,7 +179,7 @@ export function playTurn() {
                 // Make sure attributes are within bounds
                 character.capAttributes();
                 updateStatBars(character);
-                if (character.sick) {
+                if (character.sick || character.infected) {
                     if (Math.random() < 0.1) {
                         character.morale -= 1;
                         addEvent(`${character.name} is not feeling very well.`);
@@ -232,6 +229,7 @@ export function playTurn() {
             for (const character of gameParty.characters) {
                 character.morale += 1;
                 character.capAttributes();
+                updateStatBars(character);
             }
             if (gameParty.characters.length < 4) {
                 addPlayer(gameParty);
@@ -270,7 +268,6 @@ export function playTurn() {
             var enemyType = enemy[Math.floor(Math.random() * enemy.length)];
             var enemyHP = 4 + Math.floor(Math.random() * 4);
             var enemyMorale = Math.floor(Math.random() * 10);
-            console.log("Enemy: " + enemyType + " HP:" + enemyHP + " Morale:" + enemyMorale);
             enemies.push({
                 type: enemyType[0],
                 hp: enemyHP,
@@ -332,12 +329,8 @@ export function playTurn() {
         // Sort the combined array by morale
         combatants.sort((a, b) => b.morale - a.morale);
 
-        // print the array for debugging
-        console.log(combatants);
-
-            // Function to handle the turn-based logic
+        // Function to handle the turn-based logic
         function handleTurn(index) {
-
 
             if (index >= combatants.length) {
                 // All turns are done, start over
@@ -363,7 +356,6 @@ export function playTurn() {
                 }
                 if (Math.random() < 0.05) {
                     character.infected = true;
-                    addEvent(`${target.type} has been infected.`);
                 }
                 character.health = target.hp;
                 addEvent(`The ${combatant.type} attacks ${target.type} for ${damage} damage.`);
@@ -409,15 +401,20 @@ export function playTurn() {
                 if (enemy.type === 'enemy') {
                     const character = gameParty.characters.find(c => c.name === combatant.type);
                     const weaponButtons = document.getElementById('gameButtons');
-                    const attackButton = document.createElement('button');
+                    var attackButton = false;
                     if (character.sick) {
-                        attackButton.textContent = `${combatant.type} is unable to battle. Continue.`;
-                        attackButton.classList.add('attack');
-                        attackButton.addEventListener('click', () => {
-                            weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
-                            handleTurn(index + 1);
-                        });
+                        if (!weaponButtons.querySelector(`.attack[data-combatant="${combatant.type}"]`)) {
+                            attackButton = document.createElement('button');
+                            attackButton.setAttribute('data-combatant', combatant.type);
+                            attackButton.textContent = `${combatant.type} is unable to battle. Continue.`;
+                            attackButton.classList.add('attack');
+                            attackButton.addEventListener('click', () => {
+                                weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
+                                handleTurn(index + 1);
+                            });
+                        }
                     } else {                    
+                        attackButton = document.createElement('button');
                         attackButton.textContent = `${combatant.type} attacks ${enemy.type} (${enemy.hp} HP)`;
                         attackButton.classList.add('attack');
                         attackButton.addEventListener('click', () => {
@@ -433,26 +430,26 @@ export function playTurn() {
                                     if (allEnemies.length > 0) {
                                         enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
                                         enemyIndex = combatants.indexOf(enemy); 
-                                        addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`);
+                                        addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`, 'green');
                                     } else {
                                         nothingHappened = 1;
                                     }
                                 } else {
                                     if (criticalHit == 1) {
                                         damage += 1;
-                                        addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${damage} damage.`);
+                                        addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'green');
                                     } else if (criticalMiss == 1) {
                                         damage = 0;
-                                        addEvent(`${combatant.type} misses!`);
+                                        addEvent(`${combatant.type} misses!`, 'orange');
                                     } else {
-                                        addEvent(`${combatant.type} hit the ${enemy.type} for ${damage} damage.`);
+                                        addEvent(`${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'blue');
                                     }
                                 }
                                 if (nothingHappened == 0) {
                                     enemy.hp -= damage;                            
                                 }
                                 if (enemy.hp <= 0) {
-                                    addEvent(`The ${enemy.type} has been defeated!`);
+                                    addEvent(`The ${enemy.type} has been defeated!`, 'green');
                                     // Remove defeated enemy from combatants array
                                     combatants.splice(enemyIndex, 1);
                                     // Scavengers get a random food item
@@ -478,7 +475,9 @@ export function playTurn() {
                             
                         });
                     }
-                    weaponButtons.appendChild(attackButton);
+                    if (attackButton instanceof HTMLButtonElement) {
+                        weaponButtons.appendChild(attackButton);
+                    }
                 } 
             });
         }}
@@ -492,7 +491,6 @@ export function playTurn() {
         const weapon = weaponType[0];
         const damage = weaponType[1];
         const playTurnButton = document.getElementById('playTurnButton');
-        playTurnButton.style.display = 'none';
         addEvent(`${who} found a ${weapon}`);
         const weaponDiv = document.getElementById('gameButtons');
         for (const character of gameParty.characters) {
@@ -503,20 +501,24 @@ export function playTurn() {
                 const oldWeaponType = oldWeapon[0];
                 const oldDamage = oldWeapon[1];
                 if (oldDamage < damage) {
+                    playTurnButton.style.display = 'none';
                     button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
                     button.classList.add('weapon');
+                    button.classList.add(`${weapon}`);
                     button.addEventListener('click', () =>
                     {
                         character.weapon = weaponArray.indexOf(weaponType); 
                         addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
-                        weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
+                        weaponDiv.querySelectorAll(`.${weapon}`).forEach(button => button.remove());
                         character.updateCharacter();
                         playTurnButton.style.display = 'block';
                     });
                     weaponDiv.appendChild(button);
-                } else {
-                    playTurnButton.style.display = 'block';
-                }
+                } //else {
+                    //if (!document.querySelector('weapon')) {
+                      //  playTurnButton.style.display = 'block';
+                    //}
+                //}
             } else {
                 button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
                 button.addEventListener('click', () => 
@@ -738,7 +740,23 @@ function updateFoodAttributes(character, foodItem) {
 
 function updateMedicalAttributes(character, medicalItem) {
     character.health += medicalItem[1];
-    addEvent(`${character.name} was healed with ${medicalItem[0]}.`);
+    addEvent(`${character.name} used the ${medicalItem[0]}.`);
+    if (Math.random() < 0.1 && medicalItem[0] === 'medicine' && character.infected) {
+        character.infected = false;
+        addEvent(`${character.name} has been cured of infection!`);
+    }
+    if (Math.random() < 0.2 && medicalItem[0] === 'first aid kit' && character.infected) {
+        character.infected = false;
+        addEvent(`${character.name} has been cured of infection!`);
+    }
+    if (Math.random() < 0.2 && medicalItem[0] === 'medicine' && character.sick) {
+        character.sick = false;
+        addEvent(`${character.name} has been cured of illness!`);
+    }
+    if (Math.random() < 0.3 && medicalItem[0] === 'first aid kit' && character.sick) {
+        character.sick = false;
+        addEvent(`${character.name} has been cured of illness!`);
+    }
     updateMedicalButtons();
 }
 
@@ -750,14 +768,16 @@ function updateMedicalButtons() {
     updateButtons('medical', medical, 'Heal', updateMedicalAttributes);
 }
 
-function addEvent(eventText) {
+function addEvent(eventText, color = 'black') {
     let currentEvents = '';
     const currentEventDiv = document.getElementById('currentEvent');
-    if (currentEventDiv.textContent !== '') {
-        currentEvents = currentEventDiv.textContent;
+    if (currentEventDiv.innerHTML !== '') {
+        currentEvents = currentEventDiv.innerHTML;
     }
-    currentEvents += ' ' + eventText;
-    currentEventDiv.textContent = currentEvents.trim();
+    // Sanitize the eventText before adding it to innerHTML
+    const sanitizedEventText = DOMPurify.sanitize(`<span style="color: ${color};">${eventText}</span>`);
+    currentEvents += ` ${sanitizedEventText}`;
+    currentEventDiv.innerHTML = currentEvents.trim();
 }
 
 async function addPlayer(party) {
