@@ -275,8 +275,6 @@ export function playTurn() {
                 attack: 1 // Set attack to 1 for now
             });
         }
-        var criticalHit = 0;
-        var criticalMiss = 0;
         var players = gameParty.characters
             .map(character => {
                 let baseAttack = weaponArray[character.weapon][1];
@@ -287,26 +285,6 @@ export function playTurn() {
                     baseAttack -= 1;
                     if (baseAttack < 0) {
                         baseAttack = 0;
-                    }
-                }
-                if (character.morale === 6 || character.morale === 7) {
-                    if (Math.random() < 0.1) {
-                        criticalHit = 1;
-                    }
-                }
-                if (character.morale === 8 || character.morale === 9) {
-                    if (Math.random() < 0.2) {
-                        criticalHit = 1;
-                    }
-                }
-                if (character.morale === 0 || character.morale === 1) {
-                    if (Math.random() < 0.2) {
-                        criticalMiss = 1;
-                    }
-                }
-                if (character.morale === 2 || character.morale === 3) {
-                    if (Math.random() < 0.1) {
-                        criticalMiss = 1;
                     }
                 }
                 return {
@@ -414,6 +392,28 @@ export function playTurn() {
                             });
                         }
                     } else {                    
+                        var criticalHit = 0;
+                        var criticalMiss = 0;
+                        if (character.morale === 6 || character.morale === 7) {
+                            if (Math.random() < 0.1) {
+                                criticalHit = 1;
+                            }
+                        }
+                        if (character.morale === 8 || character.morale === 9) {
+                            if (Math.random() < 0.2) {
+                                criticalHit = 1;
+                            }
+                        }
+                        if (character.morale === 0 || character.morale === 1) {
+                            if (Math.random() < 0.2) {
+                                criticalMiss = 1;
+                            }
+                        }
+                        if (character.morale === 2 || character.morale === 3) {
+                            if (Math.random() < 0.1) {
+                                criticalMiss = 1;
+                            }
+                        }
                         attackButton = document.createElement('button');
                         attackButton.textContent = `${combatant.type} attacks ${enemy.type} (${enemy.hp} HP)`;
                         attackButton.classList.add('attack');
