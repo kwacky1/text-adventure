@@ -59,6 +59,7 @@ export class Character {
     this.hunger = 9;
     this.health = 9;
     this.sick = false;
+    this.infected = false;
     this.posTrait = posTrait;
     this.negTrait = negTrait;
     this.relationships = [];
@@ -91,6 +92,9 @@ export class Character {
     // Health can't exceed fine
     if (this.health > 9) {
       this.health = 9;
+    }
+    if (this.health < 0) {
+      this.health = 0;
     }
     // Friendly relationships can't be cold
     if (this.relationships.length > 0) {
