@@ -351,16 +351,13 @@ export function playTurn() {
                             type: 'enemy',
                             hp: 4 + Math.floor(Math.random() * 4),
                             morale: Math.floor(Math.random() * 10),
-                            attack: character.attack
+                            attack: weaponArray[character.weapon][1]
                 
                         });
                         addEvent(`${character.name} has become a zombie!`);
                     }
                     // Check if all players are defeated
                     if (combatants.filter(c => c.type !== 'enemy').length === 0) {
-                        // Unhide the playTurnButton
-                        const playTurnButton = document.getElementById('playTurnButton');
-                        playTurnButton.style.display = 'block'; 
                         document.getElementById('attackButton').remove();
                         playTurn();
                         return;
