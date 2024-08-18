@@ -316,6 +316,11 @@ export function playTurn() {
                 return;
             }
 
+            // All we need to do is update the players array to check if anyone has used a health item
+            players.forEach(player => { 
+                player.hp = gameParty.characters.find(c => c.name === player.type).health;
+            });
+
             const combatant = combatants[index];
             if (combatant.type === 'enemy') {
             // Enemy's turn to attack
