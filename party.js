@@ -18,8 +18,6 @@ class Party {
             character.id = this.nextId;
             this.nextId += 1;
             this.characters.push(character);
-            console.log(`${character.name} has joined the party!`);
-            console.log("There are now " + this.characters.length + " characters in the party.");
             if (this.characters.length > 1) {
                 // add relationship to existing characters
                 for (const existingCharacter of this.characters) {
@@ -32,14 +30,10 @@ class Party {
                             relationshipType = relationships[0];
                         }
                         character.relationships.push({ type: relationshipType, character: existingCharacter });
-                        console.log(`${character.name} and ${existingCharacter.name} are ${relationshipType}`);
                         existingCharacter.relationships.push({ type: relationshipType, character: character });
-                        console.log(`${existingCharacter.name} and ${character.name} are ${relationshipType}`);
                     }
                 }
             }
-        } else {
-            console.log(`Sorry, the party is full.`);
         }
     }
 
@@ -48,21 +42,16 @@ class Party {
         if (index !== -1) {
             this.characters.splice(index, 1);
             const characterItem = document.getElementById(character.name);
-            console.log(characterItem);
             if (characterItem) {
-                console.log('removing character');
                 characterItem.remove();
             }
-            console.log(`${character.name} has left the party.`);
             // Remove character from relationships of other characters
             for (const remainingCharacter of this.characters) {
-            const relationshipIndex = remainingCharacter.relationships.findIndex(relationship => relationship.character === character);
-            if (relationshipIndex !== -1) {
-            remainingCharacter.relationships.splice(relationshipIndex, 1);
+                const relationshipIndex = remainingCharacter.relationships.findIndex(relationship => relationship.character === character);
+                if (relationshipIndex !== -1) {
+                remainingCharacter.relationships.splice(relationshipIndex, 1);
+                }
             }
-        }
-        } else {
-            console.log(`${character.name} is not in the party.`);
         }
     }
     
@@ -73,7 +62,7 @@ class Party {
         partyInventoryDiv.innerHTML = '<p>Party Inventory</p>';
         this.inventoryMap.forEach((value, key) => {
             const itemElement = document.createElement('li');
-            itemElement.textContent = `${key}`;
+            itemElement.textContent = `${key} (${value.quantity})`;
             partyInventoryDiv.appendChild(itemElement);
         });
     }
