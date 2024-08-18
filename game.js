@@ -453,7 +453,7 @@ export function playTurn() {
                                     const character = gameParty.characters.find(c => c.name === combatant.type);
                                     if (character.posTrait === 'scavenger') {
                                         const foodItem = food[Math.floor(Math.random() * food.length)];
-                                        gameParty.inventoryMap.set(foodItem[0], foodItem[1]);
+                                        addItemToInventory(foodItem);
                                         addEvent(`${combatant.type} made food with some... questionable meat.`);
                                         gameParty.updateInventory();
                                         updateFoodButtons();
@@ -534,15 +534,33 @@ export function playTurn() {
     function foundMedical() {
         medicalType = medical[Math.floor(Math.random() * medical.length)];
         addEvent(`${who} found medical supplies (${medicalType[0]}).`);
-        gameParty.inventoryMap.set(medicalType[0], medicalType[1]);
+        addItemToInventory(medicalType);
         updateMedicalButtons();
     }
 
     function foundFood() {
         foodType = food[Math.floor(Math.random() * food.length)];
         addEvent(`${who} found food (${foodType[0]}).`);
-        gameParty.inventoryMap.set(foodType[0], foodType[1]);
+        addItemToInventory(foodType);
         updateFoodButtons();
+    }
+
+    function addItemToInventory(itemType) {
+        // Check if the food item already exists in the inventory
+        if (gameParty.inventoryMap.has(itemType[0])) {
+            // If it exists, update the quantity
+            let existingFood = gameParty.inventoryMap.get(itemType[0]);
+            existingFood.quantity += 1;
+            gameParty.inventoryMap.set(itemType[0], existingFood);
+        } else {
+            // If it does not exist, add it to the map
+            gameParty.inventoryMap.set(itemType[0], {
+                name: itemType[0],
+                value: itemType[1],
+                quantity: 1
+            });
+        }
+        console.log(gameParty.inventoryMap);    
     }
 
     function checkNegTraitEvents(character) {
@@ -618,7 +636,7 @@ export function playTurn() {
             if (Math.random() < 0.1) {
                 addEvent(`${character.name} was able to scavenge some extra food.`);
                 foodType = food[Math.floor(Math.random() * food.length)];
-                gameParty.inventoryMap.set(foodType[0], foodType[1]);   
+                addItemToInventory(foodType);
                 updateFoodButtons(); 
             }
         }
@@ -674,7 +692,11 @@ function handleSelection(event, items, updateCharacterAttributes) {
             if (character) {
                 if (gameParty.inventoryMap.has(item[0])) {
                     const inventoryItem = gameParty.inventoryMap.get(item[0]);
-                    gameParty.inventoryMap.delete(item[0]);
+                    if (inventoryItem.quantity > 1) {
+                        inventoryItem.quantity -= 1;
+                    } else {
+                        gameParty.inventoryMap.delete(item[0]);
+                    }
                     updateCharacterAttributes(character, item);
                     character.capAttributes();
                     character.updateCharacter();
