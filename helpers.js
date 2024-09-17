@@ -1,4 +1,5 @@
 import { Character, ageArray, hungerArray, moraleArray, healthArray, weaponArray } from './character.js';
+import { playTurn } from './game.js';
 
 const context = {
     gameParty: null
@@ -246,6 +247,35 @@ function foundFriend() {
     document.getElementById('gameButtons').appendChild(declineButton);
 }
 
+function checkDeathEffects(character) {
+    // when a character dies check the relationships of the other characters and set morale accordingly
+    /*
+    Family -3
+    Friends -2
+    Acquaintances -1
+    Strangers +0
+    Cold +1
+    */
+        for (const remainingCharacter of context.gameParty.characters) {
+            if (remainingCharacter !== character) {
+                const relationship = remainingCharacter.relationships.get(character);
+                if (relationship === 4) {
+                    remainingCharacter.morale -= 3;
+                }
+                if (relationship === 3) {
+                    remainingCharacter.morale -= 2;
+                }
+                if (relationship === 2) {
+                    remainingCharacter.morale -= 1;
+                }
+                if (relationship === 0) {
+                    remainingCharacter.morale += 1;
+                }
+                remainingCharacter.capAttributes();
+                updateStatBars(remainingCharacter);        }
+        }
+    }
+    
 function foundEnemy() {
     const enemy = [
         ['zombie']
@@ -503,11 +533,16 @@ function foundWeapon(who) {
                 button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
                 button.classList.add('weapon');
                 button.classList.add(`${weapon}`);
+                button.classList.add(character.name);
                 button.addEventListener('click', () =>
                 {
                     character.weapon = weaponArray.indexOf(weaponType); 
                     addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
                     weaponDiv.querySelectorAll(`.${weapon}`).forEach(button => button.remove());
+                    const characterButtons = weaponDiv.querySelectorAll(`.${character.name}`);
+                    if (characterButtons.length > 0) {
+                        characterButtons.forEach(button => button.remove());
+                    }    
                     character.updateCharacter();
                     playTurnButton.style.display = 'block';
                 });
@@ -785,4 +820,4 @@ function updateMedicalButtons() {
     updateButtons('medical', medical, 'Heal', updateMedicalAttributes);
 }
 
-export { context, setGameParty, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon};
+export { context, setGameParty, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon, checkDeathEffects};

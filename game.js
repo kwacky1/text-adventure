@@ -2,7 +2,7 @@ var turnNumber = 1;
 
 import Party from './party.js';
 import { Character, ageArray } from './character.js';
-import { context, setGameParty, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons } from './helpers.js';
+import { context, setGameParty, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects } from './helpers.js';
 
 function playTurn() {
     // Move current events to turnX div
@@ -469,35 +469,6 @@ async function createCharacterForm() {
     document.body.appendChild(formDiv);
 }
 
-function checkDeathEffects(character) {
-// when a character dies check the relationships of the other characters and set morale accordingly
-/*
-Family -3
-Friends -2
-Acquaintances -1
-Strangers +0
-Cold +1
-*/
-    for (const remainingCharacter of context.gameParty.characters) {
-        if (remainingCharacter !== character) {
-            const relationship = remainingCharacter.relationships.get(character);
-            if (relationship === 4) {
-                remainingCharacter.morale -= 3;
-            }
-            if (relationship === 3) {
-                remainingCharacter.morale -= 2;
-            }
-            if (relationship === 2) {
-                remainingCharacter.morale -= 1;
-            }
-            if (relationship === 0) {
-                remainingCharacter.morale += 1;
-            }
-            remainingCharacter.capAttributes();
-            updateStatBars(remainingCharacter);        }
-    }
-}
-
 async function startGame() {
     let gameParty;
     if (!context.gameParty) {
@@ -507,3 +478,5 @@ async function startGame() {
 }
 
 createCharacterForm();
+
+export { playTurn };
