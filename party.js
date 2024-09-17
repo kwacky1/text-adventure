@@ -39,7 +39,7 @@ class Party {
             }
             // Remove character from relationships of other characters
             for (const remainingCharacter of this.characters) {
-                remainingCharacter.relationships.delete(character.name);
+                remainingCharacter.relationships.delete(character);
             }
         }
     }
