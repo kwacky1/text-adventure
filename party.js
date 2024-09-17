@@ -1,11 +1,3 @@
-const relationships = [
-    'cold',
-    'strangers',
-    'acquaintances',
-    'friends',
-    'family'
-];
-
 class Party {
     constructor() {
         this.characters = [];
@@ -22,15 +14,15 @@ class Party {
                 // add relationship to existing characters
                 for (const existingCharacter of this.characters) {
                     if (existingCharacter !== character) {
-                        let relationshipType = relationships[1];
+                        let relationshipType = 1;
                         if (existingCharacter.posTrait === 'friendly' && existingCharacter.negTrait !== 'disconnected') {
-                            relationshipType = relationships[2];
+                            relationshipType = 2;
                         }
                         if (existingCharacter.negTrait == 'disconnected' && existingCharacter.posTrait !== 'friendly') {
-                            relationshipType = relationships[0];
+                            relationshipType = 0;
                         }
-                        character.relationships.push({ type: relationshipType, character: existingCharacter });
-                        existingCharacter.relationships.push({ type: relationshipType, character: character });
+                        character.relationships.set(existingCharacter, relationshipType);
+                        existingCharacter.relationships.set(character, relationshipType);
                     }
                 }
             }
@@ -47,10 +39,7 @@ class Party {
             }
             // Remove character from relationships of other characters
             for (const remainingCharacter of this.characters) {
-                const relationshipIndex = remainingCharacter.relationships.findIndex(relationship => relationship.character === character);
-                if (relationshipIndex !== -1) {
-                remainingCharacter.relationships.splice(relationshipIndex, 1);
-                }
+                remainingCharacter.relationships.delete(character);
             }
         }
     }

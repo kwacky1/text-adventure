@@ -62,7 +62,7 @@ export class Character {
     this.infected = false;
     this.posTrait = posTrait;
     this.negTrait = negTrait;
-    this.relationships = [];
+    this.relationships = new Map();
     this.weapon = 0;
     this.skin = skin;
     this.hair = hair;
