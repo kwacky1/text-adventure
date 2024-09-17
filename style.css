@@ -120,3 +120,7 @@ form select {
 #options select{
     min-width: 206px;
 }
+
+.character {
+    float: left;
+}
