@@ -447,8 +447,8 @@ async function createCharacterForm() {
         buttonsDiv.style.display = 'block';
 
         //unhide the events div
-        const eventsDiv = document.getElementById('events');
-        eventsDiv.style.display = 'block';
+        const eventsDiv = document.getElementById('content');
+        eventsDiv.style.display = 'flex';
 
         addEvent(`A new illness has swept the world and the infected have begun to rise from the dead. The world is ending, but ${character.name}'s life doesn't have to just yet.`)
     });
