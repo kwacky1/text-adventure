@@ -32,6 +32,8 @@ function playTurn() {
         if (playTurnButton) {        
             playTurnButton.remove()
         }
+        const eventImage = document.getElementById('eventImage');
+        eventImage.remove();
     } else {
         const chance = Math.random();
         getEvent(chance);
