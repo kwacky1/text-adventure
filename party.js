@@ -27,6 +27,7 @@ class Party {
                 }
             }
         }
+        this.updateCampsiteImage();
     }
 
     removeCharacter(character) {
@@ -42,6 +43,7 @@ class Party {
                 remainingCharacter.relationships.delete(character);
             }
         }
+        this.updateCampsiteImage();
     }
     
     updateInventory() {
@@ -54,6 +56,11 @@ class Party {
             itemElement.textContent = `${key} (${value.quantity})`;
             partyInventoryDiv.appendChild(itemElement);
         });
+    }
+
+    updateCampsiteImage() {
+        const campsiteImg = document.getElementById('eventImage');
+        campsiteImg.src = `img/campsite${this.characters.length}.png`;
     }
 }
 

@@ -124,3 +124,28 @@ form select {
 .character {
     float: left;
 }
+
+#content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+#events {
+    flex: 1;
+    margin-right: 20px;
+}
+
+#imageContainer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#eventImage {
+    width: 400px;
+    height: auto;
+    image-rendering: pixelated;
+    border: 5px solid black;
+}
