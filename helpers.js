@@ -115,7 +115,7 @@ function getEvent(chance) {
             } else if (whichItem <= 0.67) {
                 foundMedical(who);
             } else {
-                foundWeapon(who)
+                foundWeapon(who,i)
             }
         }
     } else if (chance > secondItem && chance <= illnessChance) {
@@ -514,7 +514,7 @@ function foundEnemy() {
     handleTurn(0);
 }
 
-function foundWeapon(who) {
+function foundWeapon(who, id) {
     const weaponType = weaponArray[Math.floor(Math.random() * (weaponArray.length - 1)) + 1];
     const weapon = weaponType[0];
     const damage = weaponType[1];
@@ -531,20 +531,22 @@ function foundWeapon(who) {
             if (oldDamage < damage) {
                 playTurnButton.style.display = 'none';
                 button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
-                button.classList.add('weapon');
+                button.classList.add(`weapon${id}`);
                 button.classList.add(`${weapon}`);
                 button.classList.add(character.name);
                 button.addEventListener('click', () =>
                 {
                     character.weapon = weaponArray.indexOf(weaponType); 
                     addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
-                    weaponDiv.querySelectorAll(`.${weapon}`).forEach(button => button.remove());
+                    weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
                     const characterButtons = weaponDiv.querySelectorAll(`.${character.name}`);
                     if (characterButtons.length > 0) {
                         characterButtons.forEach(button => button.remove());
                     }    
                     character.updateCharacter();
-                    playTurnButton.style.display = 'block';
+                    if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
+                        playTurnButton.style.display = 'block';
+                    }
                 });
                 weaponDiv.appendChild(button);
             } //else {
