@@ -1,0 +1,29 @@
+name: Upload to itch.io
+
+on: 
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  upload-new-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Get Butler
+      run: |
+        curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+        unzip butler.zip
+        chmod +x butler
+        ./butler -V
+
+    - name: Set BUTLER_API_KEY
+      run: echo "BUTLER_API_KEY=${{ secrets.ITCH_TOKEN }}" >> $GITHUB_ENV
+
+    - name: Update Game
+      run: ./butler push the-wanderers goosey-games/the-wanderers:html
+
