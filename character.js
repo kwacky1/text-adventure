@@ -119,7 +119,8 @@ export class Character {
   }
 
   createCharacter() {
-    const characterDiv = document.createElement('div');
+    const charactersDiv = document.getElementById("characters");
+    const characterDiv = charactersDiv.appendChild(document.createElement('div'));
     characterDiv.id = this.name;
     characterDiv.classList.add('character');
 
@@ -219,9 +220,7 @@ export class Character {
     relationships.classList.add('relationships');
     relationships.innerHTML = `<p>Relationships for ${this.name}</p>`;
     characterDiv.appendChild(relationships);
-    
-    document.body.appendChild(characterDiv);
-  }
+      }
 
   updateCharacter() {
     this.capAttributes();

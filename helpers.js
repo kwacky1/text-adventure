@@ -526,29 +526,29 @@ function foundWeapon(who, id) {
         // if character has a weapon, replace it
         if (character.weapon !== null) {
             const oldWeapon = weaponArray[character.weapon];
-            const oldWeaponType = oldWeapon[0];
-            const oldDamage = oldWeapon[1];
-            if (oldDamage < damage) {
-                playTurnButton.style.display = 'none';
-                button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
-                button.classList.add(`weapon${id}`);
-                button.classList.add(`${weapon}`);
-                button.classList.add(character.name);
-                button.addEventListener('click', () =>
-                {
-                    character.weapon = weaponArray.indexOf(weaponType); 
-                    addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
-                    weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
-                    const characterButtons = weaponDiv.querySelectorAll(`.${character.name}`);
-                    if (characterButtons.length > 0) {
-                        characterButtons.forEach(button => button.remove());
-                    }    
-                    character.updateCharacter();
-                    if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
-                        playTurnButton.style.display = 'block';
-                    }
-                });
-                weaponDiv.appendChild(button);
+    const oldWeaponType = oldWeapon[0];
+    const oldDamage = oldWeapon[1];
+    if (oldDamage < damage) {
+        playTurnButton.style.display = 'none';
+        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
+        button.classList.add(`weapon${id}`);
+        button.classList.add(`${weapon}`);
+        button.classList.add(character.name);
+        button.addEventListener('click', () =>
+        {
+            character.weapon = weaponArray.indexOf(weaponType); 
+            addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
+            weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
+            const characterButtons = weaponDiv.querySelectorAll(`.${character.name}`);
+            if (characterButtons.length > 0) {
+                characterButtons.forEach(button => button.remove());
+            }    
+            character.updateCharacter();
+            if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
+                playTurnButton.style.display = 'block';
+            }
+        });
+        weaponDiv.appendChild(button);
             } //else {
                 //if (!document.querySelector('weapon')) {
                   //  playTurnButton.style.display = 'block';
@@ -821,5 +821,10 @@ function updateFoodButtons() {
 function updateMedicalButtons() {
     updateButtons('medical', medical, 'Heal', updateMedicalAttributes);
 }
+
+const styleSelector = document.getElementById("styleselector");
+styleSelector.addEventListener("change", () => {
+    document.querySelector("link[rel='stylesheet']").href = styleSelector.value;
+});
 
 export { context, setGameParty, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon, checkDeathEffects };

@@ -160,3 +160,10 @@ form select {
     image-rendering: pixelated;
     border: 1px solid #ccc;
 }
+
+#footer {
+    clear: both;
+    margin-top: 20px;
+    text-align: right;
+    border: 1px solid #ccc;
+}
