@@ -185,7 +185,7 @@ function playTurn() {
 }
 
 async function createCharacterForm() {
-    const formDiv = document.createElement('div');
+    const formDiv = document.getElementById('characters');
     const precis = document.createElement('p');
 
     precis.textContent = 'Create a character to start the game.';
@@ -430,7 +430,7 @@ async function createCharacterForm() {
         const hair = "img/" + hairStyleSelect.value + hairColourSelect.value;
         const shirt = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
         const character = new Character(name, age, posTrait, negTrait, skin, hair, shirt);
-        formDiv.remove();
+        formDiv.innerHTML = "";
         startGame();
         const playTurnButton = document.createElement('button');
         playTurnButton.id = 'playTurnButton';
@@ -468,7 +468,6 @@ async function createCharacterForm() {
     });
 
     formDiv.appendChild(form);
-    document.body.appendChild(formDiv);
 }
 
 async function startGame() {
