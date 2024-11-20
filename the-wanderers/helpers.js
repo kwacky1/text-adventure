@@ -526,23 +526,6 @@ function foundWeapon(who, id) {
         // if character has a weapon, replace it
         if (character.weapon !== null) {
             const oldWeapon = weaponArray[character.weapon];
-            //offerWeapon(oldWeapon, weaponType, character, button, weaponDiv);
-        } else {
-            button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
-            button.addEventListener('click', () => 
-            {
-                character.weapon = weaponArray.indexOf(weaponType); 
-                addEvent(`${character.name} picked up the ${weapon}.`);
-                weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
-                character.updateCharacter();
-                playTurnButton.style.display = 'block';
-            });
-            weaponDiv.appendChild(button);
-        }
-    }
-}
-
-function offerWeapon(oldWeapon, weaponType, character, button, weaponDiv) {
     const oldWeaponType = oldWeapon[0];
     const oldDamage = oldWeapon[1];
     if (oldDamage < damage) {
@@ -566,6 +549,23 @@ function offerWeapon(oldWeapon, weaponType, character, button, weaponDiv) {
             }
         });
         weaponDiv.appendChild(button);
+            } //else {
+                //if (!document.querySelector('weapon')) {
+                  //  playTurnButton.style.display = 'block';
+                //}
+            //}
+        } else {
+            button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
+            button.addEventListener('click', () => 
+            {
+                character.weapon = weaponArray.indexOf(weaponType); 
+                addEvent(`${character.name} picked up the ${weapon}.`);
+                weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
+                character.updateCharacter();
+                playTurnButton.style.display = 'block';
+            });
+            weaponDiv.appendChild(button);
+        }
     }
 }
 
