@@ -124,29 +124,56 @@ export class Character {
     characterDiv.id = this.name;
     characterDiv.classList.add('character');
 
-    // Avatar preview container
+    // Avatar container
     const avatarContainer = document.createElement('div');
     avatarContainer.className = 'avatar';
     avatarContainer.style.position = 'relative';
 
-    // Skin preview
+    // PosTrait 
+    const posTraitPreview = document.createElement('img');
+    posTraitPreview.className = 'posTraitSprite';
+    posTraitPreview.src = "img/" + this.posTrait + ".png"; 
+    posTraitPreview.alt = this.posTrait;
+    avatarContainer.appendChild(posTraitPreview);
+
+    // NegTrait
+    const negTraitPreview = document.createElement('img');
+    negTraitPreview.className = 'negTraitSprite';
+    negTraitPreview.src = "img/" + this.negTrait + ".png"; 
+    negTraitPreview.alt = this.negTrait;
+    avatarContainer.appendChild(negTraitPreview);
+
+    // Skin 
     const skinPreview = document.createElement('img');
     skinPreview.src = this.skin; 
-    skinPreview.alt = 'Skin Preview';
+    skinPreview.alt = 'skin';
     avatarContainer.appendChild(skinPreview);
 
-    // Hair preview
+    // Hair 
     const hairPreview = document.createElement('img');
     hairPreview.src = this.hair;
-    hairPreview.alt = 'Hair Preview';
+    hairPreview.alt = 'hair';
     avatarContainer.appendChild(hairPreview);
 
-    // shirt preview
+    // Shirt
     const shirtPreview = document.createElement('img');
     shirtPreview.src = this.shirt;
-    shirtPreview.alt = 'shirt Preview';
+    shirtPreview.alt = 'shirt';
     avatarContainer.appendChild(shirtPreview);
     
+    // Weapon
+    const weaponPreview = document.createElement('img');
+    weaponPreview.className = 'weaponSprite';
+    const weaponType = weaponArray[this.weapon][0];
+    if (weaponType == 'fist') {
+      const skinType = this.skin.split('/').pop().split('.').shift();
+      weaponPreview.src = "img/" + skinType + weaponType + ".png"; 
+    } else {
+      weaponPreview.src = "img/" + weaponType + ".png";
+    }
+    weaponPreview.alt = weaponType;
+    avatarContainer.appendChild(weaponPreview);
+
     characterDiv.appendChild(avatarContainer);
 
     const nameElement = document.createElement('h2');
@@ -232,13 +259,7 @@ export class Character {
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
-      const weaponType = weaponArray[this.weapon][0];
-      if (weaponType == 'fist') {
-        const skinType = this.skin.split('/').pop().split('.').shift();
-        characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span><img class="weaponSprite" src="img/${skinType}${weaponType}.png" alt="fist">`;
-      } else {
-        characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span><img class="weaponSprite" src="img/${weaponType}.png" alt="${weaponType}">`;
-      }
+      characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
     }
   }
 }
