@@ -1,0 +1,167 @@
+html, input, select, button, body {
+    font-family: "Sanchez", serif;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 20px;
+}
+
+h1 {
+    display: inline;
+}
+
+input, button, select {
+    margin: 10px;
+    padding: 5px;
+}
+
+#footer {
+    margin: auto;
+    width: 20%;
+    text-align: center;
+    font-size: 15px;
+}
+
+#styleselector {
+    font-size: 15px;
+    text-align: center;
+}
+
+#events {
+    height: 350px;
+    overflow: scroll;
+    width: 50%;
+    padding: 10px;
+    margin: 10px;
+}
+
+::-webkit-scrollbar {
+    width: 15px;
+    height: 0px;
+}
+
+div#currentEvent, div#gameButtons div {
+    padding: 5px;
+}
+
+#events div.odd {
+    padding: 5px;
+}
+
+#events div.even {
+    padding: 5px;
+}
+
+#playerStats {
+    width: 400px;
+    margin: 20px auto;
+}
+
+.stat {
+    position: relative;
+    margin: 10px;
+    padding: 5px;
+    background-size: 0% 100%;
+}
+
+.statValue {
+    position: absolute;
+    right: 10px;
+}
+
+.stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: var(--background-color);
+    background-size: inherit;
+    width: var(--width, 0);
+}
+
+form label {
+    display: block;
+    margin: 10px;
+    width: 400px;
+    height: 60px;
+    position: relative;
+    padding: 0px 5px;
+    line-height: 60px;
+}
+
+form label input, form label select {
+    position: absolute;
+    right: 0px;
+}
+
+form button {
+    width: 412px;
+}
+
+form select {
+    width: 180px;
+    text-align: center;
+}
+
+form input {
+    width: 165px;
+}
+
+.avatar {
+    width: 412px;
+    height: 100px;
+    margin: 10px 10px 0px 10px;
+}
+
+.avatar img {
+    position: absolute;
+    top: 0;
+    width: 88px;
+    height: 88px;
+    left: 162px;
+    image-rendering: pixelated;
+}
+
+.name {
+    margin: 0px 10px 10px 10px;
+    text-align: center;
+    width: 412px;
+    border-top: none;
+}
+
+#gameButtons {
+    margin: 10px;
+    width: 50%;
+}
+
+#options select{
+    width: 180px;
+}
+
+.character {
+    float: left;
+}
+
+#content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+#events {
+    flex: 1;
+    margin-right: 20px;
+}
+
+#imageContainer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#eventImage {
+    width: 50%;
+    height: auto;
+    image-rendering: pixelated;
+}

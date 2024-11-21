@@ -1,16 +1,10 @@
 html, input, select, button, body {
     background-color: #2d2d3b;
     color: #adaddf;
-    font-family: "Sanchez", serif;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 20px;
 }
 
 input, button, select {
     border: 2px solid #4b4b6b;
-    margin: 10px;
-    padding: 5px;
 }
 
 select:hover, button:hover, input:hover, option:hover, a:hover, select:focus, button:focus, input:focus, option:focus, a:focus {
@@ -24,28 +18,16 @@ select:hover, button:hover, input:hover, option:hover, a:hover, select:focus, bu
     font-size: 15px;
 }
 
-#styleselector {
-    font-size: 15px;
-    text-align: center;
-}
-
 ::selection {
     color: #39394e;
     background: #adaddf;
 }
 
 #events {
-    height: 350px;
-    overflow: scroll;
-    width: 50%;
     border: 2px solid #4b4b6b;
-    padding: 10px;
-    margin: 10px;
 }
 
 ::-webkit-scrollbar {
-    width: 15px;
-    height: 0px;
     border-left: 2px solid #adaddf;
 }
 
@@ -67,137 +49,34 @@ select:hover, button:hover, input:hover, option:hover, a:hover, select:focus, bu
 div#currentEvent, div#gameButtons div {
     background-color: #adaddf;
     color: #2d2d3b;
-    padding: 5px;
 }
 
 #events div.odd {
     background-color: #39394e;
-    padding: 5px;
-}
-
-#events div.even {
-    padding: 5px;
-}
-
-#playerStats {
-    width: 400px;
-    margin: 20px auto;
 }
 
 .stat {
-    position: relative;
-    margin: 10px;
-    padding: 5px;
     background-color: #39394e;
     border: 2px solid #4b4b6b;
-    background-size: 0% 100%;
-}
-
-.statValue {
-    position: absolute;
-    right: 10px;
-}
-
-.stat::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background-color: var(--background-color);
-    background-size: inherit;
-    width: var(--width, 0);
 }
 
 form label {
-    display: block;
-    margin: 10px;
-    width: 400px;
-    height: 60px;
-    position: relative;
-    padding: 0px 5px;
     border: 2px solid #4b4b6b;
-    line-height: 60px;
-}
-
-form label input, form label select {
-    position: absolute;
-    right: 0px;
-}
-
-form button {
-    width: 412px;
-}
-
-form select {
-    width: 180px;
-    text-align: center;
-}
-
-form input {
-    width: 165px;
 }
 
 .avatar {
-    width: 412px;
-    height: 100px;
-    margin: 10px 10px 0px 10px;
     border: 2px solid #4b4b6b;
     background-color: #d1d1f1;
 }
 
-.avatar img {
-    position: absolute;
-    top: 0;
-    width: 88px;
-    height: 88px;
-    left: 162px;
-    image-rendering: pixelated;
-}
-
 .name {
-    margin: 0px 10px 10px 10px;
-    text-align: center;
-    width: 412px;
     border: 2px solid #4b4b6b;
-    border-top: none;
 }
 
 #gameButtons {
-    margin: 10px;
     border: 2px solid #4b4b6b;
-    width: 50%;
-}
-
-#options select{
-    width: 180px;
-}
-
-.character {
-    float: left;
-}
-
-#content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-#events {
-    flex: 1;
-    margin-right: 20px;
-}
-
-#imageContainer {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 #eventImage {
-    width: 50%;
-    height: auto;
-    image-rendering: pixelated;
     border: 2px solid #4b4b6b;
 }
