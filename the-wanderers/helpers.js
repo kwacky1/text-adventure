@@ -458,19 +458,19 @@ function foundEnemy() {
                                 if (allEnemies.length > 0) {
                                     enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
                                     enemyIndex = combatants.indexOf(enemy); 
-                                    addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`, 'green');
+                                    addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`, 'doubleHit');
                                 } else {
                                     nothingHappened = 1;
                                 }
                             } else {
                                 if (criticalHit == 1) {
                                     damage += 1;
-                                    addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'green');
+                                    addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'critHit');
                                 } else if (criticalMiss == 1) {
                                     damage = 0;
                                     addEvent(`${combatant.type} misses!`, 'orange');
                                 } else {
-                                    addEvent(`${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'blue');
+                                    addEvent(`${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'altTurn');
                                 }
                             }
                             if (nothingHappened == 0) {
@@ -641,14 +641,14 @@ function updateStatBars(character) {
     }
 }
 
-function addEvent(eventText, color = 'black') {
+function addEvent(eventText, style = "default") {
     let currentEvents = '';
     const currentEventDiv = document.getElementById('currentEvent');
     if (currentEventDiv.innerHTML !== '') {
         currentEvents = currentEventDiv.innerHTML;
     }
     // Sanitize the eventText before adding it to innerHTML
-    const sanitizedEventText = DOMPurify.sanitize(`<span style="color: ${color};">${eventText}</span>`);
+    const sanitizedEventText = DOMPurify.sanitize(`<span class="${style}">${eventText}</span>`);
     currentEvents += ` ${sanitizedEventText}`;
     currentEventDiv.innerHTML = currentEvents.trim();
 }
