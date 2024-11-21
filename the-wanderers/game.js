@@ -11,6 +11,8 @@ function playTurn() {
     const eventsDiv = document.getElementById('events');
     const eventItem = document.createElement('div');
     eventItem.id = `turn${turnNumber}`;
+    const dayCounter = document.getElementById('day');
+    dayCounter.textContent = `Day ${turnNumber}`;
     if (turnNumber % 2 === 0) {
         eventItem.classList.add('even');
     } else { 
