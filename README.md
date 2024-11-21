@@ -7,3 +7,11 @@ How long can you survive?
 ---
 
 This project is still under development and not all features are implemented yet. Feel free to give give bug reports, improvements, or suggestions. Itch.io page: [https://goosey-games.itch.io/the-wanderers](https://goosey-games.itch.io/the-wanderers)
+
+---
+
+**Credits**
+
+- Created by: [kwacky1](https://github.com/kwacky1) & [blairdactyl](https://github.com/blairdactyl)
+
+- API used to generate random names: [https://randomuser.me/](https://randomuser.me/)
