@@ -14,4 +14,4 @@ This project is still under development and not all features are implemented yet
 
 - Created by: [kwacky1](https://github.com/kwacky1) & [blairdactyl](https://github.com/blairdactyl)
 
-- API used to generate random names: [https://randomuser.me/](https://randomuser.me/)
+- API used to generate random names: [https://randomuser.me/](https://randomuser.me/) by [Keith Armstrong](https://twitter.com/solewolf1993) and [Arron Hunt](https://twitter.com/arronhunt)
