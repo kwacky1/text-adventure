@@ -259,7 +259,7 @@ export class Character {
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
-      characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
+      characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
     }
   }
 }
