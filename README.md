@@ -12,6 +12,6 @@ This project is still under development and not all features are implemented yet
 
 **Credits**
 
-Created by: [kwacky1](https://github.com/kwacky1) & [blairdactyl](https://github.com/blairdactyl)
+- Created by: [kwacky1](https://github.com/kwacky1) & [blairdactyl](https://github.com/blairdactyl)
 
-API used to generate random names: [https://randomuser.me/](https://randomuser.me/)
+- API used to generate random names: [https://randomuser.me/](https://randomuser.me/)
