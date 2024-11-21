@@ -232,7 +232,13 @@ export class Character {
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
-      characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
+      const weaponType = weaponArray[this.weapon][0];
+      if (weaponType == 'fist') {
+        const skinType = this.skin.split('/').pop().split('.').shift();
+        characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span><img class="weaponSprite" src="img/${skinType}${weaponType}.png" alt="fist">`;
+      } else {
+        characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span><img class="weaponSprite" src="img/${weaponType}.png" alt="${weaponType}">`;
+      }
     }
   }
 }
