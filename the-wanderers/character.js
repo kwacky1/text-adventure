@@ -130,48 +130,56 @@ export class Character {
     avatarContainer.style.position = 'relative';
 
     // PosTrait 
-    const posTraitPreview = document.createElement('img');
+    const posTraitPreview = document.createElement('div');
     posTraitPreview.className = 'posTraitSprite';
-    posTraitPreview.src = "img/" + this.posTrait + ".png"; 
-    posTraitPreview.alt = this.posTrait;
+    const posTraitPreviewimg = posTraitPreview.appendChild(document.createElement('img'));
+    posTraitPreviewimg.src = "img/" + this.posTrait + ".png"; 
+    posTraitPreviewimg.alt = this.posTrait;
     avatarContainer.appendChild(posTraitPreview);
 
     // NegTrait
-    const negTraitPreview = document.createElement('img');
+    const negTraitPreview = document.createElement('div');
     negTraitPreview.className = 'negTraitSprite';
-    negTraitPreview.src = "img/" + this.negTrait + ".png"; 
-    negTraitPreview.alt = this.negTrait;
+    const negTraitPreviewImg = negTraitPreview.appendChild(document.createElement('img'));
+    negTraitPreviewImg.src = "img/" + this.negTrait + ".png"; 
+    negTraitPreviewImg.alt = this.negTrait;
     avatarContainer.appendChild(negTraitPreview);
 
+    const avatar = document.createElement('div');
+    avatar.className = 'avatarSprite';
+
     // Skin 
-    const skinPreview = document.createElement('img');
+    const skinPreview = avatar.appendChild(document.createElement('img'));
     skinPreview.src = this.skin; 
     skinPreview.alt = 'skin';
-    avatarContainer.appendChild(skinPreview);
+    avatar.appendChild(skinPreview);
 
     // Hair 
     const hairPreview = document.createElement('img');
     hairPreview.src = this.hair;
     hairPreview.alt = 'hair';
-    avatarContainer.appendChild(hairPreview);
+    avatar.appendChild(hairPreview);
 
     // Shirt
     const shirtPreview = document.createElement('img');
     shirtPreview.src = this.shirt;
     shirtPreview.alt = 'shirt';
-    avatarContainer.appendChild(shirtPreview);
+    avatar.appendChild(shirtPreview);
+
+    avatarContainer.appendChild(avatar);
     
     // Weapon
-    const weaponPreview = document.createElement('img');
+    const weaponPreview = document.createElement('div');
     weaponPreview.className = 'weaponSprite';
+    const weaponPreviewImg = weaponPreview.appendChild(document.createElement('img'));
     const weaponType = weaponArray[this.weapon][0];
     if (weaponType == 'fist') {
       const skinType = this.skin.split('/').pop().split('.').shift();
-      weaponPreview.src = "img/" + skinType + weaponType + ".png"; 
+      weaponPreviewImg.src = "img/" + skinType + weaponType + ".png"; 
     } else {
-      weaponPreview.src = "img/" + weaponType + ".png";
+      weaponPreviewImg.src = "img/" + weaponType + ".png";
     }
-    weaponPreview.alt = weaponType;
+    weaponPreviewImg.alt = weaponType;
     avatarContainer.appendChild(weaponPreview);
 
     characterDiv.appendChild(avatarContainer);
