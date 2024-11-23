@@ -299,11 +299,13 @@ export class Character {
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
       const weaponType = weaponArray[this.weapon][0];
       characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
-      if (weaponType == 'fist') {
-        const skinType = this.skin.split('/').pop().split('.').shift();
-        characterDiv.querySelector('.weaponSprite').src = "img/" + skinType + weaponType + ".png";
-      } else {
-        characterDiv.querySelector('.weaponSprite').src = "img/" + weaponType + ".png";
+      if (characterDiv.querySelector('.weaponSprite')) {
+        if (weaponType == 'fist') {
+          const skinType = this.skin.split('/').pop().split('.').shift();
+          characterDiv.querySelector('div.weaponSprite img').src = "img/" + skinType + weaponType + ".png";
+        } else {
+          characterDiv.querySelector('div.weaponSprite img').src = "img/" + weaponType + ".png";
+        }
       }
     }
   }
