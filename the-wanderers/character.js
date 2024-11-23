@@ -121,7 +121,7 @@ export class Character {
   createCharacter() {
     const charactersDiv = document.getElementById("characters");
     const characterDiv = charactersDiv.appendChild(document.createElement('div'));
-    characterDiv.id = this.name;
+    characterDiv.id = this.name.split(' ').join('');
     characterDiv.classList.add('character');
 
     // Avatar container
@@ -259,7 +259,7 @@ export class Character {
 
   updateCharacter() {
     this.capAttributes();
-    const characterDiv = document.getElementById(this.name);
+    const characterDiv = document.getElementById(this.name.split(' ').join(''));
     if (characterDiv) {
       characterDiv.querySelector('.age').innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
       characterDiv.querySelector('.pos-trait').innerHTML = `Positive Trait: <span class="statValue">${this.posTrait}</span>`;

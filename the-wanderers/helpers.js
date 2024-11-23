@@ -416,6 +416,7 @@ function foundEnemy() {
                         attackButton.classList.add('attack');
                         attackButton.addEventListener('click', () => {
                             weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
+                            addEvent(`${combatant.type} was unable to battle.`);
                             handleTurn(index + 1);
                         });
                     }
@@ -519,26 +520,30 @@ function foundWeapon(who, id) {
     const weapon = weaponType[0];
     const damage = weaponType[1];
     const playTurnButton = document.getElementById('playTurnButton');
-    addEvent(`${who} found a ${weapon}`);
+    addEvent(`${who} found a ${weapon}.`);
     const weaponDiv = document.getElementById('gameButtons');
     for (const character of context.gameParty.characters) {
-        const button = document.createElement('button');
-        // if character has a weapon, replace it
-        if (character.weapon !== null) {
-            const oldWeapon = weaponArray[character.weapon];
-            offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv);
-        } else {
-            button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
-            button.addEventListener('click', () => 
-            {
-                character.weapon = weaponArray.indexOf(weaponType); 
-                addEvent(`${character.name} picked up the ${weapon}.`);
-                weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
-                character.updateCharacter();
-                playTurnButton.style.display = 'block';
-            });
-            weaponDiv.appendChild(button);
-        }
+        addWeaponChoiceButton(weaponDiv, character, weaponType, id);
+    }
+}
+
+function addWeaponChoiceButton(weaponDiv, character, weaponType, id) {
+    const button = document.createElement('button');
+    // if character has a weapon, replace it
+    if (character.weapon !== null) {
+        const oldWeapon = weaponArray[character.weapon];
+        offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv);
+    } else {
+        button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
+        button.addEventListener('click', () => 
+        {
+            character.weapon = weaponArray.indexOf(weaponType); 
+            addEvent(`${character.name} picked up the ${weapon}.`);
+            weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
+            character.updateCharacter();
+            playTurnButton.style.display = 'block';
+        });
+        weaponDiv.appendChild(button);
     }
 }
 
@@ -552,19 +557,27 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
         button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${newWeaponType} (${newDamage} damage) for ${character.name}`;
         button.classList.add(`weapon${id}`);
         button.classList.add(`${newWeaponType}`);
-        button.classList.add(character.name);
+        const characterClass = character.name.split(' ').join('');
+        button.classList.add(characterClass);
         button.addEventListener('click', () =>
         {
             character.weapon = weaponArray.indexOf(newWeapon); 
             addEvent(`${character.name} replaced their ${oldWeaponType} with the ${newWeaponType}.`);
             weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
-            const characterButtons = weaponDiv.querySelectorAll(`.${character.name}`);
+            const characterButtons = weaponDiv.querySelectorAll(`.${characterClass}`);
             if (characterButtons.length > 0) {
                 characterButtons.forEach(button => button.remove());
             }    
             character.updateCharacter();
             if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
-                playTurnButton.style.display = 'block';
+                for (const character of context.gameParty.characters) {
+                    if (weaponArray[character.weapon][1] < oldDamage) {
+                        addWeaponChoiceButton(weaponDiv, character, oldWeapon, id);
+                    }
+                }
+                if (weaponDiv.querySelectorAll('.weapon0').length === 0) {
+                    playTurnButton.style.display = 'block';
+                }
             }
         });
         weaponDiv.appendChild(button);
@@ -752,7 +765,7 @@ function updateButtons(itemType, items, defaultOptionText, updateCharacterAttrib
         const hasItems = Array.from(context.gameParty.inventoryMap.keys()).some(inventoryItem => items.some(item => item.includes(inventoryItem)));
         for (const character of context.gameParty.characters) {
             try {
-                const selectElement = document.querySelector(`#${character.name} #options #${itemType}Select`);
+                const selectElement = document.querySelector(`#${character.name.split(' ').join('')} #options #${itemType}Select`);
                 if (selectElement) {
                     const newSelectElement = selectElement.cloneNode(true);
                     selectElement.parentNode.replaceChild(newSelectElement, selectElement);
