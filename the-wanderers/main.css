@@ -113,12 +113,38 @@ form input {
     margin: 10px 10px 0px 10px;
 }
 
-.avatar img {
+.avatarSprite img {
     position: absolute;
-    top: 0;
     width: 88px;
     height: 88px;
     left: 162px;
+    image-rendering: pixelated;
+}
+
+.negTraitSprite img {
+    position: absolute;
+    bottom: 5px;
+    width: 44px;
+    height: 44px;
+    left: 52px;
+    image-rendering: pixelated;
+}
+
+.posTraitSprite img {
+    position: absolute;
+    top: 5px;
+    width: 44px;
+    height: 44px;
+    left: 52px;
+    image-rendering: pixelated;
+}
+
+.weaponSprite img {
+    position: absolute;
+    top: 8px;
+    width: 88px;
+    height: 88px;
+    right: 32px;
     image-rendering: pixelated;
 }
 
