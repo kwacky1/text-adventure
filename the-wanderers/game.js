@@ -41,6 +41,7 @@ function playTurn() {
         getEvent(chance);
         context.gameParty.updateInventory();
         turnNumber += 1;
+        console.log("Turn:" + turnNumber + "Chance: " + chance);
         const playTurnButton = document.getElementById('playTurnButton');
         if (playTurnButton) {
             playTurnButton.innerText = `Play Turn ${turnNumber}`;
