@@ -45,10 +45,10 @@ class Party {
         }
         this.updateCampsiteImage();
     }
-    
+
     updateInventory() {
         const partyInventoryDiv = document.getElementById('partyInventory');
-      
+
         // Update inventory display
         partyInventoryDiv.innerHTML = '<p>Party Inventory</p>';
         this.inventoryMap.forEach((value, key) => {
@@ -60,7 +60,7 @@ class Party {
 
     updateCampsiteImage() {
         const campsiteImg = document.getElementById('eventImage');
-        campsiteImg.src = `img/campsite${this.characters.length}.png`;
+        campsiteImg.src = `img/campsite${this.characters.length}.png`; //NEEDSALTTEXT: can you add a script that changes the alt text for each different campsite image, i'll write the descriptions after you push it
     }
 }
 
