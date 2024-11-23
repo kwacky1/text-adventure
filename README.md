@@ -24,6 +24,13 @@ This project is still under development and not all features are implemented yet
 
 Game assets are licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). 
 
+The Wanderers Text Adventure Game
+    Copyright (C) 2024  Goosey Games
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or any later version.
+
 ---
 
 ## Installation
