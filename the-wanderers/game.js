@@ -353,25 +353,30 @@ async function createCharacterForm() {
     avatarPreviewContainer.className = 'avatar';
     avatarPreviewContainer.style.position = 'relative';
 
+    const avatarPreview = document.createElement('div');
+    avatarPreview.className = 'avatarSprite';
+
     // Skin preview
-    const skinPreview = document.createElement('img');
+    const skinPreview = avatarPreview.appendChild(document.createElement('img'));
     skinPreview.src = "img/" + skinSelect.value;
     skinPreview.alt = 'Skin Preview';
-    avatarPreviewContainer.appendChild(skinPreview);
+    avatarPreview.appendChild(skinPreview);
 
     // Hair preview
-    const hairPreview = document.createElement('img');
+    const hairPreview = avatarPreview.appendChild(document.createElement('img'));
     hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
     hairPreview.alt = 'Hair Preview';
-    avatarPreviewContainer.appendChild(hairPreview);
+    avatarPreview.appendChild(hairPreview);
 
     // shirt preview
-    const shirtPreview = document.createElement('img');
+    const shirtPreview = avatarPreview.appendChild(document.createElement('img'));
     shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
     shirtPreview.alt = 'shirt Preview';
-    avatarPreviewContainer.appendChild(shirtPreview);
+    avatarPreview.appendChild(shirtPreview);
     
+    avatarPreviewContainer.appendChild(avatarPreview);
     avatarSection.appendChild(avatarPreviewContainer);
+    
 
     // Event listeners to update previews
     posTraitsSelect.addEventListener('change', () => {
