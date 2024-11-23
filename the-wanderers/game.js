@@ -455,6 +455,8 @@ async function createCharacterForm() {
         eventsDiv.style.display = 'flex';
 
         addEvent(`A new illness has swept the world and the infected have begun to rise from the dead. The world is ending, but ${character.name}'s life doesn't have to just yet.`)
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
     });
     form.appendChild(submitButton);
 
