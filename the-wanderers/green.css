@@ -73,3 +73,11 @@ form label {
 #eventImage {
     border: 2px solid #23251b;
 }
+
+.critHit, .doubleHit {
+    color: #b6e900;
+}
+
+.altTurn {
+    color: #1b5854;
+}
