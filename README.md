@@ -15,3 +15,9 @@ This project is still under development and not all features are implemented yet
 - Created by: [kwacky1](https://github.com/kwacky1) & [blairdactyl](https://github.com/blairdactyl)
 
 - API used to generate random names: [https://randomuser.me/](https://randomuser.me/)
+
+---
+
+**Licences**
+
+Game assets are licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). 
