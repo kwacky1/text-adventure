@@ -359,20 +359,47 @@ async function createCharacterForm() {
     // Skin preview
     const skinPreview = avatarPreview.appendChild(document.createElement('img'));
     skinPreview.src = "img/" + skinSelect.value;
-    skinPreview.alt = 'Character\'s skin sprite'; //NEEDSALTTEXT: see character.js
+    skinPreview.alt = nameInput.value + '\'s skin sprite.';
     avatarPreview.appendChild(skinPreview);
 
     // Hair preview
     const hairPreview = avatarPreview.appendChild(document.createElement('img'));
     hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
-    hairPreview.alt = 'Character\'s hair sprite'; //NEEDSALTTEXT: see character.js
+    hairPreview.alt = nameInput.value + '\'s hair sprite. . Their hair is ';
+    switch (hairStyleSelect.value) {
+        case 'short1':
+            hairPreview.alt += 'short and straight.';
+            break;
+        case 'short2':
+            hairPreview.alt += 'short and fluffy.';
+            break;
+        case 'long1':
+            hairPreview.alt += 'long and straight.';
+            break;
+        case 'long2':
+            hairPreview.alt += 'long and curly.';
+            break;
+    }
     avatarPreview.appendChild(hairPreview);
 
     // shirt preview
     const shirtPreview = avatarPreview.appendChild(document.createElement('img'));
     shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
-    shirtPreview.alt = 'Character\'s shirt sprite'; //NEEDSALTTEXT: see character.js
-    avatarPreview.appendChild(shirtPreview);
+    shirtPreview.alt = nameInput.value + '\'s shirt sprite';
+    switch (shirtStyleSelect.value) {
+      case "img/shirt1.png":
+        shirtPreview.alt += "hoodie.";
+        break;
+      case "img/shirt2.png":
+        shirtPreview.alt += "vest.";
+        break;
+      case "img/shirt3.png":
+        shirtPreview.alt += "jacket.";
+        break;
+      case "img/shirt4.png":
+        shirtPreview.alt += "scarf.";
+        break;
+    }avatarPreview.appendChild(shirtPreview);
 
     avatarPreviewContainer.appendChild(avatarPreview);
     avatarSection.appendChild(avatarPreviewContainer);

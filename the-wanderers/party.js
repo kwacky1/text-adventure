@@ -60,7 +60,21 @@ class Party {
 
     updateCampsiteImage() {
         const campsiteImg = document.getElementById('eventImage');
-        campsiteImg.src = `img/campsite${this.characters.length}.png`; //NEEDSALTTEXT: can you add a script that changes the alt text for each different campsite image, i'll write the descriptions after you push it
+        campsiteImg.src = `img/campsite${this.characters.length}.png`;
+        switch (this.characters.length) {
+            case 1:
+                campsiteImg.alt = 'campsite with one character';
+                break;
+            case 2:
+                campsiteImg.alt = 'campsite with two characters';
+                break;
+            case 3:
+                campsiteImg.alt = 'campsite with three characters';
+                break;
+            case 4:
+                campsiteImg.alt = 'campsite with four characters';
+                break;
+        }
     }
 }
 

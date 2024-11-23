@@ -151,27 +151,47 @@ export class Character {
     // Skin
     const skinPreview = avatar.appendChild(document.createElement('img'));
     skinPreview.src = this.skin;
-    skinPreview.alt = 'Character\'s skin sprite'; //NEEDSALTTEXT: add character's name
+    skinPreview.alt = this.name + '\'s skin sprite';
     avatar.appendChild(skinPreview);
 
     // Hair
     const hairPreview = document.createElement('img');
     hairPreview.src = this.hair;
-    hairPreview.alt = 'Character\'s hair sprite'; //NEEDSALTTEXT: add character's name and description of hair + colour
-    // short1 = "short straight"
-    // short2 = "short fluffy"
-    // long1 = "long straight"
-    // long2 = "long curly"
+    hairPreview.alt = this.name + '\'s hair sprite. Their hair is ';
+    switch (this.hair) {
+      case "img/hair1.png":
+        hairPreview.alt += "short and straight.";
+        break;
+      case "img/hair2.png":
+        hairPreview.alt += "short and fluffy.";
+        break;
+      case "img/hair3.png":
+        hairPreview.alt += "long and straight.";
+        break;
+      case "img/hair4.png":
+        hairPreview.alt += "long and curly.";
+        break;
+    }
     avatar.appendChild(hairPreview);
 
     // Shirt
     const shirtPreview = document.createElement('img');
     shirtPreview.src = this.shirt;
-    shirtPreview.alt = 'Character\'s shirt sprite'; //NEEDSALTTEXT: add character's name and shirt style + colour
-    // shirt1 = "hoodie"
-    // shirt2 = "vest"
-    // shirt3 = "jacket"
-    // shirt4 = "scarf"
+    shirtPreview.alt = this.name + '\'s shirt sprite. They\'re wearing a ';
+    switch (this.shirt) {
+      case "img/shirt1.png":
+        shirtPreview.alt += "hoodie.";
+        break;
+      case "img/shirt2.png":
+        shirtPreview.alt += "vest.";
+        break;
+      case "img/shirt3.png":
+        shirtPreview.alt += "jacket.";
+        break;
+      case "img/shirt4.png":
+        shirtPreview.alt += "scarf.";
+        break;
+    }
     avatar.appendChild(shirtPreview);
 
     avatarContainer.appendChild(avatar);
@@ -187,7 +207,7 @@ export class Character {
     } else {
       weaponPreviewImg.src = "img/" + weaponType + ".png";
     }
-    weaponPreviewImg.alt = 'An image of character\'s current weapon, a ' + weaponType; //NEEDSALTTEXT: add character's name
+    weaponPreviewImg.alt = 'An image of ' + this.name + '\'s current weapon, a ' + weaponType;
     avatarContainer.appendChild(weaponPreview);
 
     characterDiv.appendChild(avatarContainer);
