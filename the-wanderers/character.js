@@ -47,11 +47,11 @@ export const weaponArray = [
   ['fist', 1],
   ['stick', 2],
   ['knife', 3],
-  ['pistol', 4]   
+  ['pistol', 4]
 ];
 
 export class Character {
-  constructor(name, age, posTrait, negTrait, skin, hair, shirt) { 
+  constructor(name, age, posTrait, negTrait, skin, hair, shirt) {
     this.id = 0;
     this.name = name;
     this.age = age;
@@ -129,11 +129,11 @@ export class Character {
     avatarContainer.className = 'avatar';
     avatarContainer.style.position = 'relative';
 
-    // PosTrait 
+    // PosTrait
     const posTraitPreview = document.createElement('div');
     posTraitPreview.className = 'posTraitSprite';
     const posTraitPreviewimg = posTraitPreview.appendChild(document.createElement('img'));
-    posTraitPreviewimg.src = "img/" + this.posTrait + ".png"; 
+    posTraitPreviewimg.src = "img/" + this.posTrait + ".png";
     posTraitPreviewimg.alt = this.posTrait;
     avatarContainer.appendChild(posTraitPreview);
 
@@ -141,33 +141,41 @@ export class Character {
     const negTraitPreview = document.createElement('div');
     negTraitPreview.className = 'negTraitSprite';
     const negTraitPreviewImg = negTraitPreview.appendChild(document.createElement('img'));
-    negTraitPreviewImg.src = "img/" + this.negTrait + ".png"; 
+    negTraitPreviewImg.src = "img/" + this.negTrait + ".png";
     negTraitPreviewImg.alt = this.negTrait;
     avatarContainer.appendChild(negTraitPreview);
 
     const avatar = document.createElement('div');
     avatar.className = 'avatarSprite';
 
-    // Skin 
+    // Skin
     const skinPreview = avatar.appendChild(document.createElement('img'));
-    skinPreview.src = this.skin; 
-    skinPreview.alt = 'skin';
+    skinPreview.src = this.skin;
+    skinPreview.alt = 'Character\'s skin sprite'; //NEEDSALTTEXT: add character's name
     avatar.appendChild(skinPreview);
 
-    // Hair 
+    // Hair
     const hairPreview = document.createElement('img');
     hairPreview.src = this.hair;
-    hairPreview.alt = 'hair';
+    hairPreview.alt = 'Character\'s hair sprite'; //NEEDSALTTEXT: add character's name and description of hair + colour
+    // short1 = "short straight"
+    // short2 = "short fluffy"
+    // long1 = "long straight"
+    // long2 = "long curly"
     avatar.appendChild(hairPreview);
 
     // Shirt
     const shirtPreview = document.createElement('img');
     shirtPreview.src = this.shirt;
-    shirtPreview.alt = 'shirt';
+    shirtPreview.alt = 'Character\'s shirt sprite'; //NEEDSALTTEXT: add character's name and shirt style + colour
+    // shirt1 = "hoodie"
+    // shirt2 = "vest"
+    // shirt3 = "jacket"
+    // shirt4 = "scarf"
     avatar.appendChild(shirtPreview);
 
     avatarContainer.appendChild(avatar);
-    
+
     // Weapon
     const weaponPreview = document.createElement('div');
     weaponPreview.className = 'weaponSprite';
@@ -175,11 +183,11 @@ export class Character {
     const weaponType = weaponArray[this.weapon][0];
     if (weaponType == 'fist') {
       const skinType = this.skin.split('/').pop().split('.').shift();
-      weaponPreviewImg.src = "img/" + skinType + weaponType + ".png"; 
+      weaponPreviewImg.src = "img/" + skinType + weaponType + ".png";
     } else {
       weaponPreviewImg.src = "img/" + weaponType + ".png";
     }
-    weaponPreviewImg.alt = weaponType;
+    weaponPreviewImg.alt = 'An image of character\'s current weapon, a ' + weaponType; //NEEDSALTTEXT: add character's name
     avatarContainer.appendChild(weaponPreview);
 
     characterDiv.appendChild(avatarContainer);
@@ -227,7 +235,7 @@ export class Character {
     healthStat.id = 'healthStat';
     healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
     statsContainer.appendChild(healthStat);
-  
+
     const weapon = document.createElement('div');
     weapon.classList.add('stat');
     weapon.id = 'weapon';
@@ -273,7 +281,7 @@ export class Character {
       characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
       if (weaponType == 'fist') {
         const skinType = this.skin.split('/').pop().split('.').shift();
-        characterDiv.querySelector('.weaponSprite').src = "img/" + skinType + weaponType + ".png"; 
+        characterDiv.querySelector('.weaponSprite').src = "img/" + skinType + weaponType + ".png";
       } else {
         characterDiv.querySelector('.weaponSprite').src = "img/" + weaponType + ".png";
       }
