@@ -256,25 +256,28 @@ function checkDeathEffects(character) {
     Strangers +0
     Cold +1
     */
-        for (const remainingCharacter of context.gameParty.characters) {
-            if (remainingCharacter !== character) {
-                const relationship = remainingCharacter.relationships.get(character);
-                if (relationship === 4) {
-                    remainingCharacter.morale -= 3;
-                }
-                if (relationship === 3) {
-                    remainingCharacter.morale -= 2;
-                }
-                if (relationship === 2) {
-                    remainingCharacter.morale -= 1;
-                }
-                if (relationship === 0) {
-                    remainingCharacter.morale += 1;
-                }
-                remainingCharacter.capAttributes();
-                updateStatBars(remainingCharacter);        }
+    const weaponDiv = document.getElementById('gameButtons');
+    for (const remainingCharacter of context.gameParty.characters) {
+        if (remainingCharacter !== character) {
+            const relationship = remainingCharacter.relationships.get(character);
+            if (relationship === 4) {
+                remainingCharacter.morale -= 3;
+            }
+            if (relationship === 3) {
+                remainingCharacter.morale -= 2;
+            }
+            if (relationship === 2) {
+                remainingCharacter.morale -= 1;
+            }
+            if (relationship === 0) {
+                remainingCharacter.morale += 1;
+            }
+            remainingCharacter.capAttributes();
+            updateStatBars(remainingCharacter);        
+            addWeaponChoiceButton(weaponDiv, remainingCharacter, weaponArray[character.weapon], 0);
         }
     }
+}
     
 function foundEnemy() {
     const enemy = [
@@ -517,10 +520,7 @@ function foundEnemy() {
 
 function foundWeapon(who, id) {
     const weaponType = weaponArray[Math.floor(Math.random() * (weaponArray.length - 1)) + 1];
-    const weapon = weaponType[0];
-    const damage = weaponType[1];
-    const playTurnButton = document.getElementById('playTurnButton');
-    addEvent(`${who} found a ${weapon}.`);
+    addEvent(`${who} found a ${weaponType[0]}.`);
     const weaponDiv = document.getElementById('gameButtons');
     for (const character of context.gameParty.characters) {
         addWeaponChoiceButton(weaponDiv, character, weaponType, id);
@@ -541,6 +541,7 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id) {
             addEvent(`${character.name} picked up the ${weapon}.`);
             weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
             character.updateCharacter();
+            const playTurnButton = document.getElementById('playTurnButton');
             playTurnButton.style.display = 'block';
         });
         weaponDiv.appendChild(button);
@@ -548,6 +549,7 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id) {
 }
 
 function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
+    const playTurnButton = document.getElementById('playTurnButton');
     const oldWeaponType = oldWeapon[0];
     const oldDamage = oldWeapon[1];
     const newWeaponType = newWeapon[0];
