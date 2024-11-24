@@ -528,14 +528,14 @@ function foundWeapon(who, id) {
     }
 }
 
-function addWeaponChoiceButton(weaponDiv, character, weaponType, id) {
+function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'found') {
     const button = document.createElement('button');
     // if character has a weapon, replace it
     if (character.weapon !== null) {
         const oldWeapon = weaponArray[character.weapon];
         offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv);
     } else {
-        button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
+        button.innerText = `Give ${from} ${weapon} (${damage} attack) to ${character.name}`;
         button.addEventListener('click', () =>
         {
             character.weapon = weaponArray.indexOf(weaponType);
@@ -573,9 +573,9 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
             }
             character.updateCharacter();
             if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
-                for (const character of context.gameParty.characters) {
-                    if (weaponArray[character.weapon][1] < oldDamage) {
-                        addWeaponChoiceButton(weaponDiv, character, oldWeapon, id);
+                for (const otherCharacter of context.gameParty.characters) {
+                    if (weaponArray[otherCharacter.weapon][1] < oldDamage) {
+                        addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id);
                     }
                 }
                 if (weaponDiv.querySelectorAll('.weapon0').length === 0) {
@@ -682,13 +682,14 @@ async function addPlayer() {
             const age = Math.floor(Math.random() * ageArray.length);
             const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
             const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
-            const skin = "img/skin" + (Math.floor(Math.random() * 4) + 1) +".png";
-            let hairColour = ['blonde', 'ginger', 'brown', 'red', 'black'];
-            let hairStyle = ['short', 'long'];
-            const hair = "img/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + (Math.floor(Math.random() * 2) + 1) + hairColour[Math.floor(Math.random() * hairColour.length)] + ".png";
-            let shirtColour = ['red', 'yellow', 'green', 'blue'];
-            let shirtStyle = ['shirt1', 'shirt2', 'shirt3', 'shirt4'];
-            const shirt = "img/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + shirtColour[Math.floor(Math.random() * shirtStyle.length)]+ ".png";
+            const skinTypes = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png'];
+            const skin = "img/" + skinTypes[Math.floor(Math.random() * skinTypes.length)];
+            let hairColour = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png'];
+            let hairStyle = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight'];
+            const hair = "img/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + '_' + hairColour[Math.floor(Math.random() * hairColour.length)];
+            let shirtColour = ['red.png', 'yellow.png', 'green.png', 'blue.png'];
+            let shirtStyle = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest'];
+            const shirt = "img/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtStyle.length)];
             const character = new Character(firstName, age, posTrait[0], negTrait[0], skin, hair, shirt);
             context.gameParty.addCharacter(character);
             addEvent(`${character.name} has joined the party!`);
