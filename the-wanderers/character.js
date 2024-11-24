@@ -222,9 +222,9 @@ export class Character {
     const weaponType = weaponArray[this.weapon][0];
     if (weaponType == 'fist') {
       const skinType = this.skin.split('/').pop().split('.').shift();
-      weaponPreviewImg.src = "img/" + skinType + weaponType + ".png";
+      weaponPreviewImg.src = "img/weapon_" + skinType + weaponType + ".png";
     } else {
-      weaponPreviewImg.src = "img/" + weaponType + ".png";
+      weaponPreviewImg.src = "img/weapon_" + weaponType + ".png";
     }
     weaponPreviewImg.alt = 'An image of ' + this.name + '\'s current weapon, a ' + weaponType;
     avatarContainer.appendChild(weaponPreview);
@@ -323,7 +323,7 @@ export class Character {
           const skinType = this.skin.split('/').pop().split('.').shift();
           characterDiv.querySelector('div.weaponSprite img').src = "img/weapon_" + weaponType + skinType.replace('skin','') + ".png";
         } else {
-          characterDiv.querySelector('div.weaponSprite img').src = "img/" + weaponType + ".png";
+          characterDiv.querySelector('div.weaponSprite img').src = "img/weapon_" + weaponType + ".png";
         }
       }
     }
