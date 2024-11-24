@@ -187,6 +187,14 @@ export class Character {
     const avatar = document.createElement('div');
     avatar.className = 'avatarSprite';
 
+    const hairOutline = document.createElement('img');
+    hairOutline.src = "img/outline_hair_" + this.hair.split('_')[1] + ".png";
+    avatar.appendChild(hairOutline);
+
+    const shirtOutline = document.createElement('img');
+    shirtOutline.src = "img/outline_shirt_" + this.shirt.split('_')[1] + ".png";
+    avatar.appendChild(shirtOutline);
+
     // Skin
     const skinPreview = avatar.appendChild(document.createElement('img'));
     skinPreview.src = this.skin;
@@ -196,41 +204,13 @@ export class Character {
     // Hair
     const hairPreview = document.createElement('img');
     hairPreview.src = this.hair;
-    hairPreview.alt = this.name + '\'s hair sprite. Their hair is ';
-    switch (this.hair) {
-      case "img/hair1.png":
-        hairPreview.alt += "short and straight.";
-        break;
-      case "img/hair2.png":
-        hairPreview.alt += "short and fluffy.";
-        break;
-      case "img/hair3.png":
-        hairPreview.alt += "long and straight.";
-        break;
-      case "img/hair4.png":
-        hairPreview.alt += "long and curly.";
-        break;
-    }
+    hairPreview.alt = this.name + '\'s hair sprite. Their hair is ' + this.hair.split('_')[1].replace('-',' and ') + '.';
     avatar.appendChild(hairPreview);
 
     // Shirt
     const shirtPreview = document.createElement('img');
     shirtPreview.src = this.shirt;
-    shirtPreview.alt = this.name + '\'s shirt sprite. They\'re wearing a ';
-    switch (this.shirt) {
-      case "img/shirt1.png":
-        shirtPreview.alt += "hoodie.";
-        break;
-      case "img/shirt2.png":
-        shirtPreview.alt += "vest.";
-        break;
-      case "img/shirt3.png":
-        shirtPreview.alt += "jacket.";
-        break;
-      case "img/shirt4.png":
-        shirtPreview.alt += "scarf.";
-        break;
-    }
+    shirtPreview.alt = this.name + '\'s shirt sprite. They\'re wearing a ' + this.shirt.split('_')[1] + '.';
     avatar.appendChild(shirtPreview);
 
     avatarContainer.appendChild(avatar);
