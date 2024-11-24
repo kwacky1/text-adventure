@@ -291,9 +291,9 @@ export class Character {
     if (characterDiv) {
       characterDiv.querySelector('.age').innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
       characterDiv.querySelector('.pos-trait').innerHTML = `Positive Trait: <span class="statValue">${this.posTrait}</span>`;
-      characterDiv.querySelector('.posTraitSprite').src = "img/" + this.posTrait + ".png";
+      characterDiv.querySelector('div.posTraitSprite img').src = "img/" + this.posTrait + ".png";
       characterDiv.querySelector('.neg-trait').innerHTML = `Negative Trait: <span class="statValue">${this.negTrait}</span>`;
-      characterDiv.querySelector('.negTraitSprite').src = "img/" + this.negTrait + ".png";
+      characterDiv.querySelector('div.negTraitSprite img').src = "img/" + this.negTrait + ".png";
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
