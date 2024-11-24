@@ -295,7 +295,8 @@ async function createCharacterForm() {
     hairStyleImages.forEach(hairStyle => {
         const option = document.createElement('option');
         option.value = hairStyle;
-        option.textContent = hairStyle.split('_')[1].charAt(0).toUpperCase() + hairStyle.split('_')[1].slice(1) + ' ' + hairStyle.split('_')[0];
+        const hairStyleText = hairStyle.replace('-',', ');
+        option.textContent = hairStyleText.split('_')[1].charAt(0).toUpperCase() + hairStyleText.split('_')[1].slice(1) + ' ' + hairStyleText.split('_')[0];
         hairStyleSelect.appendChild(option);
     });
     hairStyleSelect.selectedIndex = Math.floor(Math.random() * hairStyleImages.length);
@@ -322,11 +323,12 @@ async function createCharacterForm() {
     const shirtStyleLabel = document.createElement('label');
     shirtStyleLabel.textContent = 'Shirt Style: ';
     const shirtStyleSelect = document.createElement('select');
-    const shirtStyleImages = ['shirt1', 'shirt2', 'shirt3', 'shirt4']; // Add your shirtStyle image filenames here
-    shirtStyleImages.forEach((shirtStyle, index) => {
+    const shirtStyleImages = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest']; // Add your shirtStyle image filenames here
+    shirtStyleImages.forEach(shirtStyle => {
         const option = document.createElement('option');
         option.value = shirtStyle;
-        option.textContent = shirtStyleImages[index].charAt(0).toUpperCase() + shirtStyleImages[index].slice(1);
+        const shirtStyleText = shirtStyle.split('_')[1];
+        option.textContent = shirtStyleText.charAt(0).toUpperCase() + shirtStyleText.slice(1);
         shirtStyleSelect.appendChild(option);
     });
     shirtStyleSelect.selectedIndex = Math.floor(Math.random() * shirtStyleImages.length);
@@ -364,7 +366,7 @@ async function createCharacterForm() {
 
     // Hair preview
     const hairPreview = avatarPreview.appendChild(document.createElement('img'));
-    hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
+    hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     hairPreview.alt = nameInput.value + '\'s hair sprite. . Their hair is ';
     switch (hairStyleSelect.value) {
         case 'short1':
@@ -384,7 +386,7 @@ async function createCharacterForm() {
 
     // shirt preview
     const shirtPreview = avatarPreview.appendChild(document.createElement('img'));
-    shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+    shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     shirtPreview.alt = nameInput.value + '\'s shirt sprite';
     switch (shirtStyleSelect.value) {
       case "img/shirt1.png":
@@ -437,19 +439,19 @@ async function createCharacterForm() {
     });
 
     hairStyleSelect.addEventListener('change', () => {
-        hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
+        hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     });
 
     hairColourSelect.addEventListener('change', () => {
-        hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
+        hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     });
 
     shirtStyleSelect.addEventListener('change', () => {
-        shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+        shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     });
 
     shirtColourSelect.addEventListener('change', () => {
-        shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+        shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     });
 
     form.appendChild(avatarSection);
@@ -462,8 +464,8 @@ async function createCharacterForm() {
         const posTrait = posTraitsSelect.value;
         const negTrait = negTraitsSelect.value;
         const skin = "img/" + skinSelect.value;
-        const hair = "img/" + hairStyleSelect.value + hairColourSelect.value;
-        const shirt = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+        const hair = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+        const shirt = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
         const character = new Character(name, age, posTrait, negTrait, skin, hair, shirt);
         formDiv.innerHTML = "";
         startGame();
