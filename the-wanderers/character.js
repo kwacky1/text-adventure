@@ -134,7 +134,13 @@ export class Character {
     posTraitPreview.className = 'posTraitSprite';
     const posTraitPreviewimg = posTraitPreview.appendChild(document.createElement('img'));
     posTraitPreviewimg.src = "img/" + this.posTrait + ".png";
-    posTraitPreviewimg.alt = this.posTrait;
+    posTraitPreviewimg.alt = "A " + traitSymbol + ", representing the" + this.posTrait + "trait";
+    // NEEDSALTTEXT: create a traitSymbol variable that corresponds with the character's trait
+    // fighter: muscle arm
+    // friendly: speech bubble
+    // resilient: heart
+    // satiated: loaf of bread
+    // scavenger: bone
     avatarContainer.appendChild(posTraitPreview);
 
     // NegTrait
@@ -142,7 +148,14 @@ export class Character {
     negTraitPreview.className = 'negTraitSprite';
     const negTraitPreviewImg = negTraitPreview.appendChild(document.createElement('img'));
     negTraitPreviewImg.src = "img/" + this.negTrait + ".png";
-    negTraitPreviewImg.alt = this.negTrait;
+    negTraitPreviewImg.alt = "A " + traitSymbol + ", representing the" + this.negTrait + "trait";
+    // NEEDSALTTEXT: see above
+    // clumsy: bandaid
+    // depressed: sad face
+    // disconnected: blank face
+    // hungry: fork and knife
+    // hypochondriac: pill
+    // vulnerable: broken heart
     avatarContainer.appendChild(negTraitPreview);
 
     const avatar = document.createElement('div');
