@@ -92,7 +92,7 @@ function getEvent(chance) {
         secondItem = 0.1 + itemChance;
     }
     if (context.gameParty.characters.length == 4) {
-        friendChance = 0.05;
+        friendChance = 0;
         enemyChance = 0.2 + friendChance;
         itemChance = 0.55 + enemyChance;
         secondItem = 0.15 + itemChance;
@@ -128,7 +128,7 @@ function getEvent(chance) {
             addEvent(event);
         }
     } else if (chance > illnessChance && chance <= miniEventChance) {
-        if (context.gameParty.characters.length > 3) {
+        if (context.gameParty.characters.length >= 3) {
             if (Math.random() < 0.5) {
                 let name = context.gameParty.characters[Math.random() * context.gameParty.characters.length].name;
                 addEvent(`${name} found a pack of cards while looking through the ruins of a house. The party plays a few rounds.`);
