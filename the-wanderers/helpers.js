@@ -56,7 +56,7 @@ function getEvent(chance) {
         who = context.gameParty.characters[0].name;
     }
     const singlePlayerEvents = [
-        `${who} watches the clouds go by.`, 
+        `${who} watches the clouds go by.`,
         `${who} stays in bed all day.`
     ];
     if (context.gameParty.characters.length > 1) {
@@ -275,7 +275,7 @@ function checkDeathEffects(character) {
                 updateStatBars(remainingCharacter);        }
         }
     }
-    
+
 function foundEnemy() {
     const enemy = [
         ['zombie']
@@ -321,7 +321,7 @@ function foundEnemy() {
             };
         }
     );
-    
+
     // Combine enemies and players into a single array
     var combatants = players.concat(enemies.map(enemy => ({
         type: 'enemy',
@@ -343,7 +343,7 @@ function foundEnemy() {
         }
 
         // All we need to do is update the players array to check if anyone has used a health item
-        players.forEach(player => { 
+        players.forEach(player => {
             player.hp = context.gameParty.characters.find(c => c.name === player.type).health;
         });
 
@@ -383,7 +383,7 @@ function foundEnemy() {
                         hp: 4 + Math.floor(Math.random() * 4),
                         morale: Math.floor(Math.random() * 10),
                         attack: weaponArray[character.weapon][1]
-            
+
                     });
                     addEvent(`${character.name} has become a zombie!`);
                 }
@@ -420,7 +420,7 @@ function foundEnemy() {
                             handleTurn(index + 1);
                         });
                     }
-                } else {                    
+                } else {
                     var criticalHit = 0;
                     var criticalMiss = 0;
                     if (character.morale === 6 || character.morale === 7) {
@@ -458,7 +458,7 @@ function foundEnemy() {
                                 const allEnemies = combatants.filter(c => c.type === 'enemy' && c.hp > 0 && c !== enemy);
                                 if (allEnemies.length > 0) {
                                     enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
-                                    enemyIndex = combatants.indexOf(enemy); 
+                                    enemyIndex = combatants.indexOf(enemy);
                                     addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`, 'doubleHit');
                                 } else {
                                     nothingHappened = 1;
@@ -475,7 +475,7 @@ function foundEnemy() {
                                 }
                             }
                             if (nothingHappened == 0) {
-                                enemy.hp -= damage;                            
+                                enemy.hp -= damage;
                             }
                             if (enemy.hp <= 0) {
                                 addEvent(`The ${enemy.type} has been defeated!`, 'green');
@@ -501,13 +501,13 @@ function foundEnemy() {
                         }
                         weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
                         handleTurn(index + 1);
-                        
+
                     });
                 }
                 if (attackButton instanceof HTMLButtonElement) {
                     weaponButtons.appendChild(attackButton);
                 }
-            } 
+            }
         });
     }}
 
@@ -535,9 +535,9 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id) {
         offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv);
     } else {
         button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
-        button.addEventListener('click', () => 
+        button.addEventListener('click', () =>
         {
-            character.weapon = weaponArray.indexOf(weaponType); 
+            character.weapon = weaponArray.indexOf(weaponType);
             addEvent(`${character.name} picked up the ${weapon}.`);
             weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
             character.updateCharacter();
@@ -561,13 +561,13 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
         button.classList.add(characterClass);
         button.addEventListener('click', () =>
         {
-            character.weapon = weaponArray.indexOf(newWeapon); 
+            character.weapon = weaponArray.indexOf(newWeapon);
             addEvent(`${character.name} replaced their ${oldWeaponType} with the ${newWeaponType}.`);
             weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
             const characterButtons = weaponDiv.querySelectorAll(`.${characterClass}`);
             if (characterButtons.length > 0) {
                 characterButtons.forEach(button => button.remove());
-            }    
+            }
             character.updateCharacter();
             if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
                 for (const character of context.gameParty.characters) {
