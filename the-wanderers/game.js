@@ -15,7 +15,7 @@ function playTurn() {
     dayCounter.textContent = `Day ${turnNumber}`;
     if (turnNumber % 2 === 0) {
         eventItem.classList.add('even');
-    } else { 
+    } else {
         eventItem.classList.add('odd');
     }
     eventItem.textContent = currentEvents;
@@ -31,7 +31,7 @@ function playTurn() {
         // output character is dead to the events div
         addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
         const playTurnButton = document.getElementById('playTurnButton');
-        if (playTurnButton) {        
+        if (playTurnButton) {
             playTurnButton.remove()
         }
         const eventImage = document.getElementById('eventImage');
@@ -46,7 +46,7 @@ function playTurn() {
             playTurnButton.innerText = `Play Turn ${turnNumber}`;
         }
     }
-    
+
     function updateParty() {
         for (const character of context.gameParty.characters) {
             if (character.checkHunger()) {
@@ -115,7 +115,7 @@ function playTurn() {
                 if (medicalitems.length > 0) {
                     const item = medicalitems[Math.floor(Math.random() * medicalitems.length)];
                     context.gameParty.inventoryMap.delete(item);
-                    addEvent(`${character.name} used the ${item} but it had no effect.`); 
+                    addEvent(`${character.name} used the ${item} but it had no effect.`);
                     updateMedicalButtons();
                 }
             }
@@ -168,7 +168,7 @@ function playTurn() {
                 addEvent(`${character.name} was able to scavenge some extra food.`);
                 const foodType = food[Math.floor(Math.random() * food.length)];
                 addItemToInventory(foodType);
-                updateFoodButtons(); 
+                updateFoodButtons();
             }
         }
         if (character.posTrait === 'optimistic') {
@@ -193,7 +193,7 @@ async function createCharacterForm() {
     precis.textContent = 'Create a character to start the game.';
     formDiv.appendChild(precis);
 
-    const form = document.createElement('form');  
+    const form = document.createElement('form');
     const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
     const data = await response.json();
     const firstName = getName(data);
@@ -205,7 +205,7 @@ async function createCharacterForm() {
     nameInput.value = firstName;
     nameLabel.appendChild(nameInput);
     form.appendChild(nameLabel);
-  
+
     const ageLabel = document.createElement('label');
     ageLabel.textContent = 'Age: ';
     const ageInput = document.createElement('select');
@@ -214,11 +214,11 @@ async function createCharacterForm() {
         option.value = i;
         option.textContent = ageArray[i];
         ageInput.appendChild(option);
-      }  
+      }
     ageInput.selectedIndex = Math.floor(Math.random() * ageArray.length);
     ageLabel.appendChild(ageInput);
     form.appendChild(ageLabel);
-  
+
     const posTraitsLabel = document.createElement('label');
     posTraitsLabel.textContent = 'Positive Trait: ';
     const posTraitsSelect = document.createElement('select');
@@ -242,7 +242,7 @@ async function createCharacterForm() {
     posEffectsList.appendChild(posEffect2);
     posTraitsDescription.appendChild(posEffectsList);
     form.appendChild(posTraitsDescription);
-  
+
     const negTraitsLabel = document.createElement('label');
     negTraitsLabel.textContent = 'Negative Trait: ';
     const negTraitsSelect = document.createElement('select');
@@ -275,11 +275,12 @@ async function createCharacterForm() {
     const skinLabel = document.createElement('label');
     skinLabel.textContent = 'Skin: ';
     const skinSelect = document.createElement('select');
-    const skinImages = ['skin1.png', 'skin2.png', 'skin3.png', 'skin4.png', 'skin5.png']; // Add your skin image filenames here
-    skinImages.forEach((skin, index) => {
+    const skinImages = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png']; // Add your skin image filenames here
+    skinImages.forEach(skin => {
         const option = document.createElement('option');
         option.value = skin;
-        option.textContent = `Skin ${index + 1}`;
+        const skinText = skin.split('.')[0];
+        option.textContent = skinText.split('_')[1].charAt(0).toUpperCase() + skinText.split('_')[1].slice(1) + ' ' + skinText.split('_')[0];
         skinSelect.appendChild(option);
     });
     skinSelect.selectedIndex = Math.floor(Math.random() * skinImages.length);
@@ -290,11 +291,12 @@ async function createCharacterForm() {
     const hairStyleLabel = document.createElement('label');
     hairStyleLabel.textContent = 'Hairstyle: ';
     const hairStyleSelect = document.createElement('select');
-    const hairStyleImages = ['short1', 'short2', 'long1', 'long2']; // Add your hairStyle image filenames here
-    hairStyleImages.forEach((hairStyle, index) => {
+    const hairStyleImages = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight']; // Add your hairStyle image filenames here
+    hairStyleImages.forEach(hairStyle => {
         const option = document.createElement('option');
         option.value = hairStyle;
-        option.textContent = hairStyleImages[index].charAt(0).toUpperCase() + hairStyleImages[index].slice(1);
+        const hairStyleText = hairStyle.replace('-',', ');
+        option.textContent = hairStyleText.split('_')[1].charAt(0).toUpperCase() + hairStyleText.split('_')[1].slice(1) + ' ' + hairStyleText.split('_')[0];
         hairStyleSelect.appendChild(option);
     });
     hairStyleSelect.selectedIndex = Math.floor(Math.random() * hairStyleImages.length);
@@ -310,7 +312,7 @@ async function createCharacterForm() {
         const option = document.createElement('option');
         option.value = hairColour;
         // grab the name of the file before the .png
-        option.textContent = hairColourImages[index].split('.')[0].charAt(0).toUpperCase() + hairColourImages[index].split('.')[0].slice(1);        
+        option.textContent = hairColourImages[index].split('.')[0].charAt(0).toUpperCase() + hairColourImages[index].split('.')[0].slice(1);
         hairColourSelect.appendChild(option);
     });
     hairColourSelect.selectedIndex = Math.floor(Math.random() * hairColourImages.length);
@@ -321,11 +323,12 @@ async function createCharacterForm() {
     const shirtStyleLabel = document.createElement('label');
     shirtStyleLabel.textContent = 'Shirt Style: ';
     const shirtStyleSelect = document.createElement('select');
-    const shirtStyleImages = ['shirt1', 'shirt2', 'shirt3', 'shirt4']; // Add your shirtStyle image filenames here
-    shirtStyleImages.forEach((shirtStyle, index) => {
+    const shirtStyleImages = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest']; // Add your shirtStyle image filenames here
+    shirtStyleImages.forEach(shirtStyle => {
         const option = document.createElement('option');
         option.value = shirtStyle;
-        option.textContent = shirtStyleImages[index].charAt(0).toUpperCase() + shirtStyleImages[index].slice(1);
+        const shirtStyleText = shirtStyle.split('_')[1];
+        option.textContent = shirtStyleText.charAt(0).toUpperCase() + shirtStyleText.slice(1);
         shirtStyleSelect.appendChild(option);
     });
     shirtStyleSelect.selectedIndex = Math.floor(Math.random() * shirtStyleImages.length);
@@ -352,25 +355,57 @@ async function createCharacterForm() {
     avatarPreviewContainer.className = 'avatar';
     avatarPreviewContainer.style.position = 'relative';
 
+    const avatarPreview = document.createElement('div');
+    avatarPreview.className = 'avatarSprite';
+
     // Skin preview
-    const skinPreview = document.createElement('img');
+    const skinPreview = avatarPreview.appendChild(document.createElement('img'));
     skinPreview.src = "img/" + skinSelect.value;
-    skinPreview.alt = 'Skin Preview';
-    avatarPreviewContainer.appendChild(skinPreview);
+    skinPreview.alt = nameInput.value + '\'s skin sprite.';
+    avatarPreview.appendChild(skinPreview);
 
     // Hair preview
-    const hairPreview = document.createElement('img');
-    hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
-    hairPreview.alt = 'Hair Preview';
-    avatarPreviewContainer.appendChild(hairPreview);
+    const hairPreview = avatarPreview.appendChild(document.createElement('img'));
+    hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+    hairPreview.alt = nameInput.value + '\'s hair sprite. . Their hair is ';
+    switch (hairStyleSelect.value) {
+        case 'short1':
+            hairPreview.alt += 'short and straight.';
+            break;
+        case 'short2':
+            hairPreview.alt += 'short and fluffy.';
+            break;
+        case 'long1':
+            hairPreview.alt += 'long and straight.';
+            break;
+        case 'long2':
+            hairPreview.alt += 'long and curly.';
+            break;
+    }
+    avatarPreview.appendChild(hairPreview);
 
     // shirt preview
-    const shirtPreview = document.createElement('img');
-    shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
-    shirtPreview.alt = 'shirt Preview';
-    avatarPreviewContainer.appendChild(shirtPreview);
-    
+    const shirtPreview = avatarPreview.appendChild(document.createElement('img'));
+    shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+    shirtPreview.alt = nameInput.value + '\'s shirt sprite';
+    switch (shirtStyleSelect.value) {
+      case "img/shirt1.png":
+        shirtPreview.alt += "hoodie.";
+        break;
+      case "img/shirt2.png":
+        shirtPreview.alt += "vest.";
+        break;
+      case "img/shirt3.png":
+        shirtPreview.alt += "jacket.";
+        break;
+      case "img/shirt4.png":
+        shirtPreview.alt += "scarf.";
+        break;
+    }avatarPreview.appendChild(shirtPreview);
+
+    avatarPreviewContainer.appendChild(avatarPreview);
     avatarSection.appendChild(avatarPreviewContainer);
+
 
     // Event listeners to update previews
     posTraitsSelect.addEventListener('change', () => {
@@ -404,19 +439,19 @@ async function createCharacterForm() {
     });
 
     hairStyleSelect.addEventListener('change', () => {
-        hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
+        hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     });
 
     hairColourSelect.addEventListener('change', () => {
-        hairPreview.src = "img/" + hairStyleSelect.value + hairColourSelect.value;
+        hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     });
 
     shirtStyleSelect.addEventListener('change', () => {
-        shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+        shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     });
 
     shirtColourSelect.addEventListener('change', () => {
-        shirtPreview.src = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+        shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     });
 
     form.appendChild(avatarSection);
@@ -429,8 +464,8 @@ async function createCharacterForm() {
         const posTrait = posTraitsSelect.value;
         const negTrait = negTraitsSelect.value;
         const skin = "img/" + skinSelect.value;
-        const hair = "img/" + hairStyleSelect.value + hairColourSelect.value;
-        const shirt = "img/" + shirtStyleSelect.value + shirtColourSelect.value;
+        const hair = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+        const shirt = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
         const character = new Character(name, age, posTrait, negTrait, skin, hair, shirt);
         formDiv.innerHTML = "";
         startGame();
@@ -455,6 +490,8 @@ async function createCharacterForm() {
         eventsDiv.style.display = 'flex';
 
         addEvent(`A new illness has swept the world and the infected have begun to rise from the dead. The world is ending, but ${character.name}'s life doesn't have to just yet.`)
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
     });
     form.appendChild(submitButton);
 

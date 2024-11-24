@@ -56,7 +56,7 @@ function getEvent(chance) {
         who = context.gameParty.characters[0].name;
     }
     const singlePlayerEvents = [
-        `${who} watches the clouds go by.`, 
+        `${who} watches the clouds go by.`,
         `${who} stays in bed all day.`
     ];
     if (context.gameParty.characters.length > 1) {
@@ -92,7 +92,7 @@ function getEvent(chance) {
         secondItem = 0.1 + itemChance;
     }
     if (context.gameParty.characters.length == 4) {
-        friendChance = 0.05;
+        friendChance = 0;
         enemyChance = 0.2 + friendChance;
         itemChance = 0.55 + enemyChance;
         secondItem = 0.15 + itemChance;
@@ -128,7 +128,7 @@ function getEvent(chance) {
             addEvent(event);
         }
     } else if (chance > illnessChance && chance <= miniEventChance) {
-        if (context.gameParty.characters.length > 3) {
+        if (context.gameParty.characters.length >= 3) {
             if (Math.random() < 0.5) {
                 let name = context.gameParty.characters[Math.random() * context.gameParty.characters.length].name;
                 addEvent(`${name} found a pack of cards while looking through the ruins of a house. The party plays a few rounds.`);
@@ -256,26 +256,29 @@ function checkDeathEffects(character) {
     Strangers +0
     Cold +1
     */
-        for (const remainingCharacter of context.gameParty.characters) {
-            if (remainingCharacter !== character) {
-                const relationship = remainingCharacter.relationships.get(character);
-                if (relationship === 4) {
-                    remainingCharacter.morale -= 3;
-                }
-                if (relationship === 3) {
-                    remainingCharacter.morale -= 2;
-                }
-                if (relationship === 2) {
-                    remainingCharacter.morale -= 1;
-                }
-                if (relationship === 0) {
-                    remainingCharacter.morale += 1;
-                }
-                remainingCharacter.capAttributes();
-                updateStatBars(remainingCharacter);        }
+    const weaponDiv = document.getElementById('gameButtons');
+    for (const remainingCharacter of context.gameParty.characters) {
+        if (remainingCharacter !== character) {
+            const relationship = remainingCharacter.relationships.get(character);
+            if (relationship === 4) {
+                remainingCharacter.morale -= 3;
+            }
+            if (relationship === 3) {
+                remainingCharacter.morale -= 2;
+            }
+            if (relationship === 2) {
+                remainingCharacter.morale -= 1;
+            }
+            if (relationship === 0) {
+                remainingCharacter.morale += 1;
+            }
+            remainingCharacter.capAttributes();
+            updateStatBars(remainingCharacter);
+            addWeaponChoiceButton(weaponDiv, remainingCharacter, weaponArray[character.weapon], 0);
         }
     }
-    
+}
+
 function foundEnemy() {
     const enemy = [
         ['zombie']
@@ -321,7 +324,7 @@ function foundEnemy() {
             };
         }
     );
-    
+
     // Combine enemies and players into a single array
     var combatants = players.concat(enemies.map(enemy => ({
         type: 'enemy',
@@ -343,7 +346,7 @@ function foundEnemy() {
         }
 
         // All we need to do is update the players array to check if anyone has used a health item
-        players.forEach(player => { 
+        players.forEach(player => {
             player.hp = context.gameParty.characters.find(c => c.name === player.type).health;
         });
 
@@ -383,7 +386,7 @@ function foundEnemy() {
                         hp: 4 + Math.floor(Math.random() * 4),
                         morale: Math.floor(Math.random() * 10),
                         attack: weaponArray[character.weapon][1]
-            
+
                     });
                     addEvent(`${character.name} has become a zombie!`);
                 }
@@ -416,10 +419,11 @@ function foundEnemy() {
                         attackButton.classList.add('attack');
                         attackButton.addEventListener('click', () => {
                             weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
+                            addEvent(`${combatant.type} was unable to battle.`, 'altTurn');
                             handleTurn(index + 1);
                         });
                     }
-                } else {                    
+                } else {
                     var criticalHit = 0;
                     var criticalMiss = 0;
                     if (character.morale === 6 || character.morale === 7) {
@@ -457,7 +461,7 @@ function foundEnemy() {
                                 const allEnemies = combatants.filter(c => c.type === 'enemy' && c.hp > 0 && c !== enemy);
                                 if (allEnemies.length > 0) {
                                     enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
-                                    enemyIndex = combatants.indexOf(enemy); 
+                                    enemyIndex = combatants.indexOf(enemy);
                                     addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`, 'doubleHit');
                                 } else {
                                     nothingHappened = 1;
@@ -474,7 +478,7 @@ function foundEnemy() {
                                 }
                             }
                             if (nothingHappened == 0) {
-                                enemy.hp -= damage;                            
+                                enemy.hp -= damage;
                             }
                             if (enemy.hp <= 0) {
                                 addEvent(`The ${enemy.type} has been defeated!`, 'green');
@@ -500,13 +504,13 @@ function foundEnemy() {
                         }
                         weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
                         handleTurn(index + 1);
-                        
+
                     });
                 }
                 if (attackButton instanceof HTMLButtonElement) {
                     weaponButtons.appendChild(attackButton);
                 }
-            } 
+            }
         });
     }}
 
@@ -516,56 +520,69 @@ function foundEnemy() {
 
 function foundWeapon(who, id) {
     const weaponType = weaponArray[Math.floor(Math.random() * (weaponArray.length - 1)) + 1];
-    const weapon = weaponType[0];
-    const damage = weaponType[1];
-    const playTurnButton = document.getElementById('playTurnButton');
-    addEvent(`${who} found a ${weapon}`);
+    addEvent(`${who} found a ${weaponType[0]}.`);
     const weaponDiv = document.getElementById('gameButtons');
     for (const character of context.gameParty.characters) {
-        const button = document.createElement('button');
-        // if character has a weapon, replace it
-        if (character.weapon !== null) {
-            const oldWeapon = weaponArray[character.weapon];
-    const oldWeaponType = oldWeapon[0];
-    const oldDamage = oldWeapon[1];
-    if (oldDamage < damage) {
-        playTurnButton.style.display = 'none';
-        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${weapon} (${damage} damage) for ${character.name}`;
-        button.classList.add(`weapon${id}`);
-        button.classList.add(`${weapon}`);
-        button.classList.add(character.name);
+        addWeaponChoiceButton(weaponDiv, character, weaponType, id);
+    }
+}
+
+function addWeaponChoiceButton(weaponDiv, character, weaponType, id) {
+    const button = document.createElement('button');
+    // if character has a weapon, replace it
+    if (character.weapon !== null) {
+        const oldWeapon = weaponArray[character.weapon];
+        offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv);
+    } else {
+        button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
         button.addEventListener('click', () =>
         {
-            character.weapon = weaponArray.indexOf(weaponType); 
-            addEvent(`${character.name} replaced their ${oldWeaponType} with the ${weapon}.`);
+            character.weapon = weaponArray.indexOf(weaponType);
+            addEvent(`${character.name} picked up the ${weapon}.`);
+            weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
+            character.updateCharacter();
+            const playTurnButton = document.getElementById('playTurnButton');
+            playTurnButton.style.display = 'block';
+        });
+        weaponDiv.appendChild(button);
+    }
+}
+
+function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
+    const playTurnButton = document.getElementById('playTurnButton');
+    const oldWeaponType = oldWeapon[0];
+    const oldDamage = oldWeapon[1];
+    const newWeaponType = newWeapon[0];
+    const newDamage = newWeapon[1];
+    if (oldDamage < newDamage) {
+        playTurnButton.style.display = 'none';
+        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${newWeaponType} (${newDamage} damage) for ${character.name}`;
+        button.classList.add(`weapon${id}`);
+        button.classList.add(`${newWeaponType}`);
+        const characterClass = character.name.split(' ').join('');
+        button.classList.add(characterClass);
+        button.addEventListener('click', () =>
+        {
+            character.weapon = weaponArray.indexOf(newWeapon);
+            addEvent(`${character.name} replaced their ${oldWeaponType} with the ${newWeaponType}.`);
             weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
-            const characterButtons = weaponDiv.querySelectorAll(`.${character.name}`);
+            const characterButtons = weaponDiv.querySelectorAll(`.${characterClass}`);
             if (characterButtons.length > 0) {
                 characterButtons.forEach(button => button.remove());
-            }    
+            }
             character.updateCharacter();
             if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
-                playTurnButton.style.display = 'block';
+                for (const character of context.gameParty.characters) {
+                    if (weaponArray[character.weapon][1] < oldDamage) {
+                        addWeaponChoiceButton(weaponDiv, character, oldWeapon, id);
+                    }
+                }
+                if (weaponDiv.querySelectorAll('.weapon0').length === 0) {
+                    playTurnButton.style.display = 'block';
+                }
             }
         });
         weaponDiv.appendChild(button);
-            } //else {
-                //if (!document.querySelector('weapon')) {
-                  //  playTurnButton.style.display = 'block';
-                //}
-            //}
-        } else {
-            button.innerText = `Give ${weapon} (${damage} attack) to ${character.name}`;
-            button.addEventListener('click', () => 
-            {
-                character.weapon = weaponArray.indexOf(weaponType); 
-                addEvent(`${character.name} picked up the ${weapon}.`);
-                weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
-                character.updateCharacter();
-                playTurnButton.style.display = 'block';
-            });
-            weaponDiv.appendChild(button);
-        }
     }
 }
 
@@ -750,7 +767,7 @@ function updateButtons(itemType, items, defaultOptionText, updateCharacterAttrib
         const hasItems = Array.from(context.gameParty.inventoryMap.keys()).some(inventoryItem => items.some(item => item.includes(inventoryItem)));
         for (const character of context.gameParty.characters) {
             try {
-                const selectElement = document.querySelector(`#${character.name} #options #${itemType}Select`);
+                const selectElement = document.querySelector(`#${character.name.split(' ').join('')} #options #${itemType}Select`);
                 if (selectElement) {
                     const newSelectElement = selectElement.cloneNode(true);
                     selectElement.parentNode.replaceChild(newSelectElement, selectElement);

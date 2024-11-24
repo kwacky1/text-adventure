@@ -45,10 +45,10 @@ class Party {
         }
         this.updateCampsiteImage();
     }
-    
+
     updateInventory() {
         const partyInventoryDiv = document.getElementById('partyInventory');
-      
+
         // Update inventory display
         partyInventoryDiv.innerHTML = '<p>Party Inventory</p>';
         this.inventoryMap.forEach((value, key) => {
@@ -61,6 +61,20 @@ class Party {
     updateCampsiteImage() {
         const campsiteImg = document.getElementById('eventImage');
         campsiteImg.src = `img/campsite${this.characters.length}.png`;
+        switch (this.characters.length) {
+            case 1:
+                campsiteImg.alt = 'A campsite for one person with a tent and an unlit campfire next to a dead tree. The sky is green and cloudy, and the grass is brown.';
+                break;
+            case 2:
+                campsiteImg.alt = 'A campsite for two people with a tent and an unlit campfire next to a dead tree. There is now a sleeping bag on the ground next to some clothes on a washing line. The sky is green and cloudy, and the grass is brown.';
+                break;
+            case 3:
+                campsiteImg.alt = 'A campsite for three people with a tent and an unlit campfire next to a dead tree. There is a sleeping bag on the ground next to some clothes on a washing line. There is now a hammock attached to the tree with a lantern hanging above it. The sky is green and cloudy, and the grass is brown.';
+                break;
+            case 4:
+                campsiteImg.alt = 'A campsite for four people with a tent and an unlit campfire next to a dead tree. There is a sleeping bag on the ground next to some clothes on a washing line. There is a hammock attached to the tree with a lantern hanging above it. There is now a second sleeping bag with a lantern next to it. The sky is green and cloudy, and the grass is brown.';
+                break;
+        }
     }
 }
 

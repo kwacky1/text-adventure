@@ -1,0 +1,83 @@
+html, input, select, button, body {
+    background-color: #656C4C;
+    color: #23251b;
+}
+
+input, button, select {
+    border: 2px solid #23251b;
+}
+
+select:hover, button:hover, input:hover, option:hover, a:hover, select:focus, button:focus, input:focus, option:focus, a:focus {
+    background-color: #78805b;
+}
+
+::selection {
+    color: #78805b;
+    background: #c3d18e;
+}
+
+#events {
+    border: 2px solid #23251b;
+}
+
+::-webkit-scrollbar {
+    border-left: 2px solid #23251b;
+}
+
+::-webkit-scrollbar-track {
+    background: #23251b;
+    border-left: 2px solid #23251b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #656C4C;
+    border-left: 2px solid #23251b;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #78805b;
+    border-left: 2px solid #23251b;
+}
+
+div#currentEvent, div#gameButtons div {
+    background-color: #8d966f;
+    color: #23251b;
+}
+
+#events div.odd {
+    background-color: #78805b;
+}
+
+.stat {
+    background-color: #78805b;
+    border: 2px solid #23251b;
+}
+
+form label {
+    border: 2px solid #23251b;
+}
+
+.avatar {
+    border: 2px solid #23251b;
+    background-color: #A1A689;
+}
+
+.name {
+    border: 2px solid #23251b;
+}
+
+#gameButtons {
+    border: 2px solid #23251b;
+}
+
+#eventImage {
+    border: 2px solid #23251b;
+}
+
+.critHit, .doubleHit {
+    color: #b6e900;
+}
+
+.altTurn {
+    color: #1b5854;
+}

@@ -47,11 +47,11 @@ export const weaponArray = [
   ['fist', 1],
   ['stick', 2],
   ['knife', 3],
-  ['pistol', 4]   
+  ['pistol', 4]
 ];
 
 export class Character {
-  constructor(name, age, posTrait, negTrait, skin, hair, shirt) { 
+  constructor(name, age, posTrait, negTrait, skin, hair, shirt) {
     this.id = 0;
     this.name = name;
     this.age = age;
@@ -121,32 +121,108 @@ export class Character {
   createCharacter() {
     const charactersDiv = document.getElementById("characters");
     const characterDiv = charactersDiv.appendChild(document.createElement('div'));
-    characterDiv.id = this.name;
+    characterDiv.id = this.name.split(' ').join('');
     characterDiv.classList.add('character');
 
-    // Avatar preview container
+    // Avatar container
     const avatarContainer = document.createElement('div');
     avatarContainer.className = 'avatar';
     avatarContainer.style.position = 'relative';
 
-    // Skin preview
-    const skinPreview = document.createElement('img');
-    skinPreview.src = this.skin; 
-    skinPreview.alt = 'Skin Preview';
-    avatarContainer.appendChild(skinPreview);
+    // PosTrait
+    const posTraitPreview = document.createElement('div');
+    posTraitPreview.className = 'posTraitSprite';
+    const posTraitPreviewimg = posTraitPreview.appendChild(document.createElement('img'));
+    posTraitPreviewimg.src = "img/trait_" + this.posTrait + ".png";
+    posTraitPreviewimg.alt = "A " + traitSymbol + ", representing the" + this.posTrait + "trait";
+    // NEEDSALTTEXT: create a traitSymbol variable that corresponds with the character's trait
+    // fighter: muscle arm
+    // friendly: speech bubble
+    // resilient: heart
+    // satiated: loaf of bread
+    // scavenger: bone
+    avatarContainer.appendChild(posTraitPreview);
 
-    // Hair preview
+    // NegTrait
+    const negTraitPreview = document.createElement('div');
+    negTraitPreview.className = 'negTraitSprite';
+    const negTraitPreviewImg = negTraitPreview.appendChild(document.createElement('img'));
+    negTraitPreviewImg.src = "img/trait_" + this.negTrait + ".png";
+    negTraitPreviewImg.alt = "A " + traitSymbol + ", representing the" + this.negTrait + "trait";
+    // NEEDSALTTEXT: see above
+    // clumsy: bandaid
+    // depressed: sad face
+    // disconnected: blank face
+    // hungry: fork and knife
+    // hypochondriac: pill
+    // vulnerable: broken heart
+    avatarContainer.appendChild(negTraitPreview);
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatarSprite';
+
+    // Skin
+    const skinPreview = avatar.appendChild(document.createElement('img'));
+    skinPreview.src = this.skin;
+    skinPreview.alt = this.name + '\'s skin sprite';
+    avatar.appendChild(skinPreview);
+
+    // Hair
     const hairPreview = document.createElement('img');
     hairPreview.src = this.hair;
-    hairPreview.alt = 'Hair Preview';
-    avatarContainer.appendChild(hairPreview);
+    hairPreview.alt = this.name + '\'s hair sprite. Their hair is ';
+    switch (this.hair) {
+      case "img/hair1.png":
+        hairPreview.alt += "short and straight.";
+        break;
+      case "img/hair2.png":
+        hairPreview.alt += "short and fluffy.";
+        break;
+      case "img/hair3.png":
+        hairPreview.alt += "long and straight.";
+        break;
+      case "img/hair4.png":
+        hairPreview.alt += "long and curly.";
+        break;
+    }
+    avatar.appendChild(hairPreview);
 
-    // shirt preview
+    // Shirt
     const shirtPreview = document.createElement('img');
     shirtPreview.src = this.shirt;
-    shirtPreview.alt = 'shirt Preview';
-    avatarContainer.appendChild(shirtPreview);
-    
+    shirtPreview.alt = this.name + '\'s shirt sprite. They\'re wearing a ';
+    switch (this.shirt) {
+      case "img/shirt1.png":
+        shirtPreview.alt += "hoodie.";
+        break;
+      case "img/shirt2.png":
+        shirtPreview.alt += "vest.";
+        break;
+      case "img/shirt3.png":
+        shirtPreview.alt += "jacket.";
+        break;
+      case "img/shirt4.png":
+        shirtPreview.alt += "scarf.";
+        break;
+    }
+    avatar.appendChild(shirtPreview);
+
+    avatarContainer.appendChild(avatar);
+
+    // Weapon
+    const weaponPreview = document.createElement('div');
+    weaponPreview.className = 'weaponSprite';
+    const weaponPreviewImg = weaponPreview.appendChild(document.createElement('img'));
+    const weaponType = weaponArray[this.weapon][0];
+    if (weaponType == 'fist') {
+      const skinType = this.skin.split('/').pop().split('.').shift();
+      weaponPreviewImg.src = "img/" + skinType + weaponType + ".png";
+    } else {
+      weaponPreviewImg.src = "img/" + weaponType + ".png";
+    }
+    weaponPreviewImg.alt = 'An image of ' + this.name + '\'s current weapon, a ' + weaponType;
+    avatarContainer.appendChild(weaponPreview);
+
     characterDiv.appendChild(avatarContainer);
 
     const nameElement = document.createElement('h2');
@@ -192,7 +268,7 @@ export class Character {
     healthStat.id = 'healthStat';
     healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
     statsContainer.appendChild(healthStat);
-  
+
     const weapon = document.createElement('div');
     weapon.classList.add('stat');
     weapon.id = 'weapon';
@@ -224,15 +300,26 @@ export class Character {
 
   updateCharacter() {
     this.capAttributes();
-    const characterDiv = document.getElementById(this.name);
+    const characterDiv = document.getElementById(this.name.split(' ').join(''));
     if (characterDiv) {
       characterDiv.querySelector('.age').innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
       characterDiv.querySelector('.pos-trait').innerHTML = `Positive Trait: <span class="statValue">${this.posTrait}</span>`;
+      characterDiv.querySelector('div.posTraitSprite img').src = "img/" + this.posTrait + ".png";
       characterDiv.querySelector('.neg-trait').innerHTML = `Negative Trait: <span class="statValue">${this.negTrait}</span>`;
+      characterDiv.querySelector('div.negTraitSprite img').src = "img/" + this.negTrait + ".png";
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
-      characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
+      const weaponType = weaponArray[this.weapon][0];
+      characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
+      if (characterDiv.querySelector('.weaponSprite')) {
+        if (weaponType == 'fist') {
+          const skinType = this.skin.split('/').pop().split('.').shift();
+          characterDiv.querySelector('div.weaponSprite img').src = "img/" + skinType + weaponType + ".png";
+        } else {
+          characterDiv.querySelector('div.weaponSprite img').src = "img/" + weaponType + ".png";
+        }
+      }
     }
   }
 }
