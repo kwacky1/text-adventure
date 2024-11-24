@@ -134,13 +134,25 @@ export class Character {
     posTraitPreview.className = 'posTraitSprite';
     const posTraitPreviewimg = posTraitPreview.appendChild(document.createElement('img'));
     posTraitPreviewimg.src = "img/trait_" + this.posTrait + ".png";
-    posTraitPreviewimg.alt = "A " + traitSymbol + ", representing the" + this.posTrait + "trait";
-    // NEEDSALTTEXT: create a traitSymbol variable that corresponds with the character's trait
-    // fighter: muscle arm
-    // friendly: speech bubble
-    // resilient: heart
-    // satiated: loaf of bread
-    // scavenger: bone
+    let postTraitSymbol;
+    switch (this.posTrait) {
+      case "fighter":
+        postTraitSymbol = "muscle arm";
+        break;
+      case "friendly":
+        postTraitSymbol = "speech bubble";
+        break;
+      case "resilient":
+        postTraitSymbol = "heart";
+        break;
+      case "satiated":
+        postTraitSymbol = "loaf of bread";
+        break;
+      case "scavenger":
+        postTraitSymbol = "bone";
+        break;
+    }
+    posTraitPreviewimg.alt = "A " + postTraitSymbol + ", representing the" + this.posTrait + "trait";
     avatarContainer.appendChild(posTraitPreview);
 
     // NegTrait
@@ -148,14 +160,28 @@ export class Character {
     negTraitPreview.className = 'negTraitSprite';
     const negTraitPreviewImg = negTraitPreview.appendChild(document.createElement('img'));
     negTraitPreviewImg.src = "img/trait_" + this.negTrait + ".png";
-    negTraitPreviewImg.alt = "A " + traitSymbol + ", representing the" + this.negTrait + "trait";
-    // NEEDSALTTEXT: see above
-    // clumsy: bandaid
-    // depressed: sad face
-    // disconnected: blank face
-    // hungry: fork and knife
-    // hypochondriac: pill
-    // vulnerable: broken heart
+    let negTraitSymbol;
+    switch (this.negTrait) {
+      case "clumsy":
+        negTraitSymbol = "bandaid";
+        break;
+      case "depressed":
+        negTraitSymbol = "sad face";
+        break;
+      case "disconnected":
+        negTraitSymbol = "blank face";
+        break;
+      case "hungry":
+        negTraitSymbol = "fork and knife";
+        break;
+      case "hypochondriac":
+        negTraitSymbol = "pill";
+        break;
+      case "vulnerable":
+        negTraitSymbol = "broken heart";
+        break;
+    }
+    negTraitPreviewImg.alt = "A " + negTraitSymbol + ", representing the" + this.negTrait + "trait";
     avatarContainer.appendChild(negTraitPreview);
 
     const avatar = document.createElement('div');
@@ -304,9 +330,9 @@ export class Character {
     if (characterDiv) {
       characterDiv.querySelector('.age').innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
       characterDiv.querySelector('.pos-trait').innerHTML = `Positive Trait: <span class="statValue">${this.posTrait}</span>`;
-      characterDiv.querySelector('div.posTraitSprite img').src = "img/" + this.posTrait + ".png";
+      characterDiv.querySelector('div.posTraitSprite img').src = "img/trait_" + this.posTrait + ".png";
       characterDiv.querySelector('.neg-trait').innerHTML = `Negative Trait: <span class="statValue">${this.negTrait}</span>`;
-      characterDiv.querySelector('div.negTraitSprite img').src = "img/" + this.negTrait + ".png";
+      characterDiv.querySelector('div.negTraitSprite img').src = "img/trait_" + this.negTrait + ".png";
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
@@ -315,7 +341,7 @@ export class Character {
       if (characterDiv.querySelector('.weaponSprite')) {
         if (weaponType == 'fist') {
           const skinType = this.skin.split('/').pop().split('.').shift();
-          characterDiv.querySelector('div.weaponSprite img').src = "img/" + skinType + weaponType + ".png";
+          characterDiv.querySelector('div.weaponSprite img').src = "img/weapon_" + weaponType + skinType.replace('skin','') + ".png";
         } else {
           characterDiv.querySelector('div.weaponSprite img').src = "img/" + weaponType + ".png";
         }
