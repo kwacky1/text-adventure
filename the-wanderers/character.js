@@ -323,7 +323,7 @@ export class Character {
           const skinType = this.skin.split('/').pop().split('.').shift();
           characterDiv.querySelector('div.weaponSprite img').src = "img/weapon_" + weaponType + skinType.replace('skin','') + ".png";
         } else {
-          characterDiv.querySelector('div.weaponSprite img').src = "img/" + weaponType + ".png";
+          characterDiv.querySelector('div.weaponSprite img').src = "img/weapon_" + weaponType + ".png";
         }
       }
     }
