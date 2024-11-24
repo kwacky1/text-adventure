@@ -275,11 +275,12 @@ async function createCharacterForm() {
     const skinLabel = document.createElement('label');
     skinLabel.textContent = 'Skin: ';
     const skinSelect = document.createElement('select');
-    const skinImages = ['skin1.png', 'skin2.png', 'skin3.png', 'skin4.png', 'skin5.png']; // Add your skin image filenames here
-    skinImages.forEach((skin, index) => {
+    const skinImages = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png']; // Add your skin image filenames here
+    skinImages.forEach(skin => {
         const option = document.createElement('option');
         option.value = skin;
-        option.textContent = `Skin ${index + 1}`;
+        const skinText = skin.split('.')[0];
+        option.textContent = skinText.split('_')[1].charAt(0).toUpperCase() + skinText.split('_')[1].slice(1) + ' ' + skinText.split('_')[0];
         skinSelect.appendChild(option);
     });
     skinSelect.selectedIndex = Math.floor(Math.random() * skinImages.length);
@@ -290,11 +291,11 @@ async function createCharacterForm() {
     const hairStyleLabel = document.createElement('label');
     hairStyleLabel.textContent = 'Hairstyle: ';
     const hairStyleSelect = document.createElement('select');
-    const hairStyleImages = ['short1', 'short2', 'long1', 'long2']; // Add your hairStyle image filenames here
-    hairStyleImages.forEach((hairStyle, index) => {
+    const hairStyleImages = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight']; // Add your hairStyle image filenames here
+    hairStyleImages.forEach(hairStyle => {
         const option = document.createElement('option');
         option.value = hairStyle;
-        option.textContent = hairStyleImages[index].charAt(0).toUpperCase() + hairStyleImages[index].slice(1);
+        option.textContent = hairStyle.split('_')[1].charAt(0).toUpperCase() + hairStyle.split('_')[1].slice(1) + ' ' + hairStyle.split('_')[0];
         hairStyleSelect.appendChild(option);
     });
     hairStyleSelect.selectedIndex = Math.floor(Math.random() * hairStyleImages.length);

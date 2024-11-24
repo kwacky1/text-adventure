@@ -133,7 +133,7 @@ export class Character {
     const posTraitPreview = document.createElement('div');
     posTraitPreview.className = 'posTraitSprite';
     const posTraitPreviewimg = posTraitPreview.appendChild(document.createElement('img'));
-    posTraitPreviewimg.src = "img/" + this.posTrait + ".png";
+    posTraitPreviewimg.src = "img/trait_" + this.posTrait + ".png";
     posTraitPreviewimg.alt = "A " + traitSymbol + ", representing the" + this.posTrait + "trait";
     // NEEDSALTTEXT: create a traitSymbol variable that corresponds with the character's trait
     // fighter: muscle arm
@@ -147,7 +147,7 @@ export class Character {
     const negTraitPreview = document.createElement('div');
     negTraitPreview.className = 'negTraitSprite';
     const negTraitPreviewImg = negTraitPreview.appendChild(document.createElement('img'));
-    negTraitPreviewImg.src = "img/" + this.negTrait + ".png";
+    negTraitPreviewImg.src = "img/trait_" + this.negTrait + ".png";
     negTraitPreviewImg.alt = "A " + traitSymbol + ", representing the" + this.negTrait + "trait";
     // NEEDSALTTEXT: see above
     // clumsy: bandaid
