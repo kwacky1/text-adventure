@@ -416,7 +416,7 @@ function foundEnemy() {
                         attackButton.classList.add('attack');
                         attackButton.addEventListener('click', () => {
                             weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
-                            addEvent(`${combatant.type} was unable to battle.`);
+                            addEvent(`${combatant.type} was unable to battle.`, 'altTurn');
                             handleTurn(index + 1);
                         });
                     }
