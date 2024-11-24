@@ -21,7 +21,7 @@ input, button, select {
     font-size: 15px;
 }
 
-#styleselector {
+#styleselector, #fontselector {
     font-size: 15px;
     text-align: center;
 }

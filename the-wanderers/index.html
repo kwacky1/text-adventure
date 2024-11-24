@@ -2,12 +2,18 @@
 <html>
 <head>
     <title>The Wanderers</title>
-    <link rel="stylesheet" type="text/css" href="light.css">
+    <link rel="stylesheet" type="text/css" href="colour-theme_light.css">
     <link rel="stylesheet" type="text/css" href="main.css">
-    <link rel="icon" type="image/x-icon" href="https://media.discordapp.net/attachments/759234666375938081/1125669631282122813/image.png">
+    <link rel="stylesheet" type="text/css" href="font_default.css">
+
+    <!-- importing all the fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Sanchez:ital@0;1&display=swap" rel="stylesheet"></head>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+Runic&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
 </head>
 <body>
     <h1>The Wanderers</h1> <span id="day">Day 0</span>
@@ -22,7 +28,7 @@
             <div id="currentEvent"></div>
         </div>
         <div id="imageContainer">
-            <img id="eventImage" src="img/campsite1.png" alt="Image of a campsite with a tent, unlit campfire, and dead tree. The sky is green and cloudy and the grass is brown.">
+            <img id="eventImage" src="img/campsite1.png" alt="A campsite for one person with a tent and an unlit campfire next to a dead tree. The sky is green and cloudy, and the grass is brown.">
         </div>
     </div>
     <div id="partyInventory"></div>
@@ -32,10 +38,19 @@
     <div id="footer">
         <label for="styleselector">Choose a style:</label>
         <select id="styleselector" name="styleselector">
-            <option href="#" value="light.css">Light</option>
-            <option href="#" value="dark.css">Dark</option>
-            <option href="#" value="green.css">Greeb</option>
-        </li>
+            <option href="#" value="colour-theme_light.css">Light</option>
+            <option href="#" value="colour-theme_dark.css">Dark</option>
+            <option href="#" value="colour-theme_green.css">Greeb</option>
+        </select>
+        <br>
+        <label for="fontselector">Choose a font:</label>
+        <select id="fontselector" name="fontselector">
+            <option value="sanchez">Default (Sanchez)</option>
+            <option value="hyperlegible" style="font-family: Atkinson Hyperlegible">Atkinson Hyperlegible</option>
+            <option value="arial" style="font-family: Arial">Arial</option>
+            <option value="comic" style="font-family: Comic Sans MS">Comic Sans</option>
+            <option value="courier" style="font-family: Courier">Courier</option>
+        </select>
     </div>
 </body>
 </html>
