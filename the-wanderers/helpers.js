@@ -125,6 +125,7 @@ function getEvent(chance) {
             sickCharacter.health -= 1;
             sickCharacter.sick = true;
             updateStatBars(sickCharacter);
+            event = `${sickCharacter.name} is feeling queasy.`;
             addEvent(event);
         }
     } else if (chance > illnessChance && chance <= miniEventChance) {

@@ -275,7 +275,7 @@ async function createCharacterForm() {
     const skinLabel = document.createElement('label');
     skinLabel.textContent = 'Skin: ';
     const skinSelect = document.createElement('select');
-    const skinImages = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png']; // Add your skin image filenames here
+    const skinImages = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png'];
     skinImages.forEach(skin => {
         const option = document.createElement('option');
         option.value = skin;
@@ -291,7 +291,7 @@ async function createCharacterForm() {
     const hairStyleLabel = document.createElement('label');
     hairStyleLabel.textContent = 'Hairstyle: ';
     const hairStyleSelect = document.createElement('select');
-    const hairStyleImages = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight']; // Add your hairStyle image filenames here
+    const hairStyleImages = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight'];
     hairStyleImages.forEach(hairStyle => {
         const option = document.createElement('option');
         option.value = hairStyle;
@@ -307,7 +307,7 @@ async function createCharacterForm() {
     const hairColourLabel = document.createElement('label');
     hairColourLabel.textContent = 'Hair Colour: ';
     const hairColourSelect = document.createElement('select');
-    const hairColourImages = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png']; // Add your hairColour image filenames here
+    const hairColourImages = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png'];
     hairColourImages.forEach((hairColour, index) => {
         const option = document.createElement('option');
         option.value = hairColour;
@@ -323,7 +323,7 @@ async function createCharacterForm() {
     const shirtStyleLabel = document.createElement('label');
     shirtStyleLabel.textContent = 'Shirt Style: ';
     const shirtStyleSelect = document.createElement('select');
-    const shirtStyleImages = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest']; // Add your shirtStyle image filenames here
+    const shirtStyleImages = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest'];
     shirtStyleImages.forEach(shirtStyle => {
         const option = document.createElement('option');
         option.value = shirtStyle;
@@ -339,7 +339,7 @@ async function createCharacterForm() {
     const shirtColourLabel = document.createElement('label');
     shirtColourLabel.textContent = 'Shirt Colour: ';
     const shirtColourSelect = document.createElement('select');
-    const shirtColourImages = ['red.png', 'yellow.png', 'green.png', 'blue.png']; // Add your shirtColour image filenames here
+    const shirtColourImages = ['red.png', 'yellow.png', 'green.png', 'blue.png'];
     shirtColourImages.forEach((shirtColour, index) => {
         const option = document.createElement('option');
         option.value = shirtColour;
