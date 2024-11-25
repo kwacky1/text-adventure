@@ -131,7 +131,7 @@ function getEvent(chance) {
     } else if (chance > illnessChance && chance <= miniEventChance) {
         if (context.gameParty.characters.length >= 3) {
             if (Math.random() < 0.5) {
-                let name = context.gameParty.characters[Math.random() * context.gameParty.characters.length].name;
+                let name = context.gameParty.characters[Math.floor(Math.random() * context.gameParty.characters.length)].name;
                 addEvent(`${name} found a pack of cards while looking through the ruins of a house. The party plays a few rounds.`);
                 for (const character of context.gameParty.characters) {
                     character.morale += 1;
@@ -275,7 +275,7 @@ function checkDeathEffects(character) {
             }
             remainingCharacter.capAttributes();
             updateStatBars(remainingCharacter);
-            addWeaponChoiceButton(weaponDiv, remainingCharacter, weaponArray[character.weapon], 0);
+            addWeaponChoiceButton(weaponDiv, remainingCharacter, weaponArray[character.weapon], 0, character.name + "'s");
         }
     }
 }
@@ -533,7 +533,7 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'fou
     // if character has a weapon, replace it
     if (character.weapon !== null) {
         const oldWeapon = weaponArray[character.weapon];
-        offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv);
+        offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv, from);
     } else {
         button.innerText = `Give ${from} ${weapon} (${damage} attack) to ${character.name}`;
         button.addEventListener('click', () =>
@@ -549,7 +549,7 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'fou
     }
 }
 
-function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
+function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, from) {
     const playTurnButton = document.getElementById('playTurnButton');
     const oldWeaponType = oldWeapon[0];
     const oldDamage = oldWeapon[1];
@@ -557,7 +557,7 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
     const newDamage = newWeapon[1];
     if (oldDamage < newDamage) {
         playTurnButton.style.display = 'none';
-        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${newWeaponType} (${newDamage} damage) for ${character.name}`;
+        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${from} ${newWeaponType} (${newDamage} damage) for ${character.name}`;
         button.classList.add(`weapon${id}`);
         button.classList.add(`${newWeaponType}`);
         const characterClass = character.name.split(' ').join('');
@@ -575,7 +575,7 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
             if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
                 for (const otherCharacter of context.gameParty.characters) {
                     if (weaponArray[otherCharacter.weapon][1] < oldDamage) {
-                        addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id);
+                        addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id, character.name + "'s");
                     }
                 }
                 if (weaponDiv.querySelectorAll('.weapon0').length === 0) {
