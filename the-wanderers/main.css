@@ -160,6 +160,11 @@ form input {
     width: 50%;
 }
 
+#options, .relationships {
+    width: 400px;
+    margin: 20px auto;
+}
+
 #options select{
     width: 180px;
 }
