@@ -2,7 +2,7 @@ var turnNumber = 1;
 
 import Party from './party.js';
 import { Character, ageArray } from './character.js';
-import { context, setGameParty, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects } from './helpers.js';
+import { context, setGameParty, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons } from './helpers.js';
 
 function playTurn() {
     // Move current events to turnX div
@@ -91,6 +91,7 @@ function playTurn() {
                 updateRelationships();
             }
         };
+        updateInteractionButtons();
     }
 
 
@@ -280,7 +281,7 @@ async function createCharacterForm() {
         const option = document.createElement('option');
         option.value = skin;
         const skinText = skin.split('.')[0];
-        option.textContent = skinText.split('_')[1].charAt(0).toUpperCase() + skinText.split('_')[1].slice(1) + ' ' + skinText.split('_')[0];
+        option.textContent = skinText.split('_')[1];
         skinSelect.appendChild(option);
     });
     skinSelect.selectedIndex = Math.floor(Math.random() * skinImages.length);
@@ -289,14 +290,13 @@ async function createCharacterForm() {
 
     // Hair style selection
     const hairStyleLabel = document.createElement('label');
-    hairStyleLabel.textContent = 'Hairstyle: ';
+    hairStyleLabel.textContent = 'Hair Style: ';
     const hairStyleSelect = document.createElement('select');
     const hairStyleImages = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight'];
     hairStyleImages.forEach(hairStyle => {
         const option = document.createElement('option');
         option.value = hairStyle;
-        const hairStyleText = hairStyle.replace('-',', ');
-        option.textContent = hairStyleText.split('_')[1].charAt(0).toUpperCase() + hairStyleText.split('_')[1].slice(1) + ' ' + hairStyleText.split('_')[0];
+        option.textContent = hairStyle.split('_')[1].replace('-',' and ');
         hairStyleSelect.appendChild(option);
     });
     hairStyleSelect.selectedIndex = Math.floor(Math.random() * hairStyleImages.length);
@@ -312,7 +312,7 @@ async function createCharacterForm() {
         const option = document.createElement('option');
         option.value = hairColour;
         // grab the name of the file before the .png
-        option.textContent = hairColourImages[index].split('.')[0].charAt(0).toUpperCase() + hairColourImages[index].split('.')[0].slice(1);
+        option.textContent = hairColourImages[index].split('.')[0];
         hairColourSelect.appendChild(option);
     });
     hairColourSelect.selectedIndex = Math.floor(Math.random() * hairColourImages.length);
@@ -327,8 +327,7 @@ async function createCharacterForm() {
     shirtStyleImages.forEach(shirtStyle => {
         const option = document.createElement('option');
         option.value = shirtStyle;
-        const shirtStyleText = shirtStyle.split('_')[1];
-        option.textContent = shirtStyleText.charAt(0).toUpperCase() + shirtStyleText.slice(1);
+        option.textContent = shirtStyle.split('_')[1];
         shirtStyleSelect.appendChild(option);
     });
     shirtStyleSelect.selectedIndex = Math.floor(Math.random() * shirtStyleImages.length);
@@ -343,7 +342,7 @@ async function createCharacterForm() {
     shirtColourImages.forEach((shirtColour, index) => {
         const option = document.createElement('option');
         option.value = shirtColour;
-        option.textContent = shirtColourImages[index].split('.')[0].charAt(0).toUpperCase() + shirtColourImages[index].split('.')[0].slice(1);
+        option.textContent = shirtColourImages[index].split('.')[0];
         shirtColourSelect.appendChild(option);
     });
     shirtColourSelect.selectedIndex = Math.floor(Math.random() * shirtColourImages.length);

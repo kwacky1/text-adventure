@@ -226,9 +226,7 @@ function foundFriend() {
             character.capAttributes();
             updateStatBars(character);
         }
-        if (context.gameParty.characters.length < 4) {
-            addPlayer();
-        }
+        addPlayer();
         friendDiv.remove();
         acceptButton.remove();
         declineButton.remove();
@@ -698,6 +696,7 @@ async function addPlayer() {
             updateStatBars(character);
             updateFoodButtons();
             updateMedicalButtons();
+            updateInteractionButtons();
         }
         updateRelationships();
     } catch (error) {
@@ -712,24 +711,46 @@ function getName(data) {
 function handleSelection(event, items, updateCharacterAttributes) {
     try {
         const selectedItem = event.target.value;
-        const item = items.find(i => i[0] === selectedItem);
-        if (item) {
+        if (selectedItem === 'interact') {
             const characterName = event.target.selectedOptions[0].dataset.characterName;
+            const targetName = event.target.selectedOptions[0].dataset.targetName;
+            event.target.remove(event.target.selectedIndex);
             const character = context.gameParty.characters.find(char => char.name === characterName);
+            const target = context.gameParty.characters.find(char => char.name === targetName);
+            const chance = Math.random();
+            if (chance <= 0.5) {
+                addEvent(`${target.name} is not interested in talking right now.`);
+            } else if (chance <= 0.75) {
+                addEvent(`${target.name} is happy to chat.`);
+                if (character.relationships.get(target) < 4) {
+                    character.relationships.set(target, character.relationships.get(target) + 1);
+                    target.relationships.set(character, target.relationships.get(character) + 1);
+                    updateRelationships();
+                }
+            } else {
+                addEvent(`${target.name} is feeling down.`);
+            }
+            
+        } else {
+            const item = items.find(i => i[0] === selectedItem);
+            if (item) {
+                const characterName = event.target.selectedOptions[0].dataset.characterName;
+                const character = context.gameParty.characters.find(char => char.name === characterName);
 
-            if (character) {
-                if (context.gameParty.inventoryMap.has(item[0])) {
-                    const inventoryItem = context.gameParty.inventoryMap.get(item[0]);
-                    if (inventoryItem.quantity > 1) {
-                        inventoryItem.quantity -= 1;
-                    } else {
-                        context.gameParty.inventoryMap.delete(item[0]);
+                if (character) {
+                    if (context.gameParty.inventoryMap.has(item[0])) {
+                        const inventoryItem = context.gameParty.inventoryMap.get(item[0]);
+                        if (inventoryItem.quantity > 1) {
+                            inventoryItem.quantity -= 1;
+                        } else {
+                            context.gameParty.inventoryMap.delete(item[0]);
+                        }
+                        updateCharacterAttributes(character, item);
+                        character.capAttributes();
+                        character.updateCharacter();
+                        updateStatBars(character);
+                        context.gameParty.updateInventory();
                     }
-                    updateCharacterAttributes(character, item);
-                    character.capAttributes();
-                    character.updateCharacter();
-                    updateStatBars(character);
-                    context.gameParty.updateInventory();
                 }
             }
         }
@@ -747,16 +768,28 @@ function clearAndPopulateOptions(selectElement, character, items, itemType, defa
     const fragment = document.createDocumentFragment();
     const defaultOption = document.createElement('option');
     defaultOption.value = itemType;
-    defaultOption.textContent = `${defaultOptionText} ${character.name}`;
+    defaultOption.textContent = `${defaultOptionText}`;
     fragment.appendChild(defaultOption);
 
-    for (const item of items) {
-        if (context.gameParty.inventoryMap.has(item[0])) {
+    if (itemType === 'interaction') {
+        const others = context.gameParty.characters.filter(c => c !== character);
+        for (const other of others) {
             const option = document.createElement('option');
-            option.textContent = `${item[0]} (+${item[1]})`;
-            option.value = item[0];
-            option.dataset.characterName = character.name; // Store character name in data attribute
+            option.textContent = other.name;
+            option.value = 'interact';
+            option.dataset.characterName = character.name;
+            option.dataset.targetName = other.name;
             fragment.appendChild(option);
+        }
+    } else {
+        for (const item of items) {
+            if (context.gameParty.inventoryMap.has(item[0])) {
+                const option = document.createElement('option');
+                option.textContent = `${item[0]} (+${item[1]})`;
+                option.value = item[0];
+                option.dataset.characterName = character.name;
+                fragment.appendChild(option);
+            }
         }
     }
 
@@ -766,7 +799,12 @@ function clearAndPopulateOptions(selectElement, character, items, itemType, defa
 
 function updateButtons(itemType, items, defaultOptionText, updateCharacterAttributes) {
     try {
-        const hasItems = Array.from(context.gameParty.inventoryMap.keys()).some(inventoryItem => items.some(item => item.includes(inventoryItem)));
+        let hasItems = false;
+        if (itemType === 'interaction') {
+            hasItems = true;
+        } else {
+            hasItems = Array.from(context.gameParty.inventoryMap.keys()).some(inventoryItem => items.some(item => item.includes(inventoryItem)));
+        }
         for (const character of context.gameParty.characters) {
             try {
                 const selectElement = document.querySelector(`#${character.name.split(' ').join('')} #options #${itemType}Select`);
@@ -833,6 +871,11 @@ function updateMedicalAttributes(character, medicalItem) {
     updateMedicalButtons();
 }
 
+function updateInteractionAttributes(character, interactionItem) {
+    addEvent(`${character.name} interacted with ${interactionItem[0]}.`);
+    updateInteractionButtons();
+}
+
 function updateFoodButtons() {
     updateButtons('food', food, 'Feed', updateFoodAttributes);
 }
@@ -841,9 +884,13 @@ function updateMedicalButtons() {
     updateButtons('medical', medical, 'Heal', updateMedicalAttributes);
 }
 
+function updateInteractionButtons() {
+    updateButtons('interaction', null, 'Interact with', updateInteractionAttributes);
+}
+
 const styleSelector = document.getElementById("styleselector");
 styleSelector.addEventListener("change", () => {
     document.querySelector("link[rel='stylesheet']").href = styleSelector.value;
 });
 
-export { context, setGameParty, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon, checkDeathEffects };
+export { context, setGameParty, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon, checkDeathEffects, updateInteractionButtons };

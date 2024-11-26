@@ -298,6 +298,11 @@ export class Character {
     medicalSelect.innerHTML = `<option value="medical">Heal ${this.name}</option>`;
     inventoryList.appendChild(medicalSelect);
 
+    const interactSelect = document.createElement('select');
+    interactSelect.id = 'interactionSelect';
+    interactSelect.innerHTML = `<option value="interaction">Interact with</option>`;
+    inventoryList.appendChild(interactSelect);
+
     const relationships = document.createElement('div');
     relationships.classList.add('relationships');
     relationships.innerHTML = `<p>Relationships for ${this.name}</p>`;
