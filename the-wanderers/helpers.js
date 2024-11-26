@@ -414,7 +414,7 @@ function foundEnemy() {
                     if (!weaponButtons.querySelector(`.attack[data-combatant="${combatant.type}"]`)) {
                         attackButton = document.createElement('button');
                         attackButton.setAttribute('data-combatant', combatant.type);
-                        attackButton.textContent = `${combatant.type} is unable to battle. Continue.`;
+                        attackButton.textContent = `${combatant.type} feels too weak to battle. Continue.`;
                         attackButton.classList.add('attack');
                         attackButton.addEventListener('click', () => {
                             weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
