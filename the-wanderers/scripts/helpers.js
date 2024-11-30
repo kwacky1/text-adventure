@@ -1064,6 +1064,14 @@ async function createCharacterForm() {
     const avatarPreview = document.createElement('div');
     avatarPreview.className = 'avatarSprite';
 
+    // Outlines
+    const hairOutline = document.createElement('img');
+    hairOutline.src = "images/hair/outline_hair_" + hairStyleSelect.value.split('_')[1] + ".png";
+    avatarPreview.appendChild(hairOutline);
+    const shirtOutline = document.createElement('img');
+    shirtOutline.src = "images/shirts/outline_shirt_" + shirtStyleSelect.value.split('_')[1] + ".png";
+    avatarPreview.appendChild(shirtOutline);
+
     // Skin preview
     const skinPreview = avatarPreview.appendChild(document.createElement('img'));
     skinPreview.src = "images/skin/" + skinSelect.value;
@@ -1107,8 +1115,9 @@ async function createCharacterForm() {
       case "images/shirts/shirt4.png":
         shirtPreview.alt += "scarf.";
         break;
-    }avatarPreview.appendChild(shirtPreview);
-
+    }
+    avatarPreview.appendChild(shirtPreview);
+    
     avatarPreviewContainer.appendChild(avatarPreview);
     avatarSection.appendChild(avatarPreviewContainer);
 
@@ -1145,6 +1154,7 @@ async function createCharacterForm() {
     });
 
     hairStyleSelect.addEventListener('change', () => {
+        hairOutline.src = "images/hair/outline_hair_" + hairStyleSelect.value.split('_')[1] + ".png";
         hairPreview.src = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     });
 
@@ -1153,6 +1163,7 @@ async function createCharacterForm() {
     });
 
     shirtStyleSelect.addEventListener('change', () => {
+        shirtOutline.src = "images/shirts/outline_shirt_" + shirtStyleSelect.value.split('_')[1] + ".png";
         shirtPreview.src = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     });
 
