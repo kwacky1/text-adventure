@@ -681,13 +681,13 @@ async function addPlayer() {
             const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
             const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
             const skinTypes = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png'];
-            const skin = "img/" + skinTypes[Math.floor(Math.random() * skinTypes.length)];
+            const skin = "images/skin/" + skinTypes[Math.floor(Math.random() * skinTypes.length)];
             let hairColour = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png'];
             let hairStyle = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight'];
-            const hair = "img/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + '_' + hairColour[Math.floor(Math.random() * hairColour.length)];
+            const hair = "images/hair/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + '_' + hairColour[Math.floor(Math.random() * hairColour.length)];
             let shirtColour = ['red.png', 'yellow.png', 'green.png', 'blue.png'];
             let shirtStyle = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest'];
-            const shirt = "img/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtStyle.length)];
+            const shirt = "images/shirts/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtStyle.length)];
             const character = new Character(firstName, age, posTrait[0], negTrait[0], skin, hair, shirt);
             context.gameParty.addCharacter(character);
             addEvent(`${character.name} has joined the party!`);

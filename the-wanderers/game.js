@@ -359,13 +359,13 @@ async function createCharacterForm() {
 
     // Skin preview
     const skinPreview = avatarPreview.appendChild(document.createElement('img'));
-    skinPreview.src = "img/" + skinSelect.value;
+    skinPreview.src = "images/skin/" + skinSelect.value;
     skinPreview.alt = nameInput.value + '\'s skin sprite.';
     avatarPreview.appendChild(skinPreview);
 
     // Hair preview
     const hairPreview = avatarPreview.appendChild(document.createElement('img'));
-    hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+    hairPreview.src = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     hairPreview.alt = nameInput.value + '\'s hair sprite. . Their hair is ';
     switch (hairStyleSelect.value) {
         case 'short1':
@@ -385,19 +385,19 @@ async function createCharacterForm() {
 
     // shirt preview
     const shirtPreview = avatarPreview.appendChild(document.createElement('img'));
-    shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+    shirtPreview.src = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     shirtPreview.alt = nameInput.value + '\'s shirt sprite';
     switch (shirtStyleSelect.value) {
-      case "img/shirt1.png":
+      case "images/shirts/shirt1.png":
         shirtPreview.alt += "hoodie.";
         break;
-      case "img/shirt2.png":
+      case "images/shirts/shirt2.png":
         shirtPreview.alt += "vest.";
         break;
-      case "img/shirt3.png":
+      case "images/shirts/shirt3.png":
         shirtPreview.alt += "jacket.";
         break;
-      case "img/shirt4.png":
+      case "images/shirts/shirt4.png":
         shirtPreview.alt += "scarf.";
         break;
     }avatarPreview.appendChild(shirtPreview);
@@ -434,23 +434,23 @@ async function createCharacterForm() {
     });
 
     skinSelect.addEventListener('change', () => {
-        skinPreview.src = "img/" + skinSelect.value;
+        skinPreview.src = "images/skin/" + skinSelect.value;
     });
 
     hairStyleSelect.addEventListener('change', () => {
-        hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+        hairPreview.src = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     });
 
     hairColourSelect.addEventListener('change', () => {
-        hairPreview.src = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+        hairPreview.src = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
     });
 
     shirtStyleSelect.addEventListener('change', () => {
-        shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+        shirtPreview.src = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     });
 
     shirtColourSelect.addEventListener('change', () => {
-        shirtPreview.src = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+        shirtPreview.src = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
     });
 
     form.appendChild(avatarSection);
@@ -462,9 +462,9 @@ async function createCharacterForm() {
         const age = ageInput.value;
         const posTrait = posTraitsSelect.value;
         const negTrait = negTraitsSelect.value;
-        const skin = "img/" + skinSelect.value;
-        const hair = "img/" + hairStyleSelect.value + '_' + hairColourSelect.value;
-        const shirt = "img/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+        const skin = "images/skin/" + skinSelect.value;
+        const hair = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+        const shirt = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
         const character = new Character(name, age, posTrait, negTrait, skin, hair, shirt);
         formDiv.innerHTML = "";
         startGame();
