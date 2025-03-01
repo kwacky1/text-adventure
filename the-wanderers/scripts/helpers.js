@@ -686,6 +686,9 @@ async function addPlayer() {
                 firstName = getName(newData);
             }
 
+            // Ensure the name doesn't contain characters that can't be used as class names
+            firstName = firstName.replace(/[^a-zA-Z0-9]/g, '');
+
             const age = Math.floor(Math.random() * ageArray.length);
             const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
             const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
