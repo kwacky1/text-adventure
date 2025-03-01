@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>The Wanderers</title>
-    <link rel="stylesheet" type="text/css" href="styles/colour-theme_light.css">
+    <link rel="stylesheet" type="text/css" href="styles/colour-theme_light.css" id="themeStylesheet">
     <link rel="stylesheet" type="text/css" href="styles/main.css">
 
     <!-- importing all the fonts -->
@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+Runic&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
-</head>
+    </head>
 <body>
     <h1>The Wanderers</h1> <span id="day">Day 0</span>
     <div id="buttons" hidden>
@@ -34,12 +34,13 @@
     <div id="characters"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"></script>
     <script type="module" src="scripts/game.js"></script>
+    <script type="module" src="scripts/settings.js"></script>
     <div id="footer">
         <label for="styleselector">Choose a style:</label>
         <select id="styleselector" name="styleselector">
             <option href="#" value="styles/colour-theme_light.css">Light</option>
             <option href="#" value="styles/colour-theme_dark.css">Dark</option>
-            <option href="#" value="styles/colour-theme_green.css">Greeb</option>
+            <option href="#" value="styles/colour-theme_green.css">Green</option>
         </select>
         <br>
         <label for="fontselector">Choose a font:</label>
@@ -51,5 +52,5 @@
             <option value="courier" style="font-family: Courier">Courier</option>
         </select>
     </div>
-</body>
+    </body>
 </html>
