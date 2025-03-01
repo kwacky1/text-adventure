@@ -696,7 +696,7 @@ async function addPlayer() {
             const hair = "images/hair/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + '_' + hairColour[Math.floor(Math.random() * hairColour.length)];
             let shirtColour = ['red.png', 'yellow.png', 'green.png', 'blue.png'];
             let shirtStyle = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest'];
-            const shirt = "images/shirts/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtStyle.length)];
+            const shirt = "images/shirts/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtColour.length)];
             const character = new Character(firstName, age, posTrait[0], negTrait[0], skin, hair, shirt);
             context.gameParty.addCharacter(character);
             addEvent(`${character.name} has joined the party!`);
