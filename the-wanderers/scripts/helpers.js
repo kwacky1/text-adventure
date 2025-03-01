@@ -910,9 +910,21 @@ async function createCharacterForm() {
     formDiv.appendChild(precis);
 
     const form = document.createElement('form');
-    const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
-    const data = await response.json();
-    const firstName = getName(data);
+
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    document.body.appendChild(spinner);
+
+    let firstName = '';
+
+    try {
+        const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+        const data = await response.json();
+        firstName = getName(data);
+    } finally {
+        // Hide the spinner
+        spinner.style.display = 'none';
+    }
 
     const nameLabel = document.createElement('label');
     nameLabel.textContent = 'Name: ';
