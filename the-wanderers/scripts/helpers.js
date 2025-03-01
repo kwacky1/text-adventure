@@ -677,7 +677,15 @@ async function addPlayer() {
         } else {
             const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
             const data = await response.json();
-            const firstName = getName(data);
+            let firstName = getName(data);
+
+            // Ensure the name doesn't already exist in the party
+            while (context.gameParty.characters.some(character => character.name === firstName)) {
+                const newResponse = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+                const newData = await newResponse.json();
+                firstName = getName(newData);
+            }
+
             const age = Math.floor(Math.random() * ageArray.length);
             const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
             const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
