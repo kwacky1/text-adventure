@@ -60,7 +60,7 @@ class Party {
 
     updateCampsiteImage() {
         const campsiteImg = document.getElementById('eventImage');
-        campsiteImg.src = `img/campsite${this.characters.length}.png`;
+        campsiteImg.src = `images/campsite/campsite${this.characters.length}.png`;
         switch (this.characters.length) {
             case 1:
                 campsiteImg.alt = 'A campsite for one person with a tent and an unlit campfire next to a dead tree. The sky is green and cloudy, and the grass is brown.';

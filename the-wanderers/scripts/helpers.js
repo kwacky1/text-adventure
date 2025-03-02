@@ -1,5 +1,6 @@
 import { Character, ageArray, hungerArray, moraleArray, healthArray, weaponArray } from './character.js';
 import { playTurn } from './game.js';
+import Party from './party.js';
 
 const context = {
     gameParty: null
@@ -131,7 +132,7 @@ function getEvent(chance) {
     } else if (chance > illnessChance && chance <= miniEventChance) {
         if (context.gameParty.characters.length >= 3) {
             if (Math.random() < 0.5) {
-                let name = context.gameParty.characters[Math.random() * context.gameParty.characters.length].name;
+                let name = context.gameParty.characters[Math.floor(Math.random() * context.gameParty.characters.length)].name;
                 addEvent(`${name} found a pack of cards while looking through the ruins of a house. The party plays a few rounds.`);
                 for (const character of context.gameParty.characters) {
                     character.morale += 1;
@@ -226,9 +227,7 @@ function foundFriend() {
             character.capAttributes();
             updateStatBars(character);
         }
-        if (context.gameParty.characters.length < 4) {
-            addPlayer();
-        }
+        addPlayer();
         friendDiv.remove();
         acceptButton.remove();
         declineButton.remove();
@@ -275,7 +274,7 @@ function checkDeathEffects(character) {
             }
             remainingCharacter.capAttributes();
             updateStatBars(remainingCharacter);
-            addWeaponChoiceButton(weaponDiv, remainingCharacter, weaponArray[character.weapon], 0);
+            addWeaponChoiceButton(weaponDiv, remainingCharacter, weaponArray[character.weapon], 0, character.name + "'s");
         }
     }
 }
@@ -416,7 +415,7 @@ function foundEnemy() {
                     if (!weaponButtons.querySelector(`.attack[data-combatant="${combatant.type}"]`)) {
                         attackButton = document.createElement('button');
                         attackButton.setAttribute('data-combatant', combatant.type);
-                        attackButton.textContent = `${combatant.type} is unable to battle. Continue.`;
+                        attackButton.textContent = `${combatant.type} feels too weak to battle. Continue.`;
                         attackButton.classList.add('attack');
                         attackButton.addEventListener('click', () => {
                             weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
@@ -533,7 +532,7 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'fou
     // if character has a weapon, replace it
     if (character.weapon !== null) {
         const oldWeapon = weaponArray[character.weapon];
-        offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv);
+        offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv, from);
     } else {
         button.innerText = `Give ${from} ${weapon} (${damage} attack) to ${character.name}`;
         button.addEventListener('click', () =>
@@ -549,7 +548,7 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'fou
     }
 }
 
-function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
+function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, from) {
     const playTurnButton = document.getElementById('playTurnButton');
     const oldWeaponType = oldWeapon[0];
     const oldDamage = oldWeapon[1];
@@ -557,7 +556,7 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
     const newDamage = newWeapon[1];
     if (oldDamage < newDamage) {
         playTurnButton.style.display = 'none';
-        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${newWeaponType} (${newDamage} damage) for ${character.name}`;
+        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${from} ${newWeaponType} (${newDamage} damage) for ${character.name}`;
         button.classList.add(`weapon${id}`);
         button.classList.add(`${newWeaponType}`);
         const characterClass = character.name.split(' ').join('');
@@ -575,7 +574,7 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv) {
             if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
                 for (const otherCharacter of context.gameParty.characters) {
                     if (weaponArray[otherCharacter.weapon][1] < oldDamage) {
-                        addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id);
+                        addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id, character.name + "'s");
                     }
                 }
                 if (weaponDiv.querySelectorAll('.weapon0').length === 0) {
@@ -678,18 +677,29 @@ async function addPlayer() {
         } else {
             const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
             const data = await response.json();
-            const firstName = getName(data);
+            let firstName = getName(data);
+
+            // Ensure the name doesn't already exist in the party
+            while (context.gameParty.characters.some(character => character.name === firstName)) {
+                const newResponse = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+                const newData = await newResponse.json();
+                firstName = getName(newData);
+            }
+
+            // Ensure the name doesn't contain characters that can't be used as class names
+            firstName = firstName.replace(/[^a-zA-Z0-9]/g, '');
+
             const age = Math.floor(Math.random() * ageArray.length);
             const posTrait = posTraits[Math.floor(Math.random() * posTraits.length)];
             const negTrait = negTraits[Math.floor(Math.random() * negTraits.length)];
             const skinTypes = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png'];
-            const skin = "img/" + skinTypes[Math.floor(Math.random() * skinTypes.length)];
+            const skin = "images/skin/" + skinTypes[Math.floor(Math.random() * skinTypes.length)];
             let hairColour = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png'];
             let hairStyle = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight'];
-            const hair = "img/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + '_' + hairColour[Math.floor(Math.random() * hairColour.length)];
+            const hair = "images/hair/" + hairStyle[Math.floor(Math.random() * hairStyle.length)] + '_' + hairColour[Math.floor(Math.random() * hairColour.length)];
             let shirtColour = ['red.png', 'yellow.png', 'green.png', 'blue.png'];
             let shirtStyle = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest'];
-            const shirt = "img/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtStyle.length)];
+            const shirt = "images/shirts/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtColour.length)];
             const character = new Character(firstName, age, posTrait[0], negTrait[0], skin, hair, shirt);
             context.gameParty.addCharacter(character);
             addEvent(`${character.name} has joined the party!`);
@@ -698,6 +708,7 @@ async function addPlayer() {
             updateStatBars(character);
             updateFoodButtons();
             updateMedicalButtons();
+            updateInteractionButtons();
         }
         updateRelationships();
     } catch (error) {
@@ -712,24 +723,46 @@ function getName(data) {
 function handleSelection(event, items, updateCharacterAttributes) {
     try {
         const selectedItem = event.target.value;
-        const item = items.find(i => i[0] === selectedItem);
-        if (item) {
+        if (selectedItem === 'interact') {
             const characterName = event.target.selectedOptions[0].dataset.characterName;
+            const targetName = event.target.selectedOptions[0].dataset.targetName;
+            event.target.remove(event.target.selectedIndex);
             const character = context.gameParty.characters.find(char => char.name === characterName);
+            const target = context.gameParty.characters.find(char => char.name === targetName);
+            const chance = Math.random();
+            if (chance <= 0.5) {
+                addEvent(`${target.name} is not interested in talking right now.`);
+            } else if (chance <= 0.75) {
+                addEvent(`${target.name} is happy to chat.`);
+                if (character.relationships.get(target) < 4) {
+                    character.relationships.set(target, character.relationships.get(target) + 1);
+                    target.relationships.set(character, target.relationships.get(character) + 1);
+                    updateRelationships();
+                }
+            } else {
+                addEvent(`${target.name} is feeling down.`);
+            }
+            
+        } else {
+            const item = items.find(i => i[0] === selectedItem);
+            if (item) {
+                const characterName = event.target.selectedOptions[0].dataset.characterName;
+                const character = context.gameParty.characters.find(char => char.name === characterName);
 
-            if (character) {
-                if (context.gameParty.inventoryMap.has(item[0])) {
-                    const inventoryItem = context.gameParty.inventoryMap.get(item[0]);
-                    if (inventoryItem.quantity > 1) {
-                        inventoryItem.quantity -= 1;
-                    } else {
-                        context.gameParty.inventoryMap.delete(item[0]);
+                if (character) {
+                    if (context.gameParty.inventoryMap.has(item[0])) {
+                        const inventoryItem = context.gameParty.inventoryMap.get(item[0]);
+                        if (inventoryItem.quantity > 1) {
+                            inventoryItem.quantity -= 1;
+                        } else {
+                            context.gameParty.inventoryMap.delete(item[0]);
+                        }
+                        updateCharacterAttributes(character, item);
+                        character.capAttributes();
+                        character.updateCharacter();
+                        updateStatBars(character);
+                        context.gameParty.updateInventory();
                     }
-                    updateCharacterAttributes(character, item);
-                    character.capAttributes();
-                    character.updateCharacter();
-                    updateStatBars(character);
-                    context.gameParty.updateInventory();
                 }
             }
         }
@@ -747,16 +780,28 @@ function clearAndPopulateOptions(selectElement, character, items, itemType, defa
     const fragment = document.createDocumentFragment();
     const defaultOption = document.createElement('option');
     defaultOption.value = itemType;
-    defaultOption.textContent = `${defaultOptionText} ${character.name}`;
+    defaultOption.textContent = `${defaultOptionText}`;
     fragment.appendChild(defaultOption);
 
-    for (const item of items) {
-        if (context.gameParty.inventoryMap.has(item[0])) {
+    if (itemType === 'interaction') {
+        const others = context.gameParty.characters.filter(c => c !== character);
+        for (const other of others) {
             const option = document.createElement('option');
-            option.textContent = `${item[0]} (+${item[1]})`;
-            option.value = item[0];
-            option.dataset.characterName = character.name; // Store character name in data attribute
+            option.textContent = other.name;
+            option.value = 'interact';
+            option.dataset.characterName = character.name;
+            option.dataset.targetName = other.name;
             fragment.appendChild(option);
+        }
+    } else {
+        for (const item of items) {
+            if (context.gameParty.inventoryMap.has(item[0])) {
+                const option = document.createElement('option');
+                option.textContent = `${item[0]} (+${item[1]})`;
+                option.value = item[0];
+                option.dataset.characterName = character.name;
+                fragment.appendChild(option);
+            }
         }
     }
 
@@ -766,7 +811,12 @@ function clearAndPopulateOptions(selectElement, character, items, itemType, defa
 
 function updateButtons(itemType, items, defaultOptionText, updateCharacterAttributes) {
     try {
-        const hasItems = Array.from(context.gameParty.inventoryMap.keys()).some(inventoryItem => items.some(item => item.includes(inventoryItem)));
+        let hasItems = false;
+        if (itemType === 'interaction') {
+            hasItems = true;
+        } else {
+            hasItems = Array.from(context.gameParty.inventoryMap.keys()).some(inventoryItem => items.some(item => item.includes(inventoryItem)));
+        }
         for (const character of context.gameParty.characters) {
             try {
                 const selectElement = document.querySelector(`#${character.name.split(' ').join('')} #options #${itemType}Select`);
@@ -805,9 +855,6 @@ function updateFoodAttributes(character, foodItem) {
             addEvent(`${character.name} ate the ${foodItem[0]}.`);
         }
     }
-    if (character.posTrait === 'satiated') {
-        character.hunger += 0.5;
-    }
     updateFoodButtons();
 }
 
@@ -833,6 +880,11 @@ function updateMedicalAttributes(character, medicalItem) {
     updateMedicalButtons();
 }
 
+function updateInteractionAttributes(character, interactionItem) {
+    addEvent(`${character.name} interacted with ${interactionItem[0]}.`);
+    updateInteractionButtons();
+}
+
 function updateFoodButtons() {
     updateButtons('food', food, 'Feed', updateFoodAttributes);
 }
@@ -841,9 +893,365 @@ function updateMedicalButtons() {
     updateButtons('medical', medical, 'Heal', updateMedicalAttributes);
 }
 
+function updateInteractionButtons() {
+    updateButtons('interaction', null, 'Interact with', updateInteractionAttributes);
+}
+
 const styleSelector = document.getElementById("styleselector");
 styleSelector.addEventListener("change", () => {
     document.querySelector("link[rel='stylesheet']").href = styleSelector.value;
 });
 
-export { context, setGameParty, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon, checkDeathEffects };
+async function createCharacterForm() {
+    const formDiv = document.getElementById('characters');
+    const precis = document.createElement('p');
+
+    precis.textContent = 'Create a character to start the game.';
+    formDiv.appendChild(precis);
+
+    const form = document.createElement('form');
+
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    document.body.appendChild(spinner);
+
+    let firstName = '';
+
+    try {
+        const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+        const data = await response.json();
+        firstName = getName(data);
+    } finally {
+        // Hide the spinner
+        spinner.style.display = 'none';
+    }
+
+    const nameLabel = document.createElement('label');
+    nameLabel.textContent = 'Name: ';
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = firstName;
+    nameLabel.appendChild(nameInput);
+    form.appendChild(nameLabel);
+
+    const ageLabel = document.createElement('label');
+    ageLabel.textContent = 'Age: ';
+    const ageInput = document.createElement('select');
+    for (let i = 0; i < ageArray.length; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = ageArray[i];
+        ageInput.appendChild(option);
+      }
+    ageInput.selectedIndex = Math.floor(Math.random() * ageArray.length);
+    ageLabel.appendChild(ageInput);
+    form.appendChild(ageLabel);
+
+    const posTraitsLabel = document.createElement('label');
+    posTraitsLabel.textContent = 'Positive Trait: ';
+    const posTraitsSelect = document.createElement('select');
+    for (const trait of posTraits) {
+      const option = document.createElement('option');
+      option.value = trait[0];
+      option.textContent = trait[0];
+      posTraitsSelect.appendChild(option);
+    }
+    posTraitsSelect.selectedIndex = Math.floor(Math.random() * posTraits.length);
+    posTraitsLabel.appendChild(posTraitsSelect);
+    form.appendChild(posTraitsLabel);
+
+    const posTraitsDescription = document.createElement('p');
+    const posEffectsList = document.createElement('ul');
+    let posEffect1 = document.createElement('li');
+    posEffect1.textContent = posTraits[posTraitsSelect.selectedIndex][1];
+    posEffectsList.appendChild(posEffect1);
+    let posEffect2 = document.createElement('li');
+    posEffect2.textContent = posTraits[posTraitsSelect.selectedIndex][2];
+    posEffectsList.appendChild(posEffect2);
+    posTraitsDescription.appendChild(posEffectsList);
+    form.appendChild(posTraitsDescription);
+
+    const negTraitsLabel = document.createElement('label');
+    negTraitsLabel.textContent = 'Negative Trait: ';
+    const negTraitsSelect = document.createElement('select');
+    for (const trait of negTraits) {
+      const option = document.createElement('option');
+      option.value = trait[0];
+      option.textContent = trait[0];
+      negTraitsSelect.appendChild(option);
+    }
+    negTraitsSelect.selectedIndex = Math.floor(Math.random() * negTraits.length);
+    negTraitsLabel.appendChild(negTraitsSelect);
+    form.appendChild(negTraitsLabel);
+
+    const negTraitsDescription = document.createElement('p');
+    const negEffectsList = document.createElement('ul');
+    let negEffect1 = document.createElement('li');
+    negEffect1.textContent = negTraits[negTraitsSelect.selectedIndex][1];
+    negEffectsList.appendChild(negEffect1);
+    let negEffect2 = document.createElement('li');
+    negEffect2.textContent = negTraits[negTraitsSelect.selectedIndex][2];
+    negEffectsList.appendChild(negEffect2);
+    negTraitsDescription.appendChild(negEffectsList);
+    form.appendChild(negTraitsDescription);
+
+    // Avatar creation section
+    const avatarSection = document.createElement('div');
+    avatarSection.innerHTML = '<p>Create your avatar:</p>';
+
+    // Skin selection
+    const skinLabel = document.createElement('label');
+    skinLabel.textContent = 'Skin: ';
+    const skinSelect = document.createElement('select');
+    const skinImages = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png'];
+    skinImages.forEach(skin => {
+        const option = document.createElement('option');
+        option.value = skin;
+        const skinText = skin.split('.')[0];
+        option.textContent = skinText.split('_')[1];
+        skinSelect.appendChild(option);
+    });
+    skinSelect.selectedIndex = Math.floor(Math.random() * skinImages.length);
+    skinLabel.appendChild(skinSelect);
+    avatarSection.appendChild(skinLabel);
+
+    // Hair style selection
+    const hairStyleLabel = document.createElement('label');
+    hairStyleLabel.textContent = 'Hair Style: ';
+    const hairStyleSelect = document.createElement('select');
+    const hairStyleImages = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight'];
+    hairStyleImages.forEach(hairStyle => {
+        const option = document.createElement('option');
+        option.value = hairStyle;
+        option.textContent = hairStyle.split('_')[1].replace('-',' and ');
+        hairStyleSelect.appendChild(option);
+    });
+    hairStyleSelect.selectedIndex = Math.floor(Math.random() * hairStyleImages.length);
+    hairStyleLabel.appendChild(hairStyleSelect);
+    avatarSection.appendChild(hairStyleLabel);
+
+    // Hair colour selection
+    const hairColourLabel = document.createElement('label');
+    hairColourLabel.textContent = 'Hair Colour: ';
+    const hairColourSelect = document.createElement('select');
+    const hairColourImages = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png'];
+    hairColourImages.forEach((hairColour, index) => {
+        const option = document.createElement('option');
+        option.value = hairColour;
+        // grab the name of the file before the .png
+        option.textContent = hairColourImages[index].split('.')[0];
+        hairColourSelect.appendChild(option);
+    });
+    hairColourSelect.selectedIndex = Math.floor(Math.random() * hairColourImages.length);
+    hairColourLabel.appendChild(hairColourSelect);
+    avatarSection.appendChild(hairColourLabel);
+
+    // shirt style selection
+    const shirtStyleLabel = document.createElement('label');
+    shirtStyleLabel.textContent = 'Shirt Style: ';
+    const shirtStyleSelect = document.createElement('select');
+    const shirtStyleImages = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest'];
+    shirtStyleImages.forEach(shirtStyle => {
+        const option = document.createElement('option');
+        option.value = shirtStyle;
+        option.textContent = shirtStyle.split('_')[1];
+        shirtStyleSelect.appendChild(option);
+    });
+    shirtStyleSelect.selectedIndex = Math.floor(Math.random() * shirtStyleImages.length);
+    shirtStyleLabel.appendChild(shirtStyleSelect);
+    avatarSection.appendChild(shirtStyleLabel);
+
+    // shirt colour selection
+    const shirtColourLabel = document.createElement('label');
+    shirtColourLabel.textContent = 'Shirt Colour: ';
+    const shirtColourSelect = document.createElement('select');
+    const shirtColourImages = ['red.png', 'yellow.png', 'green.png', 'blue.png'];
+    shirtColourImages.forEach((shirtColour, index) => {
+        const option = document.createElement('option');
+        option.value = shirtColour;
+        option.textContent = shirtColourImages[index].split('.')[0];
+        shirtColourSelect.appendChild(option);
+    });
+    shirtColourSelect.selectedIndex = Math.floor(Math.random() * shirtColourImages.length);
+    shirtColourLabel.appendChild(shirtColourSelect);
+    avatarSection.appendChild(shirtColourLabel);
+
+    // Avatar preview container
+    const avatarPreviewContainer = document.createElement('div');
+    avatarPreviewContainer.className = 'avatar';
+    avatarPreviewContainer.style.position = 'relative';
+
+    const avatarPreview = document.createElement('div');
+    avatarPreview.className = 'avatarSprite';
+
+    // Outlines
+    const hairOutline = document.createElement('img');
+    hairOutline.src = "images/hair/outline_hair_" + hairStyleSelect.value.split('_')[1] + ".png";
+    avatarPreview.appendChild(hairOutline);
+    const shirtOutline = document.createElement('img');
+    shirtOutline.src = "images/shirts/outline_shirt_" + shirtStyleSelect.value.split('_')[1] + ".png";
+    avatarPreview.appendChild(shirtOutline);
+
+    // Skin preview
+    const skinPreview = avatarPreview.appendChild(document.createElement('img'));
+    skinPreview.src = "images/skin/" + skinSelect.value;
+    skinPreview.alt = nameInput.value + '\'s skin sprite.';
+    avatarPreview.appendChild(skinPreview);
+
+    // Hair preview
+    const hairPreview = avatarPreview.appendChild(document.createElement('img'));
+    hairPreview.src = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+    hairPreview.alt = nameInput.value + '\'s hair sprite. . Their hair is ';
+    switch (hairStyleSelect.value) {
+        case 'short1':
+            hairPreview.alt += 'short and straight.';
+            break;
+        case 'short2':
+            hairPreview.alt += 'short and fluffy.';
+            break;
+        case 'long1':
+            hairPreview.alt += 'long and straight.';
+            break;
+        case 'long2':
+            hairPreview.alt += 'long and curly.';
+            break;
+    }
+    avatarPreview.appendChild(hairPreview);
+
+    // shirt preview
+    const shirtPreview = avatarPreview.appendChild(document.createElement('img'));
+    shirtPreview.src = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+    shirtPreview.alt = nameInput.value + '\'s shirt sprite';
+    switch (shirtStyleSelect.value) {
+      case "images/shirts/shirt1.png":
+        shirtPreview.alt += "hoodie.";
+        break;
+      case "images/shirts/shirt2.png":
+        shirtPreview.alt += "vest.";
+        break;
+      case "images/shirts/shirt3.png":
+        shirtPreview.alt += "jacket.";
+        break;
+      case "images/shirts/shirt4.png":
+        shirtPreview.alt += "scarf.";
+        break;
+    }
+    avatarPreview.appendChild(shirtPreview);
+    
+    avatarPreviewContainer.appendChild(avatarPreview);
+    avatarSection.appendChild(avatarPreviewContainer);
+
+
+    // Event listeners to update previews
+    posTraitsSelect.addEventListener('change', () => {
+        const posTraitIndex = posTraits.findIndex(trait => trait[0] === posTraitsSelect.value);
+        const effectsList = document.createElement('ul');
+        let effect1 = document.createElement('li');
+        effect1.textContent = posTraits[posTraitIndex][1];
+        effectsList.appendChild(effect1);
+        let effect2 = document.createElement('li');
+        effect2.textContent = posTraits[posTraitIndex][2];
+        effectsList.appendChild(effect2);
+        posTraitsDescription.innerHTML = '';
+        posTraitsDescription.appendChild(effectsList);
+    });
+
+    negTraitsSelect.addEventListener('change', () => {
+        const negTraitIndex = negTraits.findIndex(trait => trait[0] === negTraitsSelect.value);
+        const effectsList = document.createElement('ul');
+        let effect1 = document.createElement('li');
+        effect1.textContent = negTraits[negTraitIndex][1];
+        effectsList.appendChild(effect1);
+        let effect2 = document.createElement('li');
+        effect2.textContent = negTraits[negTraitIndex][2];
+        effectsList.appendChild(effect2);
+        negTraitsDescription.innerHTML = '';
+        negTraitsDescription.appendChild(effectsList);
+    });
+
+    skinSelect.addEventListener('change', () => {
+        skinPreview.src = "images/skin/" + skinSelect.value;
+    });
+
+    hairStyleSelect.addEventListener('change', () => {
+        hairOutline.src = "images/hair/outline_hair_" + hairStyleSelect.value.split('_')[1] + ".png";
+        hairPreview.src = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+    });
+
+    hairColourSelect.addEventListener('change', () => {
+        hairPreview.src = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+    });
+
+    shirtStyleSelect.addEventListener('change', () => {
+        shirtOutline.src = "images/shirts/outline_shirt_" + shirtStyleSelect.value.split('_')[1] + ".png";
+        shirtPreview.src = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+    });
+
+    shirtColourSelect.addEventListener('change', () => {
+        shirtPreview.src = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+    });
+
+    form.appendChild(avatarSection);
+
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Start Game';
+    submitButton.addEventListener('click', () => {
+        const name = nameInput.value;
+        const age = ageInput.value;
+        const posTrait = posTraitsSelect.value;
+        const negTrait = negTraitsSelect.value;
+        const skin = "images/skin/" + skinSelect.value;
+        const hair = "images/hair/" + hairStyleSelect.value + '_' + hairColourSelect.value;
+        const shirt = "images/shirts/" + shirtStyleSelect.value + '_' + shirtColourSelect.value;
+        const character = new Character(name, age, posTrait, negTrait, skin, hair, shirt);
+        formDiv.innerHTML = "";
+        startGame();
+        const playTurnButton = document.createElement('button');
+        playTurnButton.id = 'playTurnButton';
+        playTurnButton.textContent = 'Play Turn 1';
+        playTurnButton.addEventListener('click', () => {
+            playTurn();
+        });
+        document.getElementById('gameButtons').appendChild(playTurnButton);
+        context.gameParty.addCharacter(character);
+        character.createCharacter();
+        character.updateCharacter();
+        updateStatBars(character);
+
+        //unhide the buttons div
+        const buttonsDiv = document.getElementById('buttons');
+        buttonsDiv.style.display = 'block';
+
+        //unhide the events div
+        const eventsDiv = document.getElementById('content');
+        eventsDiv.style.display = 'flex';
+
+        addEvent(`A new illness has swept the world and the infected have begun to rise from the dead. The world is ending, but ${character.name}'s life doesn't have to just yet.`)
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    });
+    form.appendChild(submitButton);
+
+    // Set focus on the name input field
+    nameInput.focus();
+
+    // Submit the form when Enter key is pressed in the name input field
+    nameInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      form.submit();
+    }
+    });
+
+    formDiv.appendChild(form);
+}
+
+async function startGame() {
+    let gameParty;
+    if (!context.gameParty) {
+        gameParty = new Party();
+    }
+    setGameParty(gameParty);
+}
+
+export { context, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm };

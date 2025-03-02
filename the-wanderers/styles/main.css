@@ -19,6 +19,7 @@ input, button, select {
     width: 20%;
     text-align: center;
     font-size: 15px;
+    clear: both;
 }
 
 #styleselector, #fontselector {
@@ -160,6 +161,11 @@ form input {
     width: 50%;
 }
 
+#options, .relationships {
+    width: 400px;
+    margin: 20px auto;
+}
+
 #options select{
     width: 180px;
 }
@@ -190,4 +196,27 @@ form input {
     width: 50%;
     height: auto;
     image-rendering: pixelated;
+}
+
+.spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    margin: -25px 0 0 -25px;
+    border: 5px solid rgba(0, 0, 0, 0.1);
+    border-top: 5px solid #000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
