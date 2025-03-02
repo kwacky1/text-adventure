@@ -855,9 +855,6 @@ function updateFoodAttributes(character, foodItem) {
             addEvent(`${character.name} ate the ${foodItem[0]}.`);
         }
     }
-    if (character.posTrait === 'satiated') {
-        character.hunger += 0.5;
-    }
     updateFoodButtons();
 }
 
