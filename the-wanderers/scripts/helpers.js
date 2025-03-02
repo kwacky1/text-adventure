@@ -1254,4 +1254,4 @@ async function startGame() {
     setGameParty(gameParty);
 }
 
-export { context, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, getName, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon, checkDeathEffects, updateInteractionButtons, createCharacterForm };
+export { context, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, foundFriend, foundEnemy, foundFood, foundMedical, foundWeapon, checkDeathEffects, updateInteractionButtons, createCharacterForm };
