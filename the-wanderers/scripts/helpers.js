@@ -3,11 +3,18 @@ import { playTurn } from './game.js';
 import Party from './party.js';
 
 const context = {
-    gameParty: null
+    gameParty: null,
+    remainingNames: []
 };
 
 function setGameParty(gameParty) {
     context.gameParty = gameParty;
+}
+
+async function fetchNames(amount = 4) {
+    const response = await fetch('https://randomuser.me/api/?results=' + amount + '&nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+    const data = await response.json();
+    context.remainingNames = data.results.map(result => getName(result));
 }
 
 const food = [
@@ -220,14 +227,14 @@ function foundFriend() {
     friendDiv.textContent = 'You are approached by an adventurer who wants to join your party';
     const acceptButton = document.createElement('button');
     acceptButton.textContent = 'Accept';
-    acceptButton.addEventListener('click', () => {
+    acceptButton.addEventListener('click', async () => {
         // make morale of party members go up when a new member joins
         for (const character of context.gameParty.characters) {
             character.morale += 1;
             character.capAttributes();
             updateStatBars(character);
         }
-        addPlayer();
+        await addPlayer();
         friendDiv.remove();
         acceptButton.remove();
         declineButton.remove();
@@ -675,16 +682,11 @@ async function addPlayer() {
         if (context.gameParty.characters.length == 0) {
             createCharacterForm();
         } else {
-            const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
-            const data = await response.json();
-            let firstName = getName(data);
-
-            // Ensure the name doesn't already exist in the party
-            while (context.gameParty.characters.some(character => character.name === firstName)) {
-                const newResponse = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
-                const newData = await newResponse.json();
-                firstName = getName(newData);
+            if (context.remainingNames.length === 0) {
+                await fetchNames();
             }
+            // Use the remaining names fetched from randomuser.me
+            let firstName = context.remainingNames.shift();
 
             // Ensure the name doesn't contain characters that can't be used as class names
             firstName = firstName.replace(/[^a-zA-Z0-9]/g, '');
@@ -717,7 +719,7 @@ async function addPlayer() {
 }
 
 function getName(data) {
-    return data.results[0].name.first;
+    return data.name.first;
 }
 
 function handleSelection(event, items, updateCharacterAttributes) {
@@ -918,9 +920,10 @@ async function createCharacterForm() {
     let firstName = '';
 
     try {
-        const response = await fetch('https://randomuser.me/api/?nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+        const response = await fetch('https://randomuser.me/api/?results=4&nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
         const data = await response.json();
-        firstName = getName(data);
+        firstName = getName(data.results[0]);
+        context.remainingNames = data.results.slice(1).map(result => getName(result));
     } finally {
         // Hide the spinner
         spinner.style.display = 'none';
