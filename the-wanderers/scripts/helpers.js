@@ -11,10 +11,19 @@ function setGameParty(gameParty) {
     context.gameParty = gameParty;
 }
 
-async function fetchNames(amount = 4) {
-    const response = await fetch('https://randomuser.me/api/?results=' + amount + '&nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
-    const data = await response.json();
-    context.remainingNames = data.results.map(result => getName(result));
+async function fetchNames(amount = 10) {
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    document.body.appendChild(spinner);
+
+    try {
+        const response = await fetch('https://randomuser.me/api/?results=' + amount + '&nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
+        const data = await response.json();
+        context.remainingNames = data.results.map(result => getName(result));
+    } finally {
+        // Hide the spinner
+        spinner.style.display = 'none';
+    }
 }
 
 const food = [
@@ -406,6 +415,7 @@ function foundEnemy() {
             }
             character.updateCharacter();
             updateStatBars(character);
+            checkPartyAlerts(character);
             handleTurn(index + 1);
             attackButton.remove();
         });
@@ -624,6 +634,26 @@ function addItemToInventory(itemType) {
     }
 }
 
+function checkPartyAlerts(character) {
+    const moralePercentage = (character.morale / (moraleArray.length - 1)) * 100;
+    const hungerPercentage = (character.hunger / (hungerArray.length - 1)) * 100;
+    const healthPercentage = (character.health / (healthArray.length - 1)) * 100;
+
+    // Define threshold percentages
+    const lowThreshold = 30;
+
+    // Function to display a message when below a threshold
+    if (moralePercentage < lowThreshold) {
+        addEvent(`${character.name} is feeling ${moraleArray[Math.round(character.morale)]}.`);
+    }
+    if (hungerPercentage < lowThreshold) {
+        addEvent(`${character.name} is ${hungerArray[Math.round(character.hunger)]}.`);
+    }
+    if (healthPercentage < lowThreshold) {
+        addEvent(`${character.name} is ${healthArray[Math.round(character.health)]}.`);
+    }
+}
+
 function updateStatBars(character) {
     const characterDiv = document.getElementById(character.name);
     if (characterDiv) {
@@ -631,13 +661,9 @@ function updateStatBars(character) {
         const hungerStat = characterDiv.querySelector('#hungerStat');
         const healthStat = characterDiv.querySelector('#healthStat');
 
-        const moraleValue = character.morale;
-        const hungerValue = character.hunger;
-        const healthValue = character.health;
-
-        const moralePercentage = (moraleValue / (moraleArray.length - 1)) * 100;
-        const hungerPercentage = (hungerValue / (hungerArray.length - 1)) * 100;
-        const healthPercentage = (healthValue / (healthArray.length - 1)) * 100;
+        const moralePercentage = (character.morale / (moraleArray.length - 1)) * 100;
+        const hungerPercentage = (character.hunger / (hungerArray.length - 1)) * 100;
+        const healthPercentage = (character.health / (healthArray.length - 1)) * 100;
 
         moraleStat.style.setProperty('--width', `${moralePercentage}%`);
         hungerStat.style.setProperty('--width', `${hungerPercentage}%`);
@@ -685,7 +711,6 @@ async function addPlayer() {
             if (context.remainingNames.length === 0) {
                 await fetchNames();
             }
-            // Use the remaining names fetched from randomuser.me
             let firstName = context.remainingNames.shift();
 
             // Ensure the name doesn't contain characters that can't be used as class names
@@ -913,21 +938,8 @@ async function createCharacterForm() {
 
     const form = document.createElement('form');
 
-    const spinner = document.createElement('div');
-    spinner.className = 'spinner';
-    document.body.appendChild(spinner);
-
-    let firstName = '';
-
-    try {
-        const response = await fetch('https://randomuser.me/api/?results=4&nat=au,br,ca,ch,de,dk,es,fi,fr,gb,ie,in,mx,nl,no,nz,rs,tr,ua,us');
-        const data = await response.json();
-        firstName = getName(data.results[0]);
-        context.remainingNames = data.results.slice(1).map(result => getName(result));
-    } finally {
-        // Hide the spinner
-        spinner.style.display = 'none';
-    }
+    await fetchNames();
+    const firstName = context.remainingNames.shift();
 
     const nameLabel = document.createElement('label');
     nameLabel.textContent = 'Name: ';
@@ -1257,4 +1269,4 @@ async function startGame() {
     setGameParty(gameParty);
 }
 
-export { context, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm };
+export { context, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts };

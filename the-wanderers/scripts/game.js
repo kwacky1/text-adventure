@@ -1,6 +1,6 @@
 var turnNumber = 1;
 
-import { context, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm } from './helpers.js';
+import { context, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts } from './helpers.js';
 
 function playTurn() {
     // Move current events to turnX div
@@ -88,6 +88,7 @@ function playTurn() {
                 context.gameParty.removeCharacter(character);
                 updateRelationships();
             }
+            checkPartyAlerts(character);
         };
         updateInteractionButtons();
     }
