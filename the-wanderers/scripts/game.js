@@ -1,6 +1,6 @@
 var turnNumber = 1;
 
-import { context, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts } from './helpers.js';
+import { context, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts, setPlayButton } from './helpers.js';
 
 function playTurn() {
     // Move current events to turnX div
@@ -19,6 +19,7 @@ function playTurn() {
     eventItem.textContent = currentEvents;
     eventsDiv.insertBefore(eventItem, eventsDiv.children[1]);
     currentEventsDiv.textContent = '';
+    setPlayButton('hide');
     // Begin new turn
     updateParty();
     if (context.gameParty.characters.length === 0) {
@@ -26,23 +27,16 @@ function playTurn() {
         allButtons.remove();
         const partyInventoryDiv = document.getElementById('partyInventory');
         partyInventoryDiv.remove();
-        // output character is dead to the events div
-        addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
-        const playTurnButton = document.getElementById('playTurnButton');
-        if (playTurnButton) {
-            playTurnButton.remove()
-        }
         const eventImage = document.getElementById('eventImage');
         eventImage.remove();
+        // output character is dead to the events div
+        addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
     } else {
         const chance = Math.random();
         getEvent(chance);
         context.gameParty.updateInventory();
         turnNumber += 1;
-        const playTurnButton = document.getElementById('playTurnButton');
-        if (playTurnButton) {
-            playTurnButton.innerText = `Play Turn ${turnNumber}`;
-        }
+        setPlayButton(`Play Turn ${turnNumber}`)
     }
 
     function updateParty() {

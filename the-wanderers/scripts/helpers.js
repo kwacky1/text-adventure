@@ -4,7 +4,8 @@ import Party from './party.js';
 
 const context = {
     gameParty: null,
-    remainingNames: []
+    remainingNames: [],
+    battleInProgress: false
 };
 
 function setGameParty(gameParty) {
@@ -216,6 +217,7 @@ function getEvent(chance) {
         // output the event to the events div
         addEvent(event);
     }
+    setPlayButton('show');
 }
 
 function updateRelationships() {
@@ -234,8 +236,6 @@ function updateRelationships() {
 }
 
 function foundFriend() {
-    const playTurnButton = document.getElementById('playTurnButton');
-    playTurnButton.style.display = 'none';
     const friendDiv = document.createElement('div');
     friendDiv.textContent = 'You are approached by an adventurer who wants to join your party';
     const acceptButton = document.createElement('button');
@@ -251,7 +251,7 @@ function foundFriend() {
         friendDiv.remove();
         acceptButton.remove();
         declineButton.remove();
-        playTurnButton.style.display = 'block';
+        setPlayButton('show');
     });
     const declineButton = document.createElement('button');
     declineButton.textContent = 'Decline';
@@ -260,7 +260,7 @@ function foundFriend() {
         friendDiv.remove();
         acceptButton.remove();
         declineButton.remove();
-        playTurnButton.style.display = 'block';
+        setPlayButton('show');
     });
     document.getElementById('gameButtons').appendChild(friendDiv);
     document.getElementById('gameButtons').appendChild(acceptButton);
@@ -303,8 +303,6 @@ function foundEnemy() {
     const enemy = [
         ['zombie']
     ];
-    const playTurnButton = document.getElementById('playTurnButton');
-    playTurnButton.style.display = 'none';
     var numberOfEnemies = Math.floor(Math.random() * context.gameParty.characters.length) + 1;
     if (numberOfEnemies == 1) {
         addEvent(`An enemy has appeared!`);
@@ -374,6 +372,7 @@ function foundEnemy() {
         if (combatant.type === 'enemy') {
         // Enemy's turn to attack
         // Add a button to commence the attack
+        setPlayButton('hide');
         const attackButton = document.createElement('button');
         attackButton.textContent = `The ${combatant.type} attacks!`;
         attackButton.id = 'attackButton';
@@ -416,12 +415,14 @@ function foundEnemy() {
                     playTurn();
                     return;
                 }
-            }
-            character.updateCharacter();
-            updateStatBars(character);
-            checkPartyAlerts(character);
+            } else {
+                checkPartyAlerts(character);
+                character.updateCharacter();
+                updateStatBars(character);
+            }    
             handleTurn(index + 1);
             attackButton.remove();
+            setPlayButton('show');
         });
         const weaponButtons = document.getElementById('gameButtons');
         weaponButtons.appendChild(attackButton);
@@ -434,6 +435,7 @@ function foundEnemy() {
                 var attackButton = false;
                 if (character.sick) {
                     if (!weaponButtons.querySelector(`.attack[data-combatant="${combatant.type}"]`)) {
+                        setPlayButton('hide');
                         attackButton = document.createElement('button');
                         attackButton.setAttribute('data-combatant', combatant.type);
                         attackButton.textContent = `${combatant.type} feels too weak to battle. Continue.`;
@@ -441,6 +443,7 @@ function foundEnemy() {
                         attackButton.addEventListener('click', () => {
                             weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
                             addEvent(`${combatant.type} was unable to battle.`, 'altTurn');
+                            addWeaponChoiceButton(weaponButtons, character, weaponArray[character.weapon], 0);
                             handleTurn(index + 1);
                         });
                     }
@@ -467,6 +470,7 @@ function foundEnemy() {
                             criticalMiss = 1;
                         }
                     }
+                    setPlayButton('hide');
                     attackButton = document.createElement('button');
                     attackButton.textContent = `${combatant.type} attacks ${enemy.type} (${enemy.hp} HP)`;
                     attackButton.classList.add('attack');
@@ -516,14 +520,12 @@ function foundEnemy() {
                                 }
                                 // Check if all enemies are defeated
                                 if (combatants.filter(c => c.type === 'enemy').length === 0) {
-                                    // Unhide the playTurnButton
-                                    const playTurnButton = document.getElementById('playTurnButton');
-                                    playTurnButton.style.display = 'block';
                                     break;
                                 }
                             }
                         }
                         weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
+                        setPlayButton('show');
                         handleTurn(index + 1);
 
                     });
@@ -560,23 +562,23 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'fou
         {
             character.weapon = weaponArray.indexOf(weaponType);
             addEvent(`${character.name} picked up the ${weapon}.`);
-            weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
+//            weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
             character.updateCharacter();
-            const playTurnButton = document.getElementById('playTurnButton');
-            playTurnButton.style.display = 'block';
         });
         weaponDiv.appendChild(button);
     }
 }
 
 function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, from) {
-    const playTurnButton = document.getElementById('playTurnButton');
     const oldWeaponType = oldWeapon[0];
     const oldDamage = oldWeapon[1];
     const newWeaponType = newWeapon[0];
     const newDamage = newWeapon[1];
     if (oldDamage < newDamage) {
-        playTurnButton.style.display = 'none';
+        // hide all divs and buttons in the weaponDiv
+        const allButtonsExceptWeapons = weaponDiv.querySelectorAll(`button:not(.weapon0):not(.weapon1)`);
+        allButtonsExceptWeapons.forEach(button => button.style.display = 'none');
+        weaponDiv.querySelectorAll('div').forEach(div => div.style.display = 'none');
         button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${from} ${newWeaponType} (${newDamage} damage) for ${character.name}`;
         button.classList.add(`weapon${id}`);
         button.classList.add(`${newWeaponType}`);
@@ -598,10 +600,10 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, fro
                         addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id, character.name + "'s");
                     }
                 }
-                if (weaponDiv.querySelectorAll('.weapon0').length === 0) {
-                    playTurnButton.style.display = 'block';
-                }
             }
+            // restore all divs and buttons
+            weaponDiv.querySelectorAll('button').forEach(button => button.style.display = 'block');
+            weaponDiv.querySelectorAll('div').forEach(div => div.style.display = 'block');
         });
         weaponDiv.appendChild(button);
     }
@@ -639,22 +641,25 @@ function addItemToInventory(itemType) {
 }
 
 function checkPartyAlerts(character) {
-    const moralePercentage = (character.morale / (moraleArray.length - 1)) * 100;
-    const hungerPercentage = (character.hunger / (hungerArray.length - 1)) * 100;
-    const healthPercentage = (character.health / (healthArray.length - 1)) * 100;
+    // Check if the character is in the party before proceeding
+    if (context.gameParty.characters.includes(character)) {
+        const moralePercentage = (character.morale / (moraleArray.length - 1)) * 100;
+        const hungerPercentage = (character.hunger / (hungerArray.length - 1)) * 100;
+        const healthPercentage = (character.health / (healthArray.length - 1)) * 100;
 
-    // Define threshold percentages
-    const lowThreshold = 30;
+        // Define threshold percentages
+        const lowThreshold = 30;
 
-    // Function to display a message when below a threshold
-    if (moralePercentage < lowThreshold) {
-        addEvent(`${character.name} is feeling ${moraleArray[Math.round(character.morale)]}.`);
-    }
-    if (hungerPercentage < lowThreshold) {
-        addEvent(`${character.name} is ${hungerArray[Math.round(character.hunger)]}.`);
-    }
-    if (healthPercentage < lowThreshold) {
-        addEvent(`${character.name} is ${healthArray[Math.round(character.health)]}.`);
+        // Function to display a message when below a threshold
+        if (moralePercentage < lowThreshold) {
+            addEvent(`${character.name} is feeling ${moraleArray[Math.round(character.morale)]}.`);
+        }
+        if (hungerPercentage < lowThreshold) {
+            addEvent(`${character.name} is ${hungerArray[Math.round(character.hunger)]}.`);
+        }
+        if (healthPercentage < lowThreshold) {
+            addEvent(`${character.name} is ${healthArray[Math.round(character.health)]}.`);
+        }
     }
 }
 
@@ -1273,4 +1278,30 @@ async function startGame() {
     setGameParty(gameParty);
 }
 
-export { context, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts };
+function setPlayButton(display) {
+    const playTurnButton = document.getElementById('playTurnButton');
+    if (playTurnButton === null) {
+        return;
+    }
+    switch (display) {
+        case "show":
+            // Check if there are other buttons in the gameButtons container
+            const gameButtons = document.getElementById('gameButtons');
+            const otherButtons = gameButtons.querySelectorAll('button:not(#playTurnButton)');
+            // Only show the playTurnButton if there are no other buttons visible
+            if (otherButtons.length === 0) {
+                playTurnButton.style.display = 'block';
+            }
+            break;
+        case "hide":
+            playTurnButton.style.display = 'none';
+            break;
+        case "remove":
+            playTurnButton.remove();
+            break;
+        default:
+            playTurnButton.innerText = display;
+    }
+}
+
+export { context, addItemToInventory, getEvent, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts, setPlayButton };
