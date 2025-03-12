@@ -1,6 +1,7 @@
 var turnNumber = 1;
 
-import { context, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts, setPlayButton } from './helpers.js';
+import { context, getEvent, addItemToInventory, updateStatBars, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts, setPlayButton } from './helpers.js';
+import { food, medical } from './party.js';
 
 function playTurn() {
     // Move current events to turnX div
@@ -34,7 +35,8 @@ function playTurn() {
     } else {
         const chance = Math.random();
         getEvent(chance);
-        context.gameParty.updateInventory();
+        // Update inventory display - changed to use inventory.updateDisplay() directly
+        context.gameParty.inventory.updateDisplay();
         turnNumber += 1;
         setPlayButton(`Play Turn ${turnNumber}`)
     }
@@ -98,17 +100,17 @@ function playTurn() {
         if (character.negTrait === 'hypochondriac') {
             // 10% chance of using a medical item without benefit
             if (Math.random() < 0.1) {
-                // Collect medical items from the inventory Map
-                const medicalitems = [];
-                context.gameParty.inventoryMap.forEach((value, key) => {
-                    if (medical.some(medicalItem => medicalItem.includes(key))) {
-                        medicalitems.push(key);
+                // Collect medical items using the new Inventory class methods
+                const medicalItems = [];
+                medical.forEach(medItem => {
+                    if (context.gameParty.inventory.hasItem(medItem[0])) {
+                        medicalItems.push(medItem[0]);
                     }
                 });
 
-                if (medicalitems.length > 0) {
-                    const item = medicalitems[Math.floor(Math.random() * medicalitems.length)];
-                    context.gameParty.inventoryMap.delete(item);
+                if (medicalItems.length > 0) {
+                    const item = medicalItems[Math.floor(Math.random() * medicalItems.length)];
+                    context.gameParty.inventory.removeItem(item);
                     addEvent(`${character.name} used the ${item} but it had no effect.`);
                     updateMedicalButtons();
                 }

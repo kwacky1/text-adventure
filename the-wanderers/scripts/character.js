@@ -1,3 +1,5 @@
+import { weapons } from './party.js';
+
 export const hungerArray = [
     'near death',
     'near death',
@@ -41,13 +43,6 @@ export const healthArray = [
   'slightly injured',
   'fine',
   'fine'
-];
-
-export const weaponArray = [
-  ['fist', 1],
-  ['stick', 2],
-  ['knife', 3],
-  ['pistol', 4]
 ];
 
 export class Character {
@@ -219,7 +214,7 @@ export class Character {
     const weaponPreview = document.createElement('div');
     weaponPreview.className = 'weaponSprite';
     const weaponPreviewImg = weaponPreview.appendChild(document.createElement('img'));
-    const weaponType = weaponArray[this.weapon][0];
+    const weaponType = weapons[this.weapon][0];
     if (weaponType == 'fist') {
       const skinType = this.skin.split('/').pop().split('.').shift();
       weaponPreviewImg.src = "images/weapons/weapon_" + skinType + weaponType + ".png";
@@ -278,7 +273,7 @@ export class Character {
     const weapon = document.createElement('div');
     weapon.classList.add('stat');
     weapon.id = 'weapon';
-    weapon.innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
+    weapon.innerHTML = `Weapon: <span class="statValue">${weapons[this.weapon][0]}</span>`;
     statsContainer.appendChild(weapon);
 
     characterDiv.appendChild(statsContainer);
@@ -321,7 +316,7 @@ export class Character {
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
-      const weaponType = weaponArray[this.weapon][0];
+      const weaponType = weapons[this.weapon][0];
       characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
       if (characterDiv.querySelector('.weaponSprite')) {
         if (weaponType == 'fist') {

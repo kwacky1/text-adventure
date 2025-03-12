@@ -1,6 +1,6 @@
-import { Character, ageArray, hungerArray, moraleArray, healthArray, weaponArray } from './character.js';
+import { Character, ageArray, hungerArray, moraleArray, healthArray } from './character.js';
 import { playTurn } from './game.js';
-import Party from './party.js';
+import Party, { food, medical, weapons } from './party.js';
 
 const context = {
     gameParty: null,
@@ -25,21 +25,6 @@ async function fetchNames(amount = 10) {
         spinner.style.display = 'none';
     }
 }
-
-const food = [
-    ['rations', 0.5],
-    ['snack', 1],
-    ['dish', 2],
-    ['meal', 3],
-    ['dessert', 2] // dessert is a treat, so it's worth more also beneficial for morale
- ];
-
- const medical = [
-    ['band aid', 1],
-    ['bandage', 2],
-    ['medicine', 3],
-    ['first aid kit', 4]
- ];
 
  const posTraits = [
     ['resilient', 'Every turn has a 10% chance to heal', 'Has a higher chance of being cured of illness and infection'],
@@ -179,7 +164,7 @@ function getEvent(chance) {
             if (Math.random() < 0.5) {
                 var hasFood = false;
                 for (const foodItem of food) {
-                    if (context.gameParty.inventoryMap.has(foodItem[0])) {
+                    if (context.gameParty.inventory.hasItem(foodItem[0])) {
                         addEvent(`${name1.name} and ${name2.name} are arguing over who gets to eat the ${foodItem[0]}.`);
                         name1.relationships.set(name2, name1.relationships.get(name2) - 1);
                         name2.relationships.set(name1, name2.relationships.get(name1) - 1);
@@ -293,7 +278,7 @@ function checkDeathEffects(character) {
             }
             remainingCharacter.capAttributes();
             updateStatBars(remainingCharacter);
-            addWeaponChoiceButton(weaponDiv, remainingCharacter, weaponArray[character.weapon], 0, character.name + "'s");
+            addWeaponChoiceButton(weaponDiv, remainingCharacter, weapons[character.weapon], 0, character.name + "'s");
         }
     }
 }
@@ -323,7 +308,7 @@ function foundEnemy() {
     }
     var players = context.gameParty.characters
         .map(character => {
-            let baseAttack = weaponArray[character.weapon][1];
+            let baseAttack = weapons[character.weapon][1];
             if (character.posTrait === 'fighter') {
                 baseAttack += 1;
             }
@@ -403,7 +388,7 @@ function foundEnemy() {
                         type: 'enemy',
                         hp: 4 + Math.floor(Math.random() * 4),
                         morale: Math.floor(Math.random() * 10),
-                        attack: weaponArray[character.weapon][1]
+                        attack: weapons[character.weapon][1]
 
                     });
                     addEvent(`${character.name} has become a zombie!`);
@@ -442,7 +427,7 @@ function foundEnemy() {
                         attackButton.addEventListener('click', () => {
                             weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
                             addEvent(`${combatant.type} was unable to battle.`, 'altTurn');
-                            addWeaponChoiceButton(weaponButtons, character, weaponArray[character.weapon], 0);
+                            addWeaponChoiceButton(weaponButtons, character, weapons[character.weapon], 0);
                             handleTurn(index + 1);
                         });
                     }
@@ -514,7 +499,7 @@ function foundEnemy() {
                                     const foodItem = food[Math.floor(Math.random() * food.length)];
                                     addItemToInventory(foodItem);
                                     addEvent(`${combatant.type} made food with some... questionable meat.`);
-                                    context.gameParty.updateInventory();
+                                    context.gameParty.inventory.updateDisplay();
                                     updateFoodButtons();
                                 }
                                 // Check if all enemies are defeated
@@ -541,7 +526,7 @@ function foundEnemy() {
 }
 
 function foundWeapon(who, id) {
-    const weaponType = weaponArray[Math.floor(Math.random() * (weaponArray.length - 1)) + 1];
+    const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1];
     addEvent(`${who} found a ${weaponType[0]}.`);
     const weaponDiv = document.getElementById('gameButtons');
     for (const character of context.gameParty.characters) {
@@ -553,13 +538,13 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'fou
     const button = document.createElement('button');
     // if character has a weapon, replace it
     if (character.weapon !== null) {
-        const oldWeapon = weaponArray[character.weapon];
+        const oldWeapon = weapons[character.weapon];
         offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv, from);
     } else {
         button.innerText = `Give ${from} ${weapon} (${damage} attack) to ${character.name}`;
         button.addEventListener('click', () =>
         {
-            character.weapon = weaponArray.indexOf(weaponType);
+            character.weapon = weapons.indexOf(weaponType);
             addEvent(`${character.name} picked up the ${weapon}.`);
 //            weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
             character.updateCharacter();
@@ -577,7 +562,6 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, fro
         // hide all divs and buttons in the weaponDiv
         const allButtonsExceptWeapons = weaponDiv.querySelectorAll(`button:not(.weapon0):not(.weapon1)`);
         allButtonsExceptWeapons.forEach(button => button.style.display = 'none');
-        weaponDiv.querySelectorAll('div').forEach(div => div.style.display = 'none');
         button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${from} ${newWeaponType} (${newDamage} damage) for ${character.name}`;
         button.classList.add(`weapon${id}`);
         button.classList.add(`${newWeaponType}`);
@@ -585,7 +569,7 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, fro
         button.classList.add(characterClass);
         button.addEventListener('click', () =>
         {
-            character.weapon = weaponArray.indexOf(newWeapon);
+            character.weapon = weapons.indexOf(newWeapon);
             addEvent(`${character.name} replaced their ${oldWeaponType} with the ${newWeaponType}.`);
             weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
             const characterButtons = weaponDiv.querySelectorAll(`.${characterClass}`);
@@ -595,14 +579,12 @@ function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, fro
             character.updateCharacter();
             if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
                 for (const otherCharacter of context.gameParty.characters) {
-                    if (weaponArray[otherCharacter.weapon][1] < oldDamage) {
+                    if (weapons[otherCharacter.weapon][1] < oldDamage) {
                         addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id, character.name + "'s");
                     }
                 }
             }
-            // restore all divs and buttons
-            weaponDiv.querySelectorAll('button').forEach(button => button.style.display = 'block');
-            weaponDiv.querySelectorAll('div').forEach(div => div.style.display = 'block');
+            setPlayButton('show');
         });
         weaponDiv.appendChild(button);
     }
@@ -623,20 +605,8 @@ function foundFood(who) {
 }
 
 function addItemToInventory(itemType) {
-    // Check if the food item already exists in the inventory
-    if (context.gameParty.inventoryMap.has(itemType[0])) {
-        // If it exists, update the quantity
-        let existingFood = context.gameParty.inventoryMap.get(itemType[0]);
-        existingFood.quantity += 1;
-        context.gameParty.inventoryMap.set(itemType[0], existingFood);
-    } else {
-        // If it does not exist, add it to the map
-        context.gameParty.inventoryMap.set(itemType[0], {
-            name: itemType[0],
-            value: itemType[1],
-            quantity: 1
-        });
-    }
+    // Use the new Inventory class's addItem method instead of directly manipulating inventoryMap
+    context.gameParty.inventory.addItem(itemType);
 }
 
 function checkPartyAlerts(character) {
@@ -785,18 +755,14 @@ function handleSelection(event, items, updateCharacterAttributes) {
                 const character = context.gameParty.characters.find(char => char.name === characterName);
 
                 if (character) {
-                    if (context.gameParty.inventoryMap.has(item[0])) {
-                        const inventoryItem = context.gameParty.inventoryMap.get(item[0]);
-                        if (inventoryItem.quantity > 1) {
-                            inventoryItem.quantity -= 1;
-                        } else {
-                            context.gameParty.inventoryMap.delete(item[0]);
-                        }
+                    // Use the inventory's removeItem method instead of directly manipulating inventoryMap
+                    if (context.gameParty.inventory.hasItem(item[0])) {
+                        context.gameParty.inventory.removeItem(item[0]);
                         updateCharacterAttributes(character, item);
                         character.capAttributes();
                         character.updateCharacter();
                         updateStatBars(character);
-                        context.gameParty.updateInventory();
+                        context.gameParty.inventory.updateDisplay();
                     }
                 }
             }
@@ -830,7 +796,8 @@ function clearAndPopulateOptions(selectElement, character, items, itemType, defa
         }
     } else {
         for (const item of items) {
-            if (context.gameParty.inventoryMap.has(item[0])) {
+            // Use hasItem instead of checking inventoryMap directly
+            if (context.gameParty.inventory.hasItem(item[0])) {
                 const option = document.createElement('option');
                 option.textContent = `${item[0]} (+${item[1]})`;
                 option.value = item[0];
@@ -850,7 +817,8 @@ function updateButtons(itemType, items, defaultOptionText, updateCharacterAttrib
         if (itemType === 'interaction') {
             hasItems = true;
         } else {
-            hasItems = Array.from(context.gameParty.inventoryMap.keys()).some(inventoryItem => items.some(item => item.includes(inventoryItem)));
+            // Update this to use the Inventory class methods instead of directly accessing inventoryMap
+            hasItems = items.some(item => context.gameParty.inventory.hasItem(item[0]));
         }
         for (const character of context.gameParty.characters) {
             try {
@@ -1217,6 +1185,7 @@ async function createCharacterForm() {
     form.appendChild(avatarSection);
 
     const submitButton = document.createElement('button');
+
     submitButton.textContent = 'Start Game';
     submitButton.addEventListener('click', () => {
         const name = nameInput.value;
