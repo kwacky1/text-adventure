@@ -4,8 +4,7 @@ import Party from './party.js';
 
 const context = {
     gameParty: null,
-    remainingNames: [],
-    battleInProgress: false
+    remainingNames: []
 };
 
 function setGameParty(gameParty) {
