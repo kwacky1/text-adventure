@@ -92,6 +92,10 @@ function getEvent(chance) {
     } else {
         var event = singlePlayerEvents[Math.floor(Math.random() * singlePlayerEvents.length)];
     }
+    if (window.location.hostname === '127.0.0.1') {
+        console.log(`Base event: "${event}"`);
+        console.log(`Chance: ${chance}`);
+    }
     var friendChance = 0.2;
     var enemyChance = 0.1 + friendChance;
     var itemChance = 0.4 + enemyChance;
