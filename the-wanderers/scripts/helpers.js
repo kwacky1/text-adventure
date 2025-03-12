@@ -1206,6 +1206,7 @@ async function createCharacterForm() {
         });
         document.getElementById('gameButtons').appendChild(playTurnButton);
         context.gameParty.addCharacter(character);
+        context.gameParty.inventory.updateDisplay();
         character.createCharacter();
         character.updateCharacter();
         updateStatBars(character);
