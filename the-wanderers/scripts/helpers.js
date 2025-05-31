@@ -355,7 +355,7 @@ function foundEnemy() {
         const combatant = combatants[index];
         if (combatant.type === 'enemy') {
         // Enemy's turn to attack
-        // Add a button to commence the attack
+        // add a button to commence the attack
         setPlayButton('hide');
         const attackButton = document.createElement('button');
         attackButton.textContent = `The ${combatant.type} attacks!`;
@@ -466,6 +466,31 @@ function foundEnemy() {
                         }
                         for (var i = 0; i < attacks; i++) {
                             let damage = combatant.attack;
+                            
+                            // Only reduce durability if not using fists (which have infinite durability)
+                            if (character.weapon !== 0 && character.weaponDurability > 0) {
+                                // Reduce weapon durability by 1 for each attack
+                                character.weaponDurability -= 1;
+                                
+                                // Check if weapon has broken
+                                if (character.weaponDurability <= 0) {
+                                    addEvent(`${character.name}'s ${weapons[character.weapon][0]} has broken!`, 'orange');
+                                    // Set weapon back to fists
+                                    character.weapon = 0;
+                                    character.weaponDurability = 100;
+                                    character.updateCharacter();
+                                    // Adjust damage for this attack since the weapon broke
+                                    damage = weapons[0][1]; // fist damage
+                                    if (character.posTrait === 'fighter') {
+                                        damage += 1;
+                                    }
+                                    if (character.negTrait === 'clumsy') {
+                                        damage -= 1;
+                                        if (damage < 0) damage = 0;
+                                    }
+                                }
+                            }
+                            
                             if (i == 1) {
                                 const allEnemies = combatants.filter(c => c.type === 'enemy' && c.hp > 0 && c !== enemy);
                                 if (allEnemies.length > 0) {
@@ -508,6 +533,8 @@ function foundEnemy() {
                                 }
                             }
                         }
+                        // Update character stats to reflect weapon durability changes
+                        character.updateCharacter();
                         weaponButtons.querySelectorAll('.attack').forEach(button => button.remove());
                         setPlayButton('show');
                         handleTurn(index + 1);
@@ -528,6 +555,11 @@ function foundEnemy() {
 function foundWeapon(who, id) {
     const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1];
     addEvent(`${who} found a ${weaponType[0]}.`);
+    // Add the weapon to inventory instead of immediately offering it
+    addItemToInventory([weaponType[0], weaponType[2]]);
+    context.gameParty.inventory.updateDisplay();
+    
+    // Offer the weapon to characters
     const weaponDiv = document.getElementById('gameButtons');
     for (const character of context.gameParty.characters) {
         addWeaponChoiceButton(weaponDiv, character, weaponType, id);
@@ -541,53 +573,56 @@ function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'fou
         const oldWeapon = weapons[character.weapon];
         offerWeapon(oldWeapon, weaponType, id, character, button, weaponDiv, from);
     } else {
-        button.innerText = `Give ${from} ${weapon} (${damage} attack) to ${character.name}`;
-        button.addEventListener('click', () =>
-        {
+        const weaponName = weaponType[0];
+        const damage = weaponType[1];
+        button.innerText = `Give ${from} ${weaponName} (${damage} attack) to ${character.name}`;
+        button.addEventListener('click', () => {
+            // Set weapon index and durability
             character.weapon = weapons.indexOf(weaponType);
-            addEvent(`${character.name} picked up the ${weapon}.`);
-//            weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
+            character.weaponDurability = weaponType[2];
+            
+            addEvent(`${character.name} picked up the ${weaponName}.`);
+            // Remove the weapon from inventory
+            context.gameParty.inventory.removeItem(weaponName);
+            context.gameParty.inventory.updateDisplay();
+            weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
             character.updateCharacter();
+            setPlayButton('show');
         });
         weaponDiv.appendChild(button);
     }
 }
 
-function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, from) {
-    const oldWeaponType = oldWeapon[0];
-    const oldDamage = oldWeapon[1];
-    const newWeaponType = newWeapon[0];
-    const newDamage = newWeapon[1];
-    if (oldDamage < newDamage) {
-        // hide all divs and buttons in the weaponDiv
-        const allButtonsExceptWeapons = weaponDiv.querySelectorAll(`button:not(.weapon0):not(.weapon1)`);
-        allButtonsExceptWeapons.forEach(button => button.style.display = 'none');
-        button.innerText = `Replace ${oldWeaponType} (${oldDamage} damage) with ${from} ${newWeaponType} (${newDamage} damage) for ${character.name}`;
-        button.classList.add(`weapon${id}`);
-        button.classList.add(`${newWeaponType}`);
-        const characterClass = character.name.split(' ').join('');
-        button.classList.add(characterClass);
-        button.addEventListener('click', () =>
-        {
-            character.weapon = weapons.indexOf(newWeapon);
-            addEvent(`${character.name} replaced their ${oldWeaponType} with the ${newWeaponType}.`);
-            weaponDiv.querySelectorAll(`.weapon${id}`).forEach(button => button.remove());
-            const characterButtons = weaponDiv.querySelectorAll(`.${characterClass}`);
-            if (characterButtons.length > 0) {
-                characterButtons.forEach(button => button.remove());
-            }
-            character.updateCharacter();
-            if (weaponDiv.querySelectorAll('.weapon0').length === 0 && weaponDiv.querySelectorAll('.weapon1').length === 0) {
-                for (const otherCharacter of context.gameParty.characters) {
-                    if (weapons[otherCharacter.weapon][1] < oldDamage) {
-                        addWeaponChoiceButton(weaponDiv, otherCharacter, oldWeapon, id, character.name + "'s");
-                    }
-                }
-            }
-            setPlayButton('show');
-        });
-        weaponDiv.appendChild(button);
+// Add functions for weapon management
+function updateWeaponAttributes(character, weaponItem) {
+    const weaponInfo = weapons.find(w => w[0] === weaponItem[0]);
+    if (weaponInfo) {
+        // Store the old weapon and durability
+        const oldWeapon = weapons[character.weapon];
+        const oldWeaponDurability = character.weaponDurability;
+        
+        // Set new weapon
+        character.weapon = weapons.indexOf(weaponInfo);
+        character.weaponDurability = weaponItem[1]; // Use the stored durability
+        
+        // If the old weapon wasn't fists, add it back to inventory
+        if (oldWeapon[0] !== 'fist') {
+            addItemToInventory([oldWeapon[0], oldWeaponDurability]);
+        }
+        
+        addEvent(`${character.name} equipped the ${weaponItem[0]}.`);
+        updateWeaponButtons();
     }
+}
+
+function updateWeaponButtons() {
+    // This works similar to the food and medical buttons
+    // First collect all available weapons in inventory
+    const weaponItems = weapons.slice(1).filter(weaponItem => 
+        context.gameParty.inventory.hasItem(weaponItem[0])
+    );
+    
+    updateButtons('weapon', weaponItems, 'Give weapon to', updateWeaponAttributes);
 }
 
 function foundMedical(who) {
@@ -713,6 +748,7 @@ async function addPlayer() {
             updateStatBars(character);
             updateFoodButtons();
             updateMedicalButtons();
+            updateWeaponButtons(); // Add this line to update weapon buttons when new player joins
             updateInteractionButtons();
         }
         updateRelationships();

@@ -15,10 +15,10 @@ export const medical = [
 ];
 
 export const weapons = [
-    ['fist', 1],
-    ['stick', 2],
-    ['knife', 3],
-    ['pistol', 4]
+    ['fist', 1, 100], // infinite durability but maybe like a really small chance for each hit that you break it and can't hit til the next day or something
+    ['stick', 2, 4], // low durablity, maybe 3-4 hits? that's the average amount it takes to defeat a zombie i think
+    ['knife', 3, 12], // high durability but medium damage, like 12-16 hits, 3x stick
+    ['pistol', 4, 8] // medium durability but high damage, 2x stick = 6-8 hits
 ];
 
 // Inventory management class
@@ -94,8 +94,8 @@ export class Inventory {
             else if (medical.some(medicalItem => medicalItem[0] === key)) {
                 categories.medical.items.push(item);
             }
-            // Otherwise assume it's a weapon (for future expansion)
-            else {
+            // Check if it's a weapon
+            else if (weapons.some(weaponItem => weaponItem[0] === key)) {
                 categories.weapons.items.push(item);
             }
         });
@@ -121,14 +121,22 @@ export class Inventory {
                     const itemElement = document.createElement('li');
                     itemElement.className = 'inventory-item';
                     
-                    // Add item value indicator (+ signs based on value)
-                    const valueIndicator = '+'.repeat(Math.min(5, Math.round(item.value)));
+                    let valueDisplay;
+                    if (category === categories.weapons) {
+                        // For weapons, display damage based on the matching weapon from the weapons array
+                        const weaponInfo = weapons.find(w => w[0] === item.name);
+                        const damage = weaponInfo ? weaponInfo[1] : '?';
+                        valueDisplay = `DMG: ${damage} | DUR: ${item.value}`;
+                    } else {
+                        // For other items, use the plus signs
+                        valueDisplay = '+'.repeat(Math.min(5, Math.round(item.value)));
+                    }
                     
                     itemElement.innerHTML = `
                         <span class="item-icon">${category.icon}</span>
                         <span class="item-name">${item.name}</span>
                         <span class="item-quantity">x${item.quantity}</span>
-                        <span class="item-value">${valueIndicator}</span>
+                        <span class="item-value">${valueDisplay}</span>
                     `;
                     itemList.appendChild(itemElement);
                 });
