@@ -77,10 +77,6 @@ function getEvent(chance) {
     } else {
         var event = singlePlayerEvents[Math.floor(Math.random() * singlePlayerEvents.length)];
     }
-    if (window.location.hostname === '127.0.0.1') {
-        console.log(`Base event: "${event}"`);
-        console.log(`Chance: ${chance}`);
-    }
     var friendChance = 0.2;
     var enemyChance = 0.1 + friendChance;
     var itemChance = 0.4 + enemyChance;
@@ -226,15 +222,50 @@ function foundFriend() {
     const friendDiv = document.createElement('div');
     friendDiv.textContent = 'You are approached by an adventurer who wants to join your party';
     const acceptButton = document.createElement('button');
-    acceptButton.textContent = 'Accept';
-    acceptButton.addEventListener('click', async () => {
+    acceptButton.textContent = 'Accept';    acceptButton.addEventListener('click', async () => {
+        await addPlayer();
+        const newMember = context.gameParty.characters[context.gameParty.characters.length - 1];
+        
+        // 60% chance to bring an item
+        if (Math.random() < 0.6) {
+            const itemType = Math.random();
+            let itemMessage = "";
+            
+            if (itemType <= 0.4) {
+                // 40% chance for food
+                const foodType = food[Math.floor(Math.random() * food.length)];
+                addItemToInventory(foodType);
+                updateFoodButtons();
+                context.gameParty.inventory.updateDisplay();
+                itemMessage = ` They brought some ${foodType[0]} to share.`;
+            } else if (itemType <= 0.7) {
+                // 30% chance for medical
+                const medicalType = medical[Math.floor(Math.random() * medical.length)];
+                addItemToInventory(medicalType);
+                updateMedicalButtons();
+                context.gameParty.inventory.updateDisplay();
+                itemMessage = ` They brought some medical supplies (${medicalType[0]}) with them.`;
+            } else {
+                // 30% chance for weapon
+                const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1];
+                addItemToInventory([weaponType[0], weaponType[2]]);
+                context.gameParty.inventory.updateDisplay();
+                itemMessage = ` They brought a ${weaponType[0]} for protection.`;
+            }
+            addEvent(`${newMember.name} has joined the party!${itemMessage}`);
+        } else {
+            addEvent(`${newMember.name} has joined the party!`);
+        }
+
         // make morale of party members go up when a new member joins
         for (const character of context.gameParty.characters) {
-            character.morale += 1;
-            character.capAttributes();
-            updateStatBars(character);
+            if (character !== newMember) {  // Don't increase new member's morale
+                character.morale += 1;
+                character.capAttributes();
+                updateStatBars(character);
+            }
         }
-        await addPlayer();
+
         friendDiv.remove();
         acceptButton.remove();
         declineButton.remove();
@@ -794,7 +825,6 @@ async function addPlayer() {
             const shirt = "images/shirts/" + shirtStyle[Math.floor(Math.random() * shirtStyle.length)] + '_' + shirtColour[Math.floor(Math.random() * shirtColour.length)];
             const character = new Character(firstName, age, posTrait[0], negTrait[0], skin, hair, shirt);
             context.gameParty.addCharacter(character);
-            addEvent(`${character.name} has joined the party!`);
             character.createCharacter();
             character.updateCharacter();
             updateStatBars(character);
