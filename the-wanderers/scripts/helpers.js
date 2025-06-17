@@ -1350,7 +1350,29 @@ async function createCharacterForm() {
         const eventsDiv = document.getElementById('content');
         eventsDiv.style.display = 'flex';
 
-        addEvent(`A new illness has swept the world and the infected have begun to rise from the dead. The world is ending, but ${character.name}'s life doesn't have to just yet.`)
+        // Get trait-specific introduction text
+        let introText = 'A new illness has swept the world and the infected have begun to rise from the dead. ';
+        switch(posTrait) {
+            case 'resilient':
+                introText += `Despite this, ${character.name} knows they're going to push through.`;
+                break;
+            case 'friendly':
+                introText += `The other survivors are out there somewhere, and ${character.name}'s already looking.`;
+                break;
+            case 'scavenger':
+                introText += `Luckily, ${character.name} is equipped for this situation.`;
+                break;
+            case 'optimistic':
+                introText += `The world is ending, but ${character.name}'s life doesn't have to just yet.`;
+                break;
+            case 'fighter':
+                introText += `They'd better look out, though - ${character.name} knows how to fight.`;
+                break;
+            default:
+                introText += `The world is ending, but ${character.name}'s life doesn't have to just yet.`;
+        }
+        addEvent(introText);
+
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
     });
