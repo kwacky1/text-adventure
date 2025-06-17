@@ -1,3 +1,5 @@
+import { weapons } from './party.js';
+
 export const hungerArray = [
     'near death',
     'near death',
@@ -43,13 +45,6 @@ export const healthArray = [
   'fine'
 ];
 
-export const weaponArray = [
-  ['fist', 1],
-  ['stick', 2],
-  ['knife', 3],
-  ['pistol', 4]
-];
-
 export class Character {
   constructor(name, age, posTrait, negTrait, skin, hair, shirt) {
     this.id = 0;
@@ -64,6 +59,7 @@ export class Character {
     this.negTrait = negTrait;
     this.relationships = new Map();
     this.weapon = 0;
+    this.weaponDurability = 100;
     this.skin = skin;
     this.hair = hair;
     this.shirt = shirt;
@@ -219,7 +215,7 @@ export class Character {
     const weaponPreview = document.createElement('div');
     weaponPreview.className = 'weaponSprite';
     const weaponPreviewImg = weaponPreview.appendChild(document.createElement('img'));
-    const weaponType = weaponArray[this.weapon][0];
+    const weaponType = weapons[this.weapon][0];
     if (weaponType == 'fist') {
       const skinType = this.skin.split('/').pop().split('.').shift();
       weaponPreviewImg.src = "images/weapons/weapon_" + skinType + weaponType + ".png";
@@ -275,10 +271,17 @@ export class Character {
     healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
     statsContainer.appendChild(healthStat);
 
+    // Display weapon with durability information
     const weapon = document.createElement('div');
     weapon.classList.add('stat');
     weapon.id = 'weapon';
-    weapon.innerHTML = `Weapon: <span class="statValue">${weaponArray[this.weapon][0]}</span>`;
+    
+    if (this.weapon === 0) {
+      weapon.innerHTML = `Weapon: <span class="statValue">${weapons[this.weapon][0]}</span>`;
+    } else {
+      weapon.innerHTML = `Weapon: <span class="statValue">${weapons[this.weapon][0]} (${this.weaponDurability}/${weapons[this.weapon][2]})</span>`;
+    }
+    
     statsContainer.appendChild(weapon);
 
     characterDiv.appendChild(statsContainer);
@@ -298,6 +301,12 @@ export class Character {
     medicalSelect.innerHTML = `<option value="medical">Heal ${this.name}</option>`;
     inventoryList.appendChild(medicalSelect);
 
+    // Add weapon select dropdown
+    const weaponSelect = document.createElement('select');
+    weaponSelect.id = 'weaponSelect';
+    weaponSelect.innerHTML = `<option value="weapon">Give weapon to ${this.name}</option>`;
+    inventoryList.appendChild(weaponSelect);
+
     const interactSelect = document.createElement('select');
     interactSelect.id = 'interactionSelect';
     interactSelect.innerHTML = `<option value="interaction">Interact with</option>`;
@@ -307,7 +316,7 @@ export class Character {
     relationships.classList.add('relationships');
     relationships.innerHTML = `<p>Relationships for ${this.name}</p>`;
     characterDiv.appendChild(relationships);
-      }
+  }
 
   updateCharacter() {
     this.capAttributes();
@@ -321,8 +330,13 @@ export class Character {
       characterDiv.querySelector('#moraleStat').innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
       characterDiv.querySelector('#hungerStat').innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
       characterDiv.querySelector('#healthStat').innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
-      const weaponType = weaponArray[this.weapon][0];
-      characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
+      const weaponType = weapons[this.weapon][0];
+      // Display weapon durability (except for fists which have "infinite" durability)
+      if (this.weapon === 0) {
+        characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType}</span>`;
+      } else {
+        characterDiv.querySelector('#weapon').innerHTML = `Weapon: <span class="statValue">${weaponType} (${this.weaponDurability}/${weapons[this.weapon][2]})</span>`;
+      }
       if (characterDiv.querySelector('.weaponSprite')) {
         if (weaponType == 'fist') {
           const skinType = this.skin.split('/').pop().split('.').shift();

@@ -1,6 +1,7 @@
 var turnNumber = 1;
 
-import { context, getEvent, addItemToInventory, updateStatBars, food, medical, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm } from './helpers.js';
+import { context, getEvent, addItemToInventory, updateStatBars, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts, setPlayButton } from './helpers.js';
+import { food, medical } from './party.js';
 
 function playTurn() {
     // Move current events to turnX div
@@ -19,6 +20,7 @@ function playTurn() {
     eventItem.textContent = currentEvents;
     eventsDiv.insertBefore(eventItem, eventsDiv.children[1]);
     currentEventsDiv.textContent = '';
+    setPlayButton('hide');
     // Begin new turn
     updateParty();
     if (context.gameParty.characters.length === 0) {
@@ -26,23 +28,17 @@ function playTurn() {
         allButtons.remove();
         const partyInventoryDiv = document.getElementById('partyInventory');
         partyInventoryDiv.remove();
-        // output character is dead to the events div
-        addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
-        const playTurnButton = document.getElementById('playTurnButton');
-        if (playTurnButton) {
-            playTurnButton.remove()
-        }
         const eventImage = document.getElementById('eventImage');
         eventImage.remove();
+        // output character is dead to the events div
+        addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
     } else {
         const chance = Math.random();
         getEvent(chance);
-        context.gameParty.updateInventory();
+        // Update inventory display - changed to use inventory.updateDisplay() directly
+        context.gameParty.inventory.updateDisplay();
         turnNumber += 1;
-        const playTurnButton = document.getElementById('playTurnButton');
-        if (playTurnButton) {
-            playTurnButton.innerText = `Play Turn ${turnNumber}`;
-        }
+        setPlayButton(`Play Turn ${turnNumber}`)
     }
 
     function updateParty() {
@@ -75,8 +71,48 @@ function playTurn() {
                         addEvent(`${character.name} is feeling strange.`);
                         updateStatBars(character);
                     }
-                }
-                if (character.morale <= 0 && context.gameParty.characters.length > 1) {
+                }                if (character.morale <= 0 && context.gameParty.characters.length > 1) {
+                    // Calculate average relationship level (0=cold to 4=family)
+                    let totalRelationship = 0;
+                    let otherCharacters = context.gameParty.characters.filter(c => c !== character);
+                    for (const other of otherCharacters) {
+                        totalRelationship += character.relationships.get(other);
+                    }
+                    let avgRelationship = totalRelationship / otherCharacters.length;
+                    
+                    // Higher chance to steal if relationships are bad (cold/strangers)
+                    // Base 10% chance, goes up to 50% for cold relationships
+                    let stealChance = 0.1 + (0.4 * (1 - (avgRelationship / 4)));
+                    
+                    if (Math.random() < stealChance) {
+                        // Try to steal something
+                        let allItems = [];
+                        // Add all food items
+                        food.forEach(f => {
+                            if (context.gameParty.inventory.hasItem(f[0])) {
+                                allItems.push(f[0]);
+                            }
+                        });
+                        // Add all medical items
+                        medical.forEach(m => {
+                            if (context.gameParty.inventory.hasItem(m[0])) {
+                                allItems.push(m[0]);
+                            }
+                        });
+                        
+                        if (allItems.length > 0) {
+                            // Steal 1-2 random items
+                            let itemsToSteal = Math.min(1 + Math.floor(Math.random() * 2), allItems.length);
+                            for (let i = 0; i < itemsToSteal; i++) {
+                                let stolenItem = allItems[Math.floor(Math.random() * allItems.length)];
+                                context.gameParty.inventory.removeItem(stolenItem);
+                                addEvent(`${character.name} took some ${stolenItem} with them.`, "orange");
+                                allItems = allItems.filter(item => item !== stolenItem);
+                            }
+                            context.gameParty.inventory.updateDisplay();
+                        }
+                    }
+                    
                     addEvent(`${character.name} has lost all hope. They have left the party.`);
                     checkDeathEffects(character);
                     context.gameParty.removeCharacter(character);
@@ -88,6 +124,7 @@ function playTurn() {
                 context.gameParty.removeCharacter(character);
                 updateRelationships();
             }
+            checkPartyAlerts(character);
         };
         updateInteractionButtons();
     }
@@ -103,17 +140,17 @@ function playTurn() {
         if (character.negTrait === 'hypochondriac') {
             // 10% chance of using a medical item without benefit
             if (Math.random() < 0.1) {
-                // Collect medical items from the inventory Map
-                const medicalitems = [];
-                context.gameParty.inventoryMap.forEach((value, key) => {
-                    if (medical.some(medicalItem => medicalItem.includes(key))) {
-                        medicalitems.push(key);
+                // Collect medical items using the new Inventory class methods
+                const medicalItems = [];
+                medical.forEach(medItem => {
+                    if (context.gameParty.inventory.hasItem(medItem[0])) {
+                        medicalItems.push(medItem[0]);
                     }
                 });
 
-                if (medicalitems.length > 0) {
-                    const item = medicalitems[Math.floor(Math.random() * medicalitems.length)];
-                    context.gameParty.inventoryMap.delete(item);
+                if (medicalItems.length > 0) {
+                    const item = medicalItems[Math.floor(Math.random() * medicalItems.length)];
+                    context.gameParty.inventory.removeItem(item);
                     addEvent(`${character.name} used the ${item} but it had no effect.`);
                     updateMedicalButtons();
                 }
