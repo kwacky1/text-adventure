@@ -126,7 +126,8 @@ export class Inventory {
                         // For weapons, display damage based on the matching weapon from the weapons array
                         const weaponInfo = weapons.find(w => w[0] === item.name);
                         const damage = weaponInfo ? weaponInfo[1] : '?';
-                        valueDisplay = `DMG: ${damage} | DUR: ${item.value}`;
+                        const durability = weaponInfo ? weaponInfo[2] : '?';
+                        valueDisplay = `DMG: ${damage} | DUR: ${durability}`;
                     } else {
                         // For other items, use the plus signs
                         valueDisplay = '+'.repeat(Math.min(5, Math.round(item.value)));
