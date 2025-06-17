@@ -71,8 +71,48 @@ function playTurn() {
                         addEvent(`${character.name} is feeling strange.`);
                         updateStatBars(character);
                     }
-                }
-                if (character.morale <= 0 && context.gameParty.characters.length > 1) {
+                }                if (character.morale <= 0 && context.gameParty.characters.length > 1) {
+                    // Calculate average relationship level (0=cold to 4=family)
+                    let totalRelationship = 0;
+                    let otherCharacters = context.gameParty.characters.filter(c => c !== character);
+                    for (const other of otherCharacters) {
+                        totalRelationship += character.relationships.get(other);
+                    }
+                    let avgRelationship = totalRelationship / otherCharacters.length;
+                    
+                    // Higher chance to steal if relationships are bad (cold/strangers)
+                    // Base 10% chance, goes up to 50% for cold relationships
+                    let stealChance = 0.1 + (0.4 * (1 - (avgRelationship / 4)));
+                    
+                    if (Math.random() < stealChance) {
+                        // Try to steal something
+                        let allItems = [];
+                        // Add all food items
+                        food.forEach(f => {
+                            if (context.gameParty.inventory.hasItem(f[0])) {
+                                allItems.push(f[0]);
+                            }
+                        });
+                        // Add all medical items
+                        medical.forEach(m => {
+                            if (context.gameParty.inventory.hasItem(m[0])) {
+                                allItems.push(m[0]);
+                            }
+                        });
+                        
+                        if (allItems.length > 0) {
+                            // Steal 1-2 random items
+                            let itemsToSteal = Math.min(1 + Math.floor(Math.random() * 2), allItems.length);
+                            for (let i = 0; i < itemsToSteal; i++) {
+                                let stolenItem = allItems[Math.floor(Math.random() * allItems.length)];
+                                context.gameParty.inventory.removeItem(stolenItem);
+                                addEvent(`${character.name} took some ${stolenItem} with them.`, "orange");
+                                allItems = allItems.filter(item => item !== stolenItem);
+                            }
+                            context.gameParty.inventory.updateDisplay();
+                        }
+                    }
+                    
                     addEvent(`${character.name} has lost all hope. They have left the party.`);
                     checkDeathEffects(character);
                     context.gameParty.removeCharacter(character);
