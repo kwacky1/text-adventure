@@ -846,12 +846,25 @@ function getName(data) {
 function handleSelection(event, items, updateCharacterAttributes) {
     try {
         const selectedItem = event.target.value;
-        if (selectedItem === 'interact') {
-            const characterName = event.target.selectedOptions[0].dataset.characterName;
+        if (selectedItem === 'interact') {            const characterName = event.target.selectedOptions[0].dataset.characterName;
             const targetName = event.target.selectedOptions[0].dataset.targetName;
             event.target.remove(event.target.selectedIndex);
             const character = context.gameParty.characters.find(char => char.name === characterName);
             const target = context.gameParty.characters.find(char => char.name === targetName);
+
+            // Remove the reciprocal interaction option
+            const targetSelect = document.querySelector(`#${targetName.split(' ').join('')} #options #interactionSelect`);
+            if (targetSelect) {
+                const options = Array.from(targetSelect.options);
+                const reciprocalOption = options.find(option => 
+                    option.dataset.characterName === targetName && 
+                    option.dataset.targetName === characterName
+                );
+                if (reciprocalOption) {
+                    targetSelect.remove(reciprocalOption.index);
+                }
+            }
+
             const chance = Math.random();
             if (chance <= 0.5) {
                 addEvent(`${target.name} is not interested in talking right now.`);
