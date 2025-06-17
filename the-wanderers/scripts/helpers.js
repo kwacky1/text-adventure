@@ -133,6 +133,9 @@ function getEvent(chance) {
             updateStatBars(sickCharacter);
             event = `${sickCharacter.name} is feeling queasy.`;
             addEvent(event);
+        } else {
+            // If no healthy characters are available, use the base event
+            addEvent(event);
         }
     } else if (chance > illnessChance && chance <= miniEventChance) {
         if (context.gameParty.characters.length >= 3) {
@@ -555,15 +558,64 @@ function foundEnemy() {
 function foundWeapon(who, id) {
     const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1];
     addEvent(`${who} found a ${weaponType[0]}.`);
-    // Add the weapon to inventory instead of immediately offering it
-    addItemToInventory([weaponType[0], weaponType[2]]);
-    context.gameParty.inventory.updateDisplay();
     
-    // Offer the weapon to characters
-    const weaponDiv = document.getElementById('gameButtons');
+    // Check if any character can use this weapon better than their current one
+    let bestCandidate = null;
+    let maxDamageDiff = -1;
+
     for (const character of context.gameParty.characters) {
-        addWeaponChoiceButton(weaponDiv, character, weaponType, id);
+        const currentWeaponDamage = weapons[character.weapon][1];
+        const newWeaponDamage = weaponType[1];
+        const damageDiff = newWeaponDamage - currentWeaponDamage;
+        
+        if (damageDiff > maxDamageDiff) {
+            maxDamageDiff = damageDiff;
+            bestCandidate = character;
+        }
     }
+
+    if (bestCandidate && maxDamageDiff > 0) {
+        // If the old weapon wasn't fists, add it back to inventory
+        const oldWeapon = weapons[bestCandidate.weapon];
+        if (oldWeapon[0] !== 'fist') {
+            addItemToInventory([oldWeapon[0], bestCandidate.weaponDurability]);
+        }
+        
+        // Equip new weapon
+        bestCandidate.weapon = weapons.indexOf(weaponType);
+        bestCandidate.weaponDurability = weaponType[2];
+        addEvent(`${bestCandidate.name} equipped the ${weaponType[0]}.`);
+        bestCandidate.updateCharacter();
+    } else {
+        // If no one can use it better, add to inventory
+        addItemToInventory([weaponType[0], weaponType[2]]);
+        context.gameParty.inventory.updateDisplay();
+    }
+}
+
+function offerWeapon(oldWeapon, newWeapon, id, character, button, weaponDiv, from = 'found') {
+    const oldDamage = oldWeapon[1];
+    const newDamage = newWeapon[1];
+    button.innerText = `Replace ${character.name}'s ${oldWeapon[0]} (${oldDamage} attack) with ${from} ${newWeapon[0]} (${newDamage} attack)`;
+    button.classList.add('weapon');
+    button.addEventListener('click', () => {
+        // If the old weapon isn't fists, add it back to inventory
+        if (oldWeapon[0] !== 'fist') {
+            addItemToInventory([oldWeapon[0], character.weaponDurability]);
+        }
+        
+        // Set new weapon
+        character.weapon = weapons.indexOf(newWeapon);
+        character.weaponDurability = newWeapon[2];
+        
+        addEvent(`${character.name} picked up the ${newWeapon[0]}.`);
+        // Remove the weapon from inventory
+        context.gameParty.inventory.removeItem(newWeapon[0]);
+        context.gameParty.inventory.updateDisplay();
+        weaponDiv.querySelectorAll('.weapon').forEach(button => button.remove());
+        character.updateCharacter();
+        setPlayButton('show');
+    });
 }
 
 function addWeaponChoiceButton(weaponDiv, character, weaponType, id, from = 'found') {
@@ -622,7 +674,7 @@ function updateWeaponButtons() {
         context.gameParty.inventory.hasItem(weaponItem[0])
     );
     
-    updateButtons('weapon', weaponItems, 'Give weapon to', updateWeaponAttributes);
+    updateButtons('weapon', weaponItems, 'Equip ', updateWeaponAttributes);
 }
 
 function foundMedical(who) {
