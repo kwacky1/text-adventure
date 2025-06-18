@@ -200,9 +200,9 @@ function playTurn() {
         }
         if (character.posTrait === 'scavenger') {
             // 10% chance of finding an extra food item
-            if (Math.random() < 0.1) {
-                addEvent(`${character.name} was able to scavenge some extra food.`);
-                const foodType = food[Math.floor(Math.random() * food.length)];
+            if (Math.random() < 0.1) {                const foodType = food[Math.floor(Math.random() * food.length)];
+                const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
+                addEvent(`${character.name} was able to scavenge ${variation} (${foodType[0]}).`);
                 addItemToInventory(foodType);
                 updateFoodButtons();
             }

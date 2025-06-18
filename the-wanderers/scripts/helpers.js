@@ -52,6 +52,72 @@ const relationships = [
     'family'
 ];
 
+const newCharacterFlavor = [
+    'They tell you they haven\'t found any shelter for days.',
+    'They breathlessly explain that their previous camp was destroyed by zombies.',
+    'They tell you they can help you.',
+    'They\'re looking around suspiciously, but keep telling you they definitely weren\'t followed.',
+    'They look distraught.',
+    'They mutter about having not talked to anyone in weeks.',
+    'They insist they\'re immune to the infection.',
+    'They\'re covered in branches and leaves and claim to be a survival expert.',
+    'They laugh a little too hard when you ask whether they\'ve been exposed to the infection.',
+    'They hide their bandaged arm behind themself.',
+    'They look you dead in the eye and promise they\'d never eat a person.',
+    'They call you an unfamiliar name and seem disappointed when you correct them.'
+];
+
+const medicalLocationFlavor = [
+    'in the bathroom of an abandoned house',
+    'in the backpack of a dead zombie',
+    'in a worn first aid kit',
+    'in a wrecked ambulance',
+    'under some floorboards',
+    'left on the floor of an abandoned clinic',
+    'buried under some rubble',
+    'inside a damaged vending machine'
+];
+
+const singleZombieVariations = [
+    'ambushes the camp from the bushes',
+    'lurches out from the doorway of an abandoned building',
+    'crawls out from under a car wreck',
+    'lunges through a cracked window',
+    'drops from the trees'
+];
+
+const multiZombieVariations = [
+    'barrage through an old wooden fence',
+    'creep out from the shadows of a collapsed building',
+    'shamble down the road towards you'
+];
+
+const meleeAttackDescriptions = [
+    'whacks a zombie in the head',
+    'swings wildly at a zombie',
+    'knocks a zombie back'
+];
+
+const knifeAttackDescriptions = [
+    'digs their knife into a zombie',
+    'slashes at a zombie'
+];
+
+const gunAttackDescriptions = [
+    'fires a shot at a zombie'
+];
+
+const zombieAttackDescriptions = [
+    'claws at [NAME]\'s arm',
+    'bites into [NAME]\'s shoulder',
+    'swipes its hand across [NAME]\'s face',
+    'lunges at [NAME]',
+    'grabs at [NAME]\'s leg',
+    'slams its head into [NAME]',
+    'scratches at [NAME]\'s chest',
+    'shoves [NAME] over'
+];
+
 function getEvent(chance) {
     var who = "The party";
     if (context.gameParty.characters.length === 1) {
@@ -164,7 +230,8 @@ function getEvent(chance) {
                 var hasFood = false;
                 for (const foodItem of food) {
                     if (context.gameParty.inventory.hasItem(foodItem[0])) {
-                        addEvent(`${name1.name} and ${name2.name} are arguing over who gets to eat the ${foodItem[0]}.`);
+                        const variation = foodItem[2][Math.floor(Math.random() * foodItem[2].length)];
+                        addEvent(`${name1.name} and ${name2.name} are arguing over who gets to eat ${variation}.`);
                         name1.relationships.set(name2, name1.relationships.get(name2) - 1);
                         name2.relationships.set(name1, name2.relationships.get(name1) - 1);
                         updateRelationships();
@@ -220,9 +287,10 @@ function updateRelationships() {
 
 function foundFriend() {
     const friendDiv = document.createElement('div');
-    friendDiv.textContent = 'You are approached by an adventurer who wants to join your party';
+    const flavorText = newCharacterFlavor[Math.floor(Math.random() * newCharacterFlavor.length)];
+    friendDiv.textContent = `You are approached by an adventurer who wants to join your party. ${flavorText}`;
     const acceptButton = document.createElement('button');
-    acceptButton.textContent = 'Accept';    acceptButton.addEventListener('click', async () => {
+    acceptButton.textContent = 'Accept';acceptButton.addEventListener('click', async () => {
         await addPlayer();
         const newMember = context.gameParty.characters[context.gameParty.characters.length - 1];
         
@@ -231,13 +299,13 @@ function foundFriend() {
             const itemType = Math.random();
             let itemMessage = "";
             
-            if (itemType <= 0.4) {
-                // 40% chance for food
+            if (itemType <= 0.4) {                // 40% chance for food
                 const foodType = food[Math.floor(Math.random() * food.length)];
+                const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
                 addItemToInventory(foodType);
                 updateFoodButtons();
                 context.gameParty.inventory.updateDisplay();
-                itemMessage = ` They brought some ${foodType[0]} to share.`;
+                itemMessage = ` They brought ${variation} (${foodType[0]}) to share.`;
             } else if (itemType <= 0.7) {
                 // 30% chance for medical
                 const medicalType = medical[Math.floor(Math.random() * medical.length)];
@@ -245,12 +313,13 @@ function foundFriend() {
                 updateMedicalButtons();
                 context.gameParty.inventory.updateDisplay();
                 itemMessage = ` They brought some medical supplies (${medicalType[0]}) with them.`;
-            } else {
-                // 30% chance for weapon
+            } else {                // 30% chance for weapon
                 const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1];
-                addItemToInventory([weaponType[0], weaponType[2]]);
-                context.gameParty.inventory.updateDisplay();
-                itemMessage = ` They brought a ${weaponType[0]} for protection.`;
+                // Set the weapon directly to the new member instead of inventory
+                newMember.weapon = weapons.indexOf(weaponType);
+                newMember.weaponDurability = weaponType[2];
+                newMember.updateCharacter();
+                itemMessage = ` They brought a ${weaponType[0]} with them.`;
             }
             addEvent(`${newMember.name} has joined the party!${itemMessage}`);
         } else {
@@ -293,11 +362,17 @@ function checkDeathEffects(character) {
     Acquaintances -1
     Strangers +0
     Cold +1
-    */
-    const weaponDiv = document.getElementById('gameButtons');
+    */    const dyingWeapon = weapons[character.weapon];
+    const dyingWeaponDamage = dyingWeapon[1];
+    
+    // Find character with worst weapon who could benefit from the dying character's weapon
+    let worstWeaponCharacter = null;
+    let worstWeaponDamage = Infinity;
+    
     for (const remainingCharacter of context.gameParty.characters) {
         if (remainingCharacter !== character) {
             const relationship = remainingCharacter.relationships.get(character);
+            // Apply morale effects based on relationship
             if (relationship === 4) {
                 remainingCharacter.morale -= 3;
             }
@@ -312,8 +387,32 @@ function checkDeathEffects(character) {
             }
             remainingCharacter.capAttributes();
             updateStatBars(remainingCharacter);
-            addWeaponChoiceButton(weaponDiv, remainingCharacter, weapons[character.weapon], 0, character.name + "'s");
+            
+            // Check if this character has a worse weapon than the dying character
+            const currentWeaponDamage = weapons[remainingCharacter.weapon][1];
+            if (currentWeaponDamage < dyingWeaponDamage && currentWeaponDamage < worstWeaponDamage) {
+                worstWeaponCharacter = remainingCharacter;
+                worstWeaponDamage = currentWeaponDamage;
+            }
         }
+    }    // If someone could use the better weapon, give it to them
+    if (worstWeaponCharacter) {
+        const oldWeapon = weapons[worstWeaponCharacter.weapon];
+        const oldWeaponName = oldWeapon[0];
+        // If the old weapon wasn't fists, add it to inventory
+        if (oldWeaponName !== 'fist') {
+            addItemToInventory([oldWeaponName, worstWeaponCharacter.weaponDurability]);
+            addEvent(`The party collects ${worstWeaponCharacter.name}'s ${oldWeaponName}.`);
+        }
+        worstWeaponCharacter.weapon = character.weapon;
+        worstWeaponCharacter.weaponDurability = character.weaponDurability;
+        worstWeaponCharacter.updateCharacter();
+        addEvent(`${worstWeaponCharacter.name} takes ${character.name}'s ${dyingWeapon[0]}, replacing their ${oldWeaponName}.`);
+    } else if (dyingWeapon[0] !== 'fist') {
+        // If no one needs the weapon and it's not fists, add it to inventory
+        addItemToInventory([dyingWeapon[0], character.weaponDurability]);
+        addEvent(`The party collects ${character.name}'s ${dyingWeapon[0]}.`);
+        context.gameParty.inventory.updateDisplay();
     }
 }
 
@@ -321,11 +420,14 @@ function foundEnemy() {
     const enemy = [
         ['zombie']
     ];
-    var numberOfEnemies = Math.floor(Math.random() * context.gameParty.characters.length) + 1;
+    var numberOfEnemies = Math.floor(Math.random() * context.gameParty.characters.length) + 1;    
+    
     if (numberOfEnemies == 1) {
-        addEvent(`An enemy has appeared!`);
+        const variation = singleZombieVariations[Math.floor(Math.random() * singleZombieVariations.length)];
+        addEvent(`A zombie ${variation}!`);
     } else {
-        addEvent(`${numberOfEnemies} enemies have appeared!`);
+        const variation = multiZombieVariations[Math.floor(Math.random() * multiZombieVariations.length)];
+        addEvent(`A group of zombies ${variation}!`);
     }
     // create array of enemies with random morale from 0 to 9
     var enemies = [];
@@ -405,9 +507,10 @@ function foundEnemy() {
             }
             if (Math.random() < 0.05) {
                 character.infected = true;
-            }
+            }            
             character.health = target.hp;
-            addEvent(`The ${combatant.type} attacks ${target.type} for ${damage} damage.`);
+            const attackDesc = zombieAttackDescriptions[Math.floor(Math.random() * zombieAttackDescriptions.length)];
+            addEvent(`A zombie ${attackDesc.replace('[NAME]', target.type)}. (${damage} damage)`);
             if (target.hp <= 0) {
                 addEvent(`${target.type} has succumbed to their wounds!`);
                 // Remove defeated player from combatants array
@@ -530,19 +633,44 @@ function foundEnemy() {
                                 if (allEnemies.length > 0) {
                                     enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
                                     enemyIndex = combatants.indexOf(enemy);
-                                    addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`, 'doubleHit');
+                                    // Get attack description based on weapon type
+                                    let attackDescriptions;
+                                    if (character.weapon === 0) {
+                                        attackDescriptions = meleeAttackDescriptions;
+                                    } else if (weapons[character.weapon][0].includes('knife')) {
+                                        attackDescriptions = knifeAttackDescriptions;
+                                    } else if (weapons[character.weapon][0].includes('gun') || weapons[character.weapon][0].includes('pistol')) {
+                                        attackDescriptions = gunAttackDescriptions;
+                                    } else {
+                                        attackDescriptions = meleeAttackDescriptions;
+                                    }
+                                    const attackDesc = attackDescriptions[Math.floor(Math.random() * attackDescriptions.length)];
+                                    addEvent(`${combatant.type} quickly ${attackDesc}. (${damage} damage)`, 'doubleHit');
                                 } else {
                                     nothingHappened = 1;
+                                }                            } else {
+                                // Get attack description based on weapon type
+                                let attackDescriptions;
+                                if (character.weapon === 0) { // fists
+                                    attackDescriptions = meleeAttackDescriptions;
+                                } else if (weapons[character.weapon][0].includes('knife')) {
+                                    attackDescriptions = knifeAttackDescriptions;
+                                } else if (weapons[character.weapon][0].includes('gun') || weapons[character.weapon][0].includes('pistol')) {
+                                    attackDescriptions = gunAttackDescriptions;
+                                } else { // stick or other melee weapons
+                                    attackDescriptions = meleeAttackDescriptions;
                                 }
-                            } else {
+                                
+                                const attackDesc = attackDescriptions[Math.floor(Math.random() * attackDescriptions.length)];
+                                
                                 if (criticalHit == 1) {
                                     damage += 1;
-                                    addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'critHit');
+                                    addEvent(`${combatant.type} ${attackDesc} with incredible force! (${damage} damage)`, 'critHit');
                                 } else if (criticalMiss == 1) {
                                     damage = 0;
-                                    addEvent(`${combatant.type} misses!`, 'orange');
+                                    addEvent(`${combatant.type} misses their attack!`, 'orange');
                                 } else {
-                                    addEvent(`${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'altTurn');
+                                    addEvent(`${combatant.type} ${attackDesc}. (${damage} damage)`, 'altTurn');
                                 }
                             }
                             if (nothingHappened == 0) {
@@ -553,11 +681,11 @@ function foundEnemy() {
                                 // Remove defeated enemy from combatants array
                                 combatants.splice(enemyIndex, 1);
                                 // Scavengers get a random food item
-                                const character = context.gameParty.characters.find(c => c.name === combatant.type);
-                                if (character.posTrait === 'scavenger') {
+                                const character = context.gameParty.characters.find(c => c.name === combatant.type);                                if (character.posTrait === 'scavenger') {
                                     const foodItem = food[Math.floor(Math.random() * food.length)];
+                                    const variation = foodItem[2][Math.floor(Math.random() * foodItem[2].length)];
                                     addItemToInventory(foodItem);
-                                    addEvent(`${combatant.type} made food with some... questionable meat.`);
+                                    addEvent(`${combatant.type} found ${variation} on the fallen enemy.`);
                                     context.gameParty.inventory.updateDisplay();
                                     updateFoodButtons();
                                 }
@@ -710,14 +838,16 @@ function updateWeaponButtons() {
 
 function foundMedical(who) {
     const medicalType = medical[Math.floor(Math.random() * medical.length)];
-    addEvent(`${who} found medical supplies (${medicalType[0]}).`);
+    const location = medicalLocationFlavor[Math.floor(Math.random() * medicalLocationFlavor.length)];
+    addEvent(`${who} found medical supplies (${medicalType[0]}) ${location}.`);
     addItemToInventory(medicalType);
     updateMedicalButtons();
 }
 
 function foundFood(who) {
     const foodType = food[Math.floor(Math.random() * food.length)];
-    addEvent(`${who} found food (${foodType[0]}).`);
+    const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
+    addEvent(`${who} found ${variation} (${foodType[0]}).`);
     addItemToInventory(foodType);
     updateFoodButtons();
 }
@@ -1350,7 +1480,29 @@ async function createCharacterForm() {
         const eventsDiv = document.getElementById('content');
         eventsDiv.style.display = 'flex';
 
-        addEvent(`A new illness has swept the world and the infected have begun to rise from the dead. The world is ending, but ${character.name}'s life doesn't have to just yet.`)
+        // Get trait-specific introduction text
+        let introText = 'A new illness has swept the world and the infected have begun to rise from the dead. ';
+        switch(posTrait) {
+            case 'resilient':
+                introText += `Despite this, ${character.name} knows they're going to push through.`;
+                break;
+            case 'friendly':
+                introText += `The other survivors are out there somewhere, and ${character.name}'s already looking.`;
+                break;
+            case 'scavenger':
+                introText += `Luckily, ${character.name} is equipped for this situation.`;
+                break;
+            case 'optimistic':
+                introText += `The world is ending, but ${character.name}'s life doesn't have to just yet.`;
+                break;
+            case 'fighter':
+                introText += `They'd better look out, though - ${character.name} knows how to fight.`;
+                break;
+            default:
+                introText += `The world is ending, but ${character.name}'s life doesn't have to just yet.`;
+        }
+        addEvent(introText);
+
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
     });
