@@ -78,6 +78,46 @@ const medicalLocationFlavor = [
     'inside a damaged vending machine'
 ];
 
+const singleZombieVariations = [
+    'ambushes the camp from the bushes',
+    'lurches out from the doorway of an abandoned building',
+    'crawls out from under a car wreck',
+    'lunges through a cracked window',
+    'drops from the trees'
+];
+
+const multiZombieVariations = [
+    'barrage through an old wooden fence',
+    'creep out from the shadows of a collapsed building',
+    'shamble down the road towards you'
+];
+
+const meleeAttackDescriptions = [
+    'whacks a zombie in the head',
+    'swings wildly at a zombie',
+    'knocks a zombie back'
+];
+
+const knifeAttackDescriptions = [
+    'digs their knife into a zombie',
+    'slashes at a zombie'
+];
+
+const gunAttackDescriptions = [
+    'fires a shot at a zombie'
+];
+
+const zombieAttackDescriptions = [
+    'claws at [NAME]\'s arm',
+    'bites into [NAME]\'s shoulder',
+    'swipes its hand across [NAME]\'s face',
+    'lunges at [NAME]',
+    'grabs at [NAME]\'s leg',
+    'slams its head into [NAME]',
+    'scratches at [NAME]\'s chest',
+    'shoves [NAME] over'
+];
+
 function getEvent(chance) {
     var who = "The party";
     if (context.gameParty.characters.length === 1) {
@@ -381,20 +421,7 @@ function foundEnemy() {
         ['zombie']
     ];
     var numberOfEnemies = Math.floor(Math.random() * context.gameParty.characters.length) + 1;    
-    const singleZombieVariations = [
-        'ambushes the camp from the bushes',
-        'lurches out from the doorway of an abandoned building',
-        'crawls out from under a car wreck',
-        'lunges through a cracked window',
-        'drops from the trees'
-    ];
     
-    const multiZombieVariations = [
-        'barrage through an old wooden fence',
-        'creep out from the shadows of a collapsed building',
-        'shamble down the road towards you'
-    ];
-
     if (numberOfEnemies == 1) {
         const variation = singleZombieVariations[Math.floor(Math.random() * singleZombieVariations.length)];
         addEvent(`A zombie ${variation}!`);
@@ -480,9 +507,10 @@ function foundEnemy() {
             }
             if (Math.random() < 0.05) {
                 character.infected = true;
-            }
+            }            
             character.health = target.hp;
-            addEvent(`The ${combatant.type} attacks ${target.type} for ${damage} damage.`);
+            const attackDesc = zombieAttackDescriptions[Math.floor(Math.random() * zombieAttackDescriptions.length)];
+            addEvent(`A zombie ${attackDesc.replace('[NAME]', target.type)}. (${damage} damage)`);
             if (target.hp <= 0) {
                 addEvent(`${target.type} has succumbed to their wounds!`);
                 // Remove defeated player from combatants array
@@ -605,19 +633,44 @@ function foundEnemy() {
                                 if (allEnemies.length > 0) {
                                     enemy = allEnemies[Math.floor(Math.random() * allEnemies.length)];
                                     enemyIndex = combatants.indexOf(enemy);
-                                    addEvent(`${combatant.type} hits another ${enemy.type} for ${damage} damage.`, 'doubleHit');
+                                    // Get attack description based on weapon type
+                                    let attackDescriptions;
+                                    if (character.weapon === 0) {
+                                        attackDescriptions = meleeAttackDescriptions;
+                                    } else if (weapons[character.weapon][0].includes('knife')) {
+                                        attackDescriptions = knifeAttackDescriptions;
+                                    } else if (weapons[character.weapon][0].includes('gun') || weapons[character.weapon][0].includes('pistol')) {
+                                        attackDescriptions = gunAttackDescriptions;
+                                    } else {
+                                        attackDescriptions = meleeAttackDescriptions;
+                                    }
+                                    const attackDesc = attackDescriptions[Math.floor(Math.random() * attackDescriptions.length)];
+                                    addEvent(`${combatant.type} quickly ${attackDesc}. (${damage} damage)`, 'doubleHit');
                                 } else {
                                     nothingHappened = 1;
+                                }                            } else {
+                                // Get attack description based on weapon type
+                                let attackDescriptions;
+                                if (character.weapon === 0) { // fists
+                                    attackDescriptions = meleeAttackDescriptions;
+                                } else if (weapons[character.weapon][0].includes('knife')) {
+                                    attackDescriptions = knifeAttackDescriptions;
+                                } else if (weapons[character.weapon][0].includes('gun') || weapons[character.weapon][0].includes('pistol')) {
+                                    attackDescriptions = gunAttackDescriptions;
+                                } else { // stick or other melee weapons
+                                    attackDescriptions = meleeAttackDescriptions;
                                 }
-                            } else {
+                                
+                                const attackDesc = attackDescriptions[Math.floor(Math.random() * attackDescriptions.length)];
+                                
                                 if (criticalHit == 1) {
                                     damage += 1;
-                                    addEvent(`${combatant.type} lands a critical hit! ${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'critHit');
+                                    addEvent(`${combatant.type} ${attackDesc} with incredible force! (${damage} damage)`, 'critHit');
                                 } else if (criticalMiss == 1) {
                                     damage = 0;
-                                    addEvent(`${combatant.type} misses!`, 'orange');
+                                    addEvent(`${combatant.type} misses their attack!`, 'orange');
                                 } else {
-                                    addEvent(`${combatant.type} hit the ${enemy.type} for ${damage} damage.`, 'altTurn');
+                                    addEvent(`${combatant.type} ${attackDesc}. (${damage} damage)`, 'altTurn');
                                 }
                             }
                             if (nothingHappened == 0) {
