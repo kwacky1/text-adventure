@@ -380,11 +380,27 @@ function foundEnemy() {
     const enemy = [
         ['zombie']
     ];
-    var numberOfEnemies = Math.floor(Math.random() * context.gameParty.characters.length) + 1;
+    var numberOfEnemies = Math.floor(Math.random() * context.gameParty.characters.length) + 1;    
+    const singleZombieVariations = [
+        'ambushes the camp from the bushes',
+        'lurches out from the doorway of an abandoned building',
+        'crawls out from under a car wreck',
+        'lunges through a cracked window',
+        'drops from the trees'
+    ];
+    
+    const multiZombieVariations = [
+        'barrage through an old wooden fence',
+        'creep out from the shadows of a collapsed building',
+        'shamble down the road towards you'
+    ];
+
     if (numberOfEnemies == 1) {
-        addEvent(`An enemy has appeared!`);
+        const variation = singleZombieVariations[Math.floor(Math.random() * singleZombieVariations.length)];
+        addEvent(`A zombie ${variation}!`);
     } else {
-        addEvent(`${numberOfEnemies} enemies have appeared!`);
+        const variation = multiZombieVariations[Math.floor(Math.random() * multiZombieVariations.length)];
+        addEvent(`A group of zombies ${variation}!`);
     }
     // create array of enemies with random morale from 0 to 9
     var enemies = [];
