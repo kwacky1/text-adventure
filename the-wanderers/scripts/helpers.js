@@ -52,6 +52,21 @@ const relationships = [
     'family'
 ];
 
+const newCharacterFlavor = [
+    'They tell you they haven\'t found any shelter for days.',
+    'They breathlessly explain that their previous camp was destroyed by zombies.',
+    'They tell you they can help you.',
+    'They\'re looking around suspiciously, but keep telling you they definitely weren\'t followed.',
+    'They look distraught.',
+    'They mutter about having not talked to anyone in weeks.',
+    'They insist they\'re immune to the infection.',
+    'They\'re covered in branches and leaves and claim to be a survival expert.',
+    'They laugh a little too hard when you ask whether they\'ve been exposed to the infection.',
+    'They hide their bandaged arm behind themself.',
+    'They look you dead in the eye and promise they\'d never eat a person.',
+    'They call you an unfamiliar name and seem disappointed when you correct them.'
+];
+
 function getEvent(chance) {
     var who = "The party";
     if (context.gameParty.characters.length === 1) {
@@ -221,9 +236,10 @@ function updateRelationships() {
 
 function foundFriend() {
     const friendDiv = document.createElement('div');
-    friendDiv.textContent = 'You are approached by an adventurer who wants to join your party';
+    const flavorText = newCharacterFlavor[Math.floor(Math.random() * newCharacterFlavor.length)];
+    friendDiv.textContent = `You are approached by an adventurer who wants to join your party. ${flavorText}`;
     const acceptButton = document.createElement('button');
-    acceptButton.textContent = 'Accept';    acceptButton.addEventListener('click', async () => {
+    acceptButton.textContent = 'Accept';acceptButton.addEventListener('click', async () => {
         await addPlayer();
         const newMember = context.gameParty.characters[context.gameParty.characters.length - 1];
         
