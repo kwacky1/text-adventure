@@ -238,7 +238,7 @@ function foundFriend() {
                 addItemToInventory(foodType);
                 updateFoodButtons();
                 context.gameParty.inventory.updateDisplay();
-                itemMessage = ` They brought ${variation} to share.`;
+                itemMessage = ` They brought ${variation} (${foodType[0]}) to share.`;
             } else if (itemType <= 0.7) {
                 // 30% chance for medical
                 const medicalType = medical[Math.floor(Math.random() * medical.length)];
@@ -246,12 +246,13 @@ function foundFriend() {
                 updateMedicalButtons();
                 context.gameParty.inventory.updateDisplay();
                 itemMessage = ` They brought some medical supplies (${medicalType[0]}) with them.`;
-            } else {
-                // 30% chance for weapon
+            } else {                // 30% chance for weapon
                 const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1];
-                addItemToInventory([weaponType[0], weaponType[2]]);
-                context.gameParty.inventory.updateDisplay();
-                itemMessage = ` They brought a ${weaponType[0]} for protection.`;
+                // Set the weapon directly to the new member instead of inventory
+                newMember.weapon = weapons.indexOf(weaponType);
+                newMember.weaponDurability = weaponType[2];
+                newMember.updateCharacter();
+                itemMessage = ` They brought a ${weaponType[0]} with them.`;
             }
             addEvent(`${newMember.name} has joined the party!${itemMessage}`);
         } else {
@@ -294,11 +295,17 @@ function checkDeathEffects(character) {
     Acquaintances -1
     Strangers +0
     Cold +1
-    */
-    const weaponDiv = document.getElementById('gameButtons');
+    */    const dyingWeapon = weapons[character.weapon];
+    const dyingWeaponDamage = dyingWeapon[1];
+    
+    // Find character with worst weapon who could benefit from the dying character's weapon
+    let worstWeaponCharacter = null;
+    let worstWeaponDamage = Infinity;
+    
     for (const remainingCharacter of context.gameParty.characters) {
         if (remainingCharacter !== character) {
             const relationship = remainingCharacter.relationships.get(character);
+            // Apply morale effects based on relationship
             if (relationship === 4) {
                 remainingCharacter.morale -= 3;
             }
@@ -313,8 +320,32 @@ function checkDeathEffects(character) {
             }
             remainingCharacter.capAttributes();
             updateStatBars(remainingCharacter);
-            addWeaponChoiceButton(weaponDiv, remainingCharacter, weapons[character.weapon], 0, character.name + "'s");
+            
+            // Check if this character has a worse weapon than the dying character
+            const currentWeaponDamage = weapons[remainingCharacter.weapon][1];
+            if (currentWeaponDamage < dyingWeaponDamage && currentWeaponDamage < worstWeaponDamage) {
+                worstWeaponCharacter = remainingCharacter;
+                worstWeaponDamage = currentWeaponDamage;
+            }
         }
+    }    // If someone could use the better weapon, give it to them
+    if (worstWeaponCharacter) {
+        const oldWeapon = weapons[worstWeaponCharacter.weapon];
+        const oldWeaponName = oldWeapon[0];
+        // If the old weapon wasn't fists, add it to inventory
+        if (oldWeaponName !== 'fist') {
+            addItemToInventory([oldWeaponName, worstWeaponCharacter.weaponDurability]);
+            addEvent(`The party collects ${worstWeaponCharacter.name}'s ${oldWeaponName}.`);
+        }
+        worstWeaponCharacter.weapon = character.weapon;
+        worstWeaponCharacter.weaponDurability = character.weaponDurability;
+        worstWeaponCharacter.updateCharacter();
+        addEvent(`${worstWeaponCharacter.name} takes ${character.name}'s ${dyingWeapon[0]}, replacing their ${oldWeaponName}.`);
+    } else if (dyingWeapon[0] !== 'fist') {
+        // If no one needs the weapon and it's not fists, add it to inventory
+        addItemToInventory([dyingWeapon[0], character.weaponDurability]);
+        addEvent(`The party collects ${character.name}'s ${dyingWeapon[0]}.`);
+        context.gameParty.inventory.updateDisplay();
     }
 }
 
