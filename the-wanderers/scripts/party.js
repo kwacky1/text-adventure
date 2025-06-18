@@ -1,10 +1,49 @@
 // Item category definitions
 export const food = [
-    ['rations', 0.5],
-    ['snack', 1],
-    ['dish', 2],
-    ['meal', 3],
-    ['dessert', 2] // dessert is a treat, so it's also beneficial for morale
+    ['rations', 0.5, [
+        'a packet of chips',
+        'some crackers',
+        'some jerky',
+        'an energy bar',
+        'some fruit mix',
+        'a box of biscuits',
+        'a packet of oatmeal'
+    ]],
+    ['snack', 1, [
+        'an apple',
+        'a block of cheese',
+        'a packet of instant noodles',
+        'a tub of peanut butter',
+        'a jar of pickles',
+        'a can of fish',
+        'a pickled egg'
+    ]],
+    ['dish', 2, [
+        'a can of soup',
+        'a pack of frozen vegetables',
+        'a can of beans',
+        'a tin of tomatoes',
+        'a frozen pie',
+        'a bowl of pasta',
+        'a can of stew'
+    ]],
+    ['meal', 3, [
+        'a frozen roast chicken',
+        'a frozen pizza',
+        'some pre-packaged curry',
+        'some packaged dumplings',
+        'a frozen tv dinner',
+        'some mystery pasta',
+        'a really big block of cheese'
+    ]],
+    ['dessert', 2, [ // dessert is a treat, so it's also beneficial for morale
+        'a tub of ice cream',
+        'a small chocolate cake',
+        'a glazed donut',
+        'a packet of marshmallows',
+        'a can of whipped cream',
+        'a tin of pudding'
+    ]]
 ];
 
 export const medical = [

@@ -164,7 +164,8 @@ function getEvent(chance) {
                 var hasFood = false;
                 for (const foodItem of food) {
                     if (context.gameParty.inventory.hasItem(foodItem[0])) {
-                        addEvent(`${name1.name} and ${name2.name} are arguing over who gets to eat the ${foodItem[0]}.`);
+                        const variation = foodItem[2][Math.floor(Math.random() * foodItem[2].length)];
+                        addEvent(`${name1.name} and ${name2.name} are arguing over who gets to eat ${variation}.`);
                         name1.relationships.set(name2, name1.relationships.get(name2) - 1);
                         name2.relationships.set(name1, name2.relationships.get(name1) - 1);
                         updateRelationships();
@@ -231,13 +232,13 @@ function foundFriend() {
             const itemType = Math.random();
             let itemMessage = "";
             
-            if (itemType <= 0.4) {
-                // 40% chance for food
+            if (itemType <= 0.4) {                // 40% chance for food
                 const foodType = food[Math.floor(Math.random() * food.length)];
+                const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
                 addItemToInventory(foodType);
                 updateFoodButtons();
                 context.gameParty.inventory.updateDisplay();
-                itemMessage = ` They brought some ${foodType[0]} to share.`;
+                itemMessage = ` They brought ${variation} to share.`;
             } else if (itemType <= 0.7) {
                 // 30% chance for medical
                 const medicalType = medical[Math.floor(Math.random() * medical.length)];
@@ -553,11 +554,11 @@ function foundEnemy() {
                                 // Remove defeated enemy from combatants array
                                 combatants.splice(enemyIndex, 1);
                                 // Scavengers get a random food item
-                                const character = context.gameParty.characters.find(c => c.name === combatant.type);
-                                if (character.posTrait === 'scavenger') {
+                                const character = context.gameParty.characters.find(c => c.name === combatant.type);                                if (character.posTrait === 'scavenger') {
                                     const foodItem = food[Math.floor(Math.random() * food.length)];
+                                    const variation = foodItem[2][Math.floor(Math.random() * foodItem[2].length)];
                                     addItemToInventory(foodItem);
-                                    addEvent(`${combatant.type} made food with some... questionable meat.`);
+                                    addEvent(`${combatant.type} found ${variation} on the fallen enemy.`);
                                     context.gameParty.inventory.updateDisplay();
                                     updateFoodButtons();
                                 }
@@ -717,7 +718,8 @@ function foundMedical(who) {
 
 function foundFood(who) {
     const foodType = food[Math.floor(Math.random() * food.length)];
-    addEvent(`${who} found food (${foodType[0]}).`);
+    const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
+    addEvent(`${who} found ${variation} (${foodType[0]}).`);
     addItemToInventory(foodType);
     updateFoodButtons();
 }
