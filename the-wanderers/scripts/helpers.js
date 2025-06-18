@@ -67,6 +67,17 @@ const newCharacterFlavor = [
     'They call you an unfamiliar name and seem disappointed when you correct them.'
 ];
 
+const medicalLocationFlavor = [
+    'in the bathroom of an abandoned house',
+    'in the backpack of a dead zombie',
+    'in a worn first aid kit',
+    'in a wrecked ambulance',
+    'under some floorboards',
+    'left on the floor of an abandoned clinic',
+    'buried under some rubble',
+    'inside a damaged vending machine'
+];
+
 function getEvent(chance) {
     var who = "The party";
     if (context.gameParty.characters.length === 1) {
@@ -758,7 +769,8 @@ function updateWeaponButtons() {
 
 function foundMedical(who) {
     const medicalType = medical[Math.floor(Math.random() * medical.length)];
-    addEvent(`${who} found medical supplies (${medicalType[0]}).`);
+    const location = medicalLocationFlavor[Math.floor(Math.random() * medicalLocationFlavor.length)];
+    addEvent(`${who} found medical supplies (${medicalType[0]}) ${location}.`);
     addItemToInventory(medicalType);
     updateMedicalButtons();
 }
