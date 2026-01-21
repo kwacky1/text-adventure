@@ -20,6 +20,9 @@ export function updateWeaponAttributes(character, weaponItem) {
         character.weaponDurability = weaponItem[1] || 100;
         character.updateCharacter();
         addEvent(`${character.name} equipped the ${weaponInfo[0]}.`);
+        
+        // Refresh all weapon dropdowns to reflect updated inventory
+        updateWeaponButtons();
     }
 }
 
