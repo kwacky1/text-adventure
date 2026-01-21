@@ -254,19 +254,19 @@ export class Character {
     statsContainer.appendChild(negTraitElement);
 
     const moraleStat = document.createElement('div');
-    moraleStat.classList.add('stat');
+    moraleStat.classList.add('stat', 'morale');
     moraleStat.id = 'moraleStat';
     moraleStat.innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
     statsContainer.appendChild(moraleStat);
 
     const hungerStat = document.createElement('div');
-    hungerStat.classList.add('stat');
+    hungerStat.classList.add('stat', 'hunger');
     hungerStat.id = 'hungerStat';
     hungerStat.innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
     statsContainer.appendChild(hungerStat);
 
     const healthStat = document.createElement('div');
-    healthStat.classList.add('stat');
+    healthStat.classList.add('stat', 'health');
     healthStat.id = 'healthStat';
     healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
     statsContainer.appendChild(healthStat);
@@ -304,7 +304,7 @@ export class Character {
     // Add weapon select dropdown
     const weaponSelect = document.createElement('select');
     weaponSelect.id = 'weaponSelect';
-    weaponSelect.innerHTML = `<option value="weapon">Give weapon to ${this.name}</option>`;
+    weaponSelect.innerHTML = `<option value="weapon">Equip weapon</option>`;
     inventoryList.appendChild(weaponSelect);
 
     const interactSelect = document.createElement('select');
