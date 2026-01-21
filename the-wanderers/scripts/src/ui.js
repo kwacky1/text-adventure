@@ -58,6 +58,16 @@ export function updateButtons(type, items, buttonText, updateFunction) {
         const select = characterDiv.querySelector(`#${type}Select`);
         if (!select) return;
 
+        // Check if this action type has already been used
+        const actionType = type; // 'food' or 'medical'
+        if (character.actionsUsed && character.actionsUsed[actionType]) {
+            select.disabled = true;
+            return;
+        }
+        
+        // Re-enable if action hasn't been used (for turn reset)
+        select.disabled = false;
+
         // Clear existing options except the first default option
         while (select.options.length > 1) {
             select.remove(1);
@@ -100,6 +110,15 @@ export function updateInteractionButtons() {
         const interactionSelect = characterDiv.querySelector('#interactionSelect');
         if (!interactionSelect) return;
 
+        // Check if interact action has already been used
+        if (character.actionsUsed && character.actionsUsed.interact) {
+            interactionSelect.disabled = true;
+            return;
+        }
+        
+        // Re-enable if action hasn't been used (for turn reset)
+        interactionSelect.disabled = false;
+
         // Clear existing options except the first default option
         while (interactionSelect.options.length > 1) {
             interactionSelect.remove(1);
@@ -128,6 +147,11 @@ export function handleSelection(event, items, updateCharacterAttributes) {
             event.target.remove(event.target.selectedIndex);
             const character = context.gameParty.characters.find(char => char.name === characterName);
             const target = context.gameParty.characters.find(char => char.name === targetName);
+
+            // Mark interact action as used and disable the dropdown
+            character.actionsUsed.interact = true;
+            event.target.disabled = true;
+            event.target.selectedIndex = 0;
 
             // Remove the reciprocal interaction option
             const targetSelect = document.querySelector(`#${targetName.split(' ').join('')} #options #interactionSelect`);
@@ -171,6 +195,16 @@ export function handleSelection(event, items, updateCharacterAttributes) {
                         character.updateCharacter();
                         updateStatBars(character);
                         context.gameParty.inventory.updateDisplay();
+                        
+                        // Mark action as used based on select type and disable the dropdown
+                        const selectId = event.target.id;
+                        if (selectId === 'foodSelect') {
+                            character.actionsUsed.food = true;
+                        } else if (selectId === 'medicalSelect') {
+                            character.actionsUsed.medical = true;
+                        }
+                        event.target.disabled = true;
+                        event.target.selectedIndex = 0;
                     }
                 }
             }

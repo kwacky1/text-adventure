@@ -27,6 +27,10 @@ export function playTurn() {
     currentEventsDiv.textContent = '';
     setPlayButton('hide');
     // Begin new turn
+    // Reset actions for all characters at the start of each turn
+    for (const character of context.gameParty.characters) {
+        character.resetActions();
+    }
     updateParty();
     if (context.gameParty.characters.length === 0) {
         const allButtons = document.getElementById('buttons');

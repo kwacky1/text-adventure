@@ -63,6 +63,11 @@ export class Character {
     this.skin = skin;
     this.hair = hair;
     this.shirt = shirt;
+    this.actionsUsed = { food: false, medical: false, interact: false };
+  }
+
+  resetActions() {
+    this.actionsUsed = { food: false, medical: false, interact: false };
   }
 
   checkHunger() {
