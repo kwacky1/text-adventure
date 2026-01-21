@@ -159,6 +159,8 @@ export function getEvent(chance) {
     } else {
         var event = singlePlayerEvents[Math.floor(Math.random() * singlePlayerEvents.length)];
     }
+    
+    // Base probabilities adjusted for party size
     var friendChance = 0.2;
     var enemyChance = 0.1 + friendChance;
     var itemChance = 0.4 + enemyChance;
@@ -181,6 +183,20 @@ export function getEvent(chance) {
         itemChance = 0.55 + enemyChance;
         secondItem = 0.15 + itemChance;
     }
+    
+    // Adjust probabilities for night time
+    const isNight = context.timeOfDay === 'night';
+    if (isNight) {
+        // No new friends at night
+        friendChance = 0;
+        // Higher zombie chance at night (+15%)
+        enemyChance = 0.25 + friendChance;
+        // Lower item find at night (reduced by 15%)
+        const baseItemChance = context.gameParty.characters.length >= 3 ? 0.35 : 0.25;
+        itemChance = baseItemChance + enemyChance;
+        secondItem = itemChance; // No double items at night
+    }
+    
     var illnessChance = secondItem + 0.05;
     var miniEventChance = illnessChance + 0.05;
     
