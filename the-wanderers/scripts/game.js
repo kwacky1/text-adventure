@@ -15,7 +15,8 @@ export function playTurn() {
     const eventItem = document.createElement('div');
     eventItem.id = `turn${context.turnNumber}`;
     const dayCounter = document.getElementById('day');
-    dayCounter.textContent = `Day ${context.turnNumber}`;
+    const timeLabel = context.timeOfDay === 'day' ? 'Day' : 'Night';
+    dayCounter.textContent = `Day ${context.dayNumber} - ${timeLabel}`;
     if (context.turnNumber % 2 === 0) {
         eventItem.classList.add('even');
     } else {
@@ -42,6 +43,14 @@ export function playTurn() {
         // Update inventory display - changed to use inventory.updateDisplay() directly
         context.gameParty.inventory.updateDisplay();
         context.turnNumber += 1;
+        
+        // Toggle time of day
+        if (context.timeOfDay === 'day') {
+            context.timeOfDay = 'night';
+        } else {
+            context.timeOfDay = 'day';
+            context.dayNumber += 1; // New day when transitioning night -> day
+        }
         
         // Update button text even during special events
         const playButton = document.getElementById('playButton');
