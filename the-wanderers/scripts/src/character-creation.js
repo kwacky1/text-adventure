@@ -3,10 +3,10 @@ import { context } from '../game-state.js';
 import { posTraits, negTraits } from './constants.js';
 import Party, { food, medical, weapons } from '../party.js';
 import { setGameParty } from '../game-state.js';
-import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons, updateWeaponButtons, updateInteractionButtons } from './ui.js';
+import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons, updateInteractionButtons } from './ui.js';
 import { playTurn } from '../game.js';
 import { newCharacterFlavor } from './events.js';
-import { addItemToInventory } from './inventory.js';
+import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 
 export async function fetchNames(amount = 10) {
     const spinner = document.createElement('div');
