@@ -548,6 +548,8 @@ export function foundFriend() {
                 itemMessage = ` They brought a ${weaponType[0]} with them.`;
             }
             addEvent(`${newMember.name} has joined the party!${itemMessage}`);
+            // Update party inventory display
+            context.gameParty.inventory.updateDisplay();
         } else {
             addEvent(`${newMember.name} has joined the party!`);
         }
