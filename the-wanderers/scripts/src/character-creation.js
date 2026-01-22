@@ -3,7 +3,7 @@ import { context } from '../game-state.js';
 import { posTraits, negTraits } from './constants.js';
 import Party, { food, medical, weapons } from '../party.js';
 import { setGameParty } from '../game-state.js';
-import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons } from './ui.js';
+import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons, updateWeaponButtons, updateInteractionButtons } from './ui.js';
 import { playTurn } from '../game.js';
 import { newCharacterFlavor } from './events.js';
 import { addItemToInventory } from './inventory.js';
@@ -560,6 +560,12 @@ export function foundFriend() {
                 updateStatBars(character);
             }
         }
+
+        // Update all dropdowns to include new member and populate their options
+        updateFoodButtons();
+        updateMedicalButtons();
+        updateWeaponButtons();
+        updateInteractionButtons();
 
         friendDiv.remove();
         acceptButton.remove();
