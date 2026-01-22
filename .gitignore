@@ -3,3 +3,4 @@ test/
 node_modules/
 .babelrc
 package*.json
+coverage/

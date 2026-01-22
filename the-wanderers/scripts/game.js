@@ -1,18 +1,22 @@
-var turnNumber = 1;
-
-import { context, getEvent, addItemToInventory, updateStatBars, addEvent, posTraits, negTraits, updateRelationships, updateFoodButtons, updateMedicalButtons, checkDeathEffects, updateInteractionButtons, createCharacterForm, checkPartyAlerts, setPlayButton } from './helpers.js';
+import { context } from './game-state.js';
 import { food, medical } from './party.js';
+import { updateStatBars, addEvent, setPlayButton, updateRelationships, updateInteractionButtons, checkPartyAlerts } from './src/ui.js';
+import { createCharacterForm } from './src/character-creation.js';
+import { handleDeathEffects, getEvent } from './src/events.js';
+import { posTraits, negTraits } from './src/constants.js';
+import { checkPosTraitEvents, checkNegTraitEvents } from './src/traits.js';
 
-function playTurn() {
+export function playTurn() {
     // Move current events to turnX div
-    const currentEventsDiv = document.getElementById('currentEvent')
+    const currentEventsDiv = document.getElementById('currentEvent');
     const currentEvents = currentEventsDiv.textContent;
     const eventsDiv = document.getElementById('events');
     const eventItem = document.createElement('div');
-    eventItem.id = `turn${turnNumber}`;
+    eventItem.id = `turn${context.turnNumber}`;
     const dayCounter = document.getElementById('day');
-    dayCounter.textContent = `Day ${turnNumber}`;
-    if (turnNumber % 2 === 0) {
+    const timeLabel = context.timeOfDay === 'day' ? 'Day' : 'Night';
+    dayCounter.textContent = `Day ${context.dayNumber} - ${timeLabel}`;
+    if (context.turnNumber % 2 === 0) {
         eventItem.classList.add('even');
     } else {
         eventItem.classList.add('odd');
@@ -22,6 +26,10 @@ function playTurn() {
     currentEventsDiv.textContent = '';
     setPlayButton('hide');
     // Begin new turn
+    // Reset actions for all characters at the start of each turn
+    for (const character of context.gameParty.characters) {
+        character.resetActions();
+    }
     updateParty();
     if (context.gameParty.characters.length === 0) {
         const allButtons = document.getElementById('buttons');
@@ -31,18 +39,38 @@ function playTurn() {
         const eventImage = document.getElementById('eventImage');
         eventImage.remove();
         // output character is dead to the events div
-        addEvent('The adventure has come to an end. You survived for ' + turnNumber + ' turns.');
+        addEvent('The adventure has come to an end. You survived for ' + context.turnNumber + ' turns.');
     } else {
         const chance = Math.random();
-        getEvent(chance);
+        const specialEventOccurred = getEvent(chance);
         // Update inventory display - changed to use inventory.updateDisplay() directly
         context.gameParty.inventory.updateDisplay();
-        turnNumber += 1;
-        setPlayButton(`Play Turn ${turnNumber}`)
+        context.turnNumber += 1;
+        
+        // Toggle time of day
+        if (context.timeOfDay === 'day') {
+            context.timeOfDay = 'night';
+        } else {
+            context.timeOfDay = 'day';
+            context.dayNumber += 1; // New day when transitioning night -> day
+        }
+        
+        // Update button text even during special events
+        const playButton = document.getElementById('playButton');
+        if (playButton) {
+            playButton.textContent = `Play Turn ${context.turnNumber}`;
+        }
+        
+        // Only show play button if not in a special event (friend/combat)
+        if (!specialEventOccurred) {
+            setPlayButton('show');
+        }
     }
 
     function updateParty() {
-        for (const character of context.gameParty.characters) {
+        // Create a copy of the array to iterate over, since we may remove characters
+        const charactersToProcess = [...context.gameParty.characters];
+        for (const character of charactersToProcess) {
             if (character.checkHunger()) {
                 checkPosTraitEvents(character);
                 checkNegTraitEvents(character);
@@ -114,13 +142,13 @@ function playTurn() {
                     }
                     
                     addEvent(`${character.name} has lost all hope. They have left the party.`);
-                    checkDeathEffects(character);
+                    handleDeathEffects(character);
                     context.gameParty.removeCharacter(character);
                     updateRelationships();
                 }
             } else {
                 addEvent(`${character.name} died of hunger.`);
-                checkDeathEffects(character);
+                handleDeathEffects(character);
                 context.gameParty.removeCharacter(character);
                 updateRelationships();
             }
@@ -128,100 +156,6 @@ function playTurn() {
         };
         updateInteractionButtons();
     }
-
-
-    function checkNegTraitEvents(character) {
-        if (character.negTrait === 'hungry') {
-            // every other turn, hunger goes up
-            if (turnNumber % 2 === 0) {
-                character.hunger -= 0.5;
-            }
-        }
-        if (character.negTrait === 'hypochondriac') {
-            // 10% chance of using a medical item without benefit
-            if (Math.random() < 0.1) {
-                // Collect medical items using the new Inventory class methods
-                const medicalItems = [];
-                medical.forEach(medItem => {
-                    if (context.gameParty.inventory.hasItem(medItem[0])) {
-                        medicalItems.push(medItem[0]);
-                    }
-                });
-
-                if (medicalItems.length > 0) {
-                    const item = medicalItems[Math.floor(Math.random() * medicalItems.length)];
-                    context.gameParty.inventory.removeItem(item);
-                    addEvent(`${character.name} used the ${item} but it had no effect.`);
-                    updateMedicalButtons();
-                }
-            }
-        }
-        if (character.negTrait === 'depressed') {
-            // 10% chance of decreasing morale
-            if (Math.random() < 0.1) {
-                character.morale -= 1;
-                addEvent(`${character.name} has been crying.`);
-            }
-            // Can't go above good
-            if (character.morale > 7) {
-                character.morale -= 2;
-            }
-        }
-        if (character.negTrait === 'clumsy') {
-            // 10% chance of getting hurt
-            if (Math.random() < 0.1) {
-                character.health -= 1;
-                addEvent(`${character.name} tripped and hurt themself.`);
-                if (character.health <= 0) {
-                    checkDeathEffects(character);
-                    context.gameParty.removeCharacter(character);
-                    updateRelationships();
-                } else {
-                    character.updateCharacter();
-                    updateStatBars(character);
-                }
-            }
-        }
-    }
-
-    function checkPosTraitEvents(character) {
-        if (character.posTrait === 'resilient') {
-            // 10% chance of healing
-            if (Math.random() < 0.1) {
-                character.health += 1;
-                addEvent(`${character.name} is feeling a bit better.`);
-            }
-        }
-        if (character.posTrait === 'satiated') {
-            // every other turn, hunger goes down
-            if (turnNumber % 2 === 0) {
-                character.hunger += 0.5;
-            }
-        }
-        if (character.posTrait === 'scavenger') {
-            // 10% chance of finding an extra food item
-            if (Math.random() < 0.1) {                const foodType = food[Math.floor(Math.random() * food.length)];
-                const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
-                addEvent(`${character.name} was able to scavenge ${variation} (${foodType[0]}).`);
-                addItemToInventory(foodType);
-                updateFoodButtons();
-            }
-        }
-        if (character.posTrait === 'optimistic') {
-            // 10% chance of increasing own morale
-            if (Math.random() < 0.1) {
-            character.morale += 1;
-            addEvent(`${character.name} looks happy today.`);
-            }
-            // Can't go below bad
-            if (character.morale < 2) {
-            character.morale += 2;
-            addEvent(`${character.name} clings on to hope`);
-            }
-        }
-    }
 }
 
 createCharacterForm();
-
-export { playTurn };
