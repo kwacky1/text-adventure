@@ -1,5 +1,5 @@
 import { addEvent, updateButtons, updateFoodButtons, updateMedicalButtons } from './ui.js';
-import { food, medical, weapons } from '../party.js';
+import { weapons } from '../party.js';
 import { context } from '../game-state.js';
 
 export function addItemToInventory(itemType) {
@@ -33,7 +33,7 @@ export function updateFoodAttributes(character, foodItem) {
     }
     if (foodItem[0] === 'dessert') {
         character.morale += 1;
-    } else if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snacks')) {
+    } else if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
         character.hunger -= foodItem[1];
     }
     updateFoodButtons();

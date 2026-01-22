@@ -533,7 +533,7 @@ export function foundFriend() {
                 const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
                 addItemToInventory(foodType);
                 updateFoodButtons();
-                itemMessage = ` They brought some food (${foodType[0]}) with them.`;
+                itemMessage = ` They brought ${variation} (${foodType[0]}) with them.`;
             } else if (itemType <= 0.7) {         // 30% chance for medical
                 const medicalType = medical[Math.floor(Math.random() * medical.length)];
                 addItemToInventory(medicalType);

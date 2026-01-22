@@ -1,9 +1,7 @@
-import { addEvent, updateStatBars, updateRelationships, setPlayButton as setPlayButtonUI } from './ui.js';
+import { addEvent, updateStatBars, setPlayButton as setPlayButtonUI } from './ui.js';
 import { weapons } from '../party.js';
-import { playTurn } from '../game.js';
 import { handleDeathEffects, singleZombieVariations, multiZombieVariations } from './events.js';
-import { attackDescriptions, zombieAttackDescriptions } from './constants.js';
-import { context } from '../game-state.js';
+import { attackDescriptions } from './constants.js';
 
 function handlePlayerTurn(current, combatants, players, context, setPlayButton, index) {
     const playerCharacter = context.gameParty.characters.find(c => c.name === current.type);
@@ -141,7 +139,7 @@ function handleEnemyTurn(combatant, players, combatants, context, setPlayButton,
             if (target.health <= 0) {
                 target.health = 0;
                 addEvent(`${target.name} has been killed!`);
-                handleDeathEffects(target, context);
+                handleDeathEffects(target);
                 if (target.infected) {
                     handleInfectedPlayerDeath(target, combatants);
                 }

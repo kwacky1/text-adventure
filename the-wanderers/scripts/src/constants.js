@@ -9,7 +9,7 @@ export const posTraits = [
 
 export const negTraits = [
     ['vulnerable', 'Takes an extra 1 damage from each attack', 'Has a lower chance of curing illness and infection'],
-    ['hungry', 'Every other turn, extra hunger is depleted', 'Rations and snacks have no effect '],
+    ['hungry', 'Every other turn, extra hunger is depleted', 'Rations and snack have no effect'],
     ['disconnected', 'Starts with lower relationships with other party members', 'Can never become family with other party members'],
     ['hypochondriac', 'Every turn has a 10% chance to use a medical item without benefit', 'Every turn has a 10% chance to display symptoms of illness despite not being sick'],
     ['depressed', 'Every turn has a 10% chance to lower morale', 'Morale cannot rise above good'],

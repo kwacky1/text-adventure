@@ -137,7 +137,7 @@ export function handleDeathEffects(character) {
 }
 
 export function getEvent(chance) {
-    var who = "The party";
+    let who = "The party";
     if (context.gameParty.characters.length === 1) {
         who = context.gameParty.characters[0].name;
     }
@@ -145,6 +145,7 @@ export function getEvent(chance) {
         `${who} watches the clouds go by.`,
         `${who} stays in bed all day.`
     ];
+    let event;
     if (context.gameParty.characters.length > 1) {
         let pone = context.gameParty.characters[Math.floor(Math.random() * context.gameParty.characters.length)].name;
         let ptwo;
@@ -155,16 +156,16 @@ export function getEvent(chance) {
             `${pone} spots a rabbit in a clearing and calls ${ptwo} to hunt for it, but it turns out to be a white bag rolling in the wind.`,
             `A zombie approaches the party but immediately collapses.`
         ];
-        var event = multiPlayerEvents[Math.floor(Math.random() * multiPlayerEvents.length)];
+        event = multiPlayerEvents[Math.floor(Math.random() * multiPlayerEvents.length)];
     } else {
-        var event = singlePlayerEvents[Math.floor(Math.random() * singlePlayerEvents.length)];
+        event = singlePlayerEvents[Math.floor(Math.random() * singlePlayerEvents.length)];
     }
     
     // Base probabilities adjusted for party size
-    var friendChance = 0.2;
-    var enemyChance = 0.1 + friendChance;
-    var itemChance = 0.4 + enemyChance;
-    var secondItem = 0 + itemChance;
+    let friendChance = 0.2;
+    let enemyChance = 0.1 + friendChance;
+    let itemChance = 0.4 + enemyChance;
+    let secondItem = 0 + itemChance;
     if (context.gameParty.characters.length == 2) {
         friendChance = 0.15;
         enemyChance = 0.15 + friendChance;
@@ -197,8 +198,8 @@ export function getEvent(chance) {
         secondItem = itemChance; // No double items at night
     }
     
-    var illnessChance = secondItem + 0.05;
-    var miniEventChance = illnessChance + 0.05;
+    const illnessChance = secondItem + 0.05;
+    const miniEventChance = illnessChance + 0.05;
     
     // Track if we're in a special event that manages the play button itself
     let specialEventOccurred = false;
@@ -210,12 +211,12 @@ export function getEvent(chance) {
         foundEnemy(context);
         specialEventOccurred = true;
     } else if (chance > enemyChance && chance <= secondItem) {
-        var items = 1;
+        let items = 1;
         if (chance > itemChance && chance <= secondItem) {
             items = 2;
         }
-        for (var i = 0; i < items; i++) {
-            var whichItem = Math.random();
+        for (let i = 0; i < items; i++) {
+            const whichItem = Math.random();
             if (whichItem <= 0.33) {
                 foundFood(who);
             } else if (whichItem <= 0.67) {
@@ -225,9 +226,9 @@ export function getEvent(chance) {
             }
         }
     } else if (chance > secondItem && chance <= illnessChance) {
-        var healthyCharacters = context.gameParty.characters.filter(character => !character.sick);
+        const healthyCharacters = context.gameParty.characters.filter(character => !character.sick);
         if (healthyCharacters.length > 0) {
-            var sickCharacter = healthyCharacters[Math.floor(Math.random() * healthyCharacters.length)];
+            const sickCharacter = healthyCharacters[Math.floor(Math.random() * healthyCharacters.length)];
             sickCharacter.health -= 1;
             sickCharacter.sick = true;
             updateStatBars(sickCharacter);
@@ -256,15 +257,15 @@ export function getEvent(chance) {
             }
         }
         if (context.gameParty.characters.length === 2) {
-            var index1 = Math.floor(Math.random() * context.gameParty.characters.length);
-            var name1 = context.gameParty.characters[index1];
-            var index2;
+            const index1 = Math.floor(Math.random() * context.gameParty.characters.length);
+            const name1 = context.gameParty.characters[index1];
+            let index2;
             do {
                 index2 = Math.floor(Math.random() * context.gameParty.characters.length);
             } while (index2 === index1);
-            var name2 = context.gameParty.characters[index2];
+            const name2 = context.gameParty.characters[index2];
             if (Math.random() < 0.5) {
-                var hasFood = false;
+                let hasFood = false;
                 for (const foodItem of food) {
                     if (context.gameParty.inventory.hasItem(foodItem[0])) {
                         const variation = foodItem[2][Math.floor(Math.random() * foodItem[2].length)];
@@ -288,12 +289,12 @@ export function getEvent(chance) {
         }
         if (context.gameParty.characters.length === 1) {
             if (Math.random() < 0.5) {
-                var character = context.gameParty.characters[0];
+                const character = context.gameParty.characters[0];
                 character.health -= 1;
                 updateStatBars(character);
                 addEvent(`${character.name} tripped over a loose brick and hurt their leg.`);
             } else {
-                var character = context.gameParty.characters[0];
+                const character = context.gameParty.characters[0];
                 character.morale += 1;
                 character.capAttributes();
                 updateStatBars(character);

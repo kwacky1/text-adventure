@@ -251,11 +251,6 @@ export function updateRelationships() {
     }
 }
 
-function updateInteractionAttributes(character, interactionItem) {
-    addEvent(`${character.name} interacted with ${interactionItem[0]}.`);
-    updateInteractionButtons();
-}
-
 export function clearAndPopulateOptions(character) {
     const characterItem = document.getElementById(character.name);
     if (!characterItem) return;

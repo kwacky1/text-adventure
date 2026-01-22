@@ -1,15 +1,14 @@
 import { context } from './game-state.js';
 import { food, medical } from './party.js';
-import { updateStatBars, addEvent, setPlayButton, updateRelationships, updateFoodButtons, updateMedicalButtons, updateInteractionButtons, checkPartyAlerts } from './src/ui.js';
+import { updateStatBars, addEvent, setPlayButton, updateRelationships, updateInteractionButtons, checkPartyAlerts } from './src/ui.js';
 import { createCharacterForm } from './src/character-creation.js';
 import { handleDeathEffects, getEvent } from './src/events.js';
-import { addItemToInventory } from './src/inventory.js';
 import { posTraits, negTraits } from './src/constants.js';
 import { checkPosTraitEvents, checkNegTraitEvents } from './src/traits.js';
 
 export function playTurn() {
     // Move current events to turnX div
-    const currentEventsDiv = document.getElementById('currentEvent')
+    const currentEventsDiv = document.getElementById('currentEvent');
     const currentEvents = currentEventsDiv.textContent;
     const eventsDiv = document.getElementById('events');
     const eventItem = document.createElement('div');
