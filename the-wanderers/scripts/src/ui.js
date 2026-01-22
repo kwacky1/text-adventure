@@ -135,6 +135,12 @@ export function updateInteractionButtons() {
                 interactionSelect.appendChild(interactOption);
             }
         });
+
+        // Make sure the change handler is attached
+        if (!interactionSelect.hasChangeHandler) {
+            interactionSelect.addEventListener('change', (event) => handleSelection(event, null, null));
+            interactionSelect.hasChangeHandler = true;
+        }
     });
 }
 
