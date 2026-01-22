@@ -69,7 +69,9 @@ export function playTurn() {
     }
 
     function updateParty() {
-        for (const character of context.gameParty.characters) {
+        // Create a copy of the array to iterate over, since we may remove characters
+        const charactersToProcess = [...context.gameParty.characters];
+        for (const character of charactersToProcess) {
             if (character.checkHunger()) {
                 checkPosTraitEvents(character);
                 checkNegTraitEvents(character);
