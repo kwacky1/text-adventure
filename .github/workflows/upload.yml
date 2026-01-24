@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Upload to itch.io
-      uses: Ayowel/butler-to-itch@v1
+      uses: Ayowel/butler-to-itch@fe309f460564d406d71dac3654d758a9aa4a57f9 # v1
       with:
         butler_key: ${{ secrets.ITCH_TOKEN }}
         itch_user: goosey-games
