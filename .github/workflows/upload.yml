@@ -12,18 +12,15 @@ jobs:
 
     steps:
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
-    - name: Get Butler
-      run: |
-        curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
-        unzip butler.zip
-        chmod +x butler
-        ./butler -V
-
-    - name: Set BUTLER_API_KEY
-      run: echo "BUTLER_API_KEY=${{ secrets.ITCH_TOKEN }}" >> $GITHUB_ENV
-
-    - name: Update Game
-      run: ./butler push the-wanderers goosey-games/the-wanderers:html
+    - name: Upload to itch.io
+      uses: Ayowel/butler-to-itch@fe309f460564d406d71dac3654d758a9aa4a57f9 # v1
+      with:
+        butler_key: ${{ secrets.ITCH_TOKEN }}
+        itch_user: goosey-games
+        itch_game: the-wanderers
+        version: ${{ github.sha }}
+        files: |
+          html the-wanderers
 
