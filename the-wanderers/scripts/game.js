@@ -92,7 +92,10 @@ export function playTurn() {
                 checkPosTraitEvents(character);
                 checkNegTraitEvents(character);
                 checkAgeEffects(character);
-                checkBirthday(character);
+                // Only check birthdays during the day
+                if (context.timeOfDay === 'day') {
+                    checkBirthday(character);
+                }
                 // Make sure attributes are within bounds
                 character.capAttributes();
                 updateStatBars(character);
