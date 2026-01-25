@@ -1,7 +1,8 @@
 import { healthArray, hungerArray, moraleArray } from '../character.js';
 import { context } from '../game-state.js';
-import { food, medical } from '../party.js';
-import { updateFoodAttributes, updateMedicalAttributes } from './inventory.js';
+import { food, medical, weapons } from '../party.js';
+import { updateFoodAttributes, updateMedicalAttributes, updateWeaponAttributes } from './inventory.js';
+import { relationships } from './constants.js';
 
 export function updateStatBars(character) {
     const characterDiv = document.getElementById(character.name);
@@ -58,11 +59,13 @@ export function updateButtons(type, items, buttonText, updateFunction) {
         const select = characterDiv.querySelector(`#${type}Select`);
         if (!select) return;
 
-        // Check if this action type has already been used
-        const actionType = type; // 'food' or 'medical'
-        if (character.actionsUsed && character.actionsUsed[actionType]) {
-            select.disabled = true;
-            return;
+        // Check if this action type has already been used (weapons don't consume actions)
+        if (type !== 'weapon') {
+            const actionType = type; // 'food' or 'medical'
+            if (character.actionsUsed && character.actionsUsed[actionType]) {
+                select.disabled = true;
+                return;
+            }
         }
         
         // Re-enable if action hasn't been used (for turn reset)
@@ -79,7 +82,12 @@ export function updateButtons(type, items, buttonText, updateFunction) {
             if (context.gameParty.inventory.hasItem(itemName)) {
                 const option = document.createElement('option');
                 option.value = itemName;
-                option.textContent = `${itemName} (+${item[1]})`; 
+                // Display damage for weapons, healing/hunger value for others
+                if (type === 'weapon') {
+                    option.textContent = `${itemName} (DMG: ${item[1]})`;
+                } else {
+                    option.textContent = `${itemName} (+${item[1]})`;
+                }
                 option.dataset.characterName = character.name;
                 select.appendChild(option);
             }
@@ -187,7 +195,15 @@ export function handleSelection(event, items, updateCharacterAttributes) {
             }
             
         } else {
-            const item = items.find(i => i[0] === selectedItem);
+            // For weapons, look up from the source weapons array since the filtered items may have changed
+            const selectId = event.target.id;
+            let item;
+            if (selectId === 'weaponSelect') {
+                item = weapons.find(w => w[0] === selectedItem);
+            } else {
+                item = items.find(i => i[0] === selectedItem);
+            }
+            
             if (item) {
                 const characterName = event.target.selectedOptions[0].dataset.characterName;
                 const character = context.gameParty.characters.find(char => char.name === characterName);
@@ -195,21 +211,36 @@ export function handleSelection(event, items, updateCharacterAttributes) {
                 if (character) {
                     // Use the inventory's removeItem method instead of directly manipulating inventoryMap
                     if (context.gameParty.inventory.hasItem(item[0])) {
+                        // For weapons, get durability from inventory BEFORE removing
+                        let itemDurability = null;
+                        if (selectId === 'weaponSelect') {
+                            const inventoryItem = context.gameParty.inventory.getItem(item[0]);
+                            itemDurability = inventoryItem ? inventoryItem.value : null;
+                        }
+                        
                         context.gameParty.inventory.removeItem(item[0]);
-                        updateCharacterAttributes(character, item);
+                        
+                        // Pass durability for weapons, use correct update function
+                        if (selectId === 'weaponSelect') {
+                            updateWeaponAttributes(character, item, itemDurability);
+                        } else {
+                            updateCharacterAttributes(character, item);
+                        }
+                        
                         character.capAttributes();
                         character.updateCharacter();
                         updateStatBars(character);
                         context.gameParty.inventory.updateDisplay();
                         
                         // Mark action as used based on select type and disable the dropdown
-                        const selectId = event.target.id;
                         if (selectId === 'foodSelect') {
                             character.actionsUsed.food = true;
+                            event.target.disabled = true;
                         } else if (selectId === 'medicalSelect') {
                             character.actionsUsed.medical = true;
+                            event.target.disabled = true;
                         }
-                        event.target.disabled = true;
+                        // Weapons don't consume actions - don't disable
                         event.target.selectedIndex = 0;
                     }
                 }
@@ -244,7 +275,8 @@ export function updateRelationships() {
         for (const [relatedCharacter, relationshipType] of character.relationships.entries()) {
             if (relatedCharacter !== character && context.gameParty.characters.includes(relatedCharacter)) {
                 const relationshipItem = document.createElement('li');
-                relationshipItem.textContent = `${relatedCharacter.name}: ${relationshipType}`;
+                const relationshipName = relationships[relationshipType] || 'unknown';
+                relationshipItem.textContent = `${relatedCharacter.name}: ${relationshipName}`;
                 relationshipsList.appendChild(relationshipItem);
             }
         }
