@@ -50,7 +50,6 @@ export function addEvent(eventText, style = "default") {
 
 export function updateButtons(type, items, buttonText, updateFunction) {
     if (!items) return; // Early return for interaction buttons which don't use items
-    if (items.length === 0) return;
 
     context.gameParty.characters.forEach(character => {
         const characterDiv = document.getElementById(character.name.split(' ').join(''));
@@ -75,6 +74,9 @@ export function updateButtons(type, items, buttonText, updateFunction) {
         while (select.options.length > 1) {
             select.remove(1);
         }
+
+        // If no items available, just leave the default option
+        if (items.length === 0) return;
 
         // Add options for each available item
         for (const item of items) {
