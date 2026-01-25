@@ -1,10 +1,19 @@
-import { addEvent, updateStatBars, setPlayButton as setPlayButtonUI } from './ui.js';
+import { addEvent, updateStatBars, setPlayButton as setPlayButtonUI, updateRelationships } from './ui.js';
 import { weapons } from '../party.js';
+import { context } from '../game-state.js';
 import { handleDeathEffects, singleZombieVariations, multiZombieVariations } from './events.js';
 import { attackDescriptions } from './constants.js';
+import { isHalloween, getHalloweenZombieDescription } from './seasonal-events.js';
 
 function handlePlayerTurn(current, combatants, players, context, setPlayButton, index) {
     const playerCharacter = context.gameParty.characters.find(c => c.name === current.type);
+    
+    // Skip turn if player died (removed from party)
+    if (!playerCharacter) {
+        handleTurn(index + 1, combatants, players, context, setPlayButton);
+        return;
+    }
+    
     // Ensure play button stays hidden
     setPlayButton('hide');
     const buttons = document.getElementById('gameButtons');
@@ -112,13 +121,24 @@ function handleEnemyTurn(combatant, players, combatants, context, setPlayButton,
         const validTargets = context.gameParty.characters.filter(c => c.health > 0);
         if (validTargets.length === 0) {
             addEvent('The party has been defeated...');
-            // Clear only combat buttons, not the play button
+            // Clear all buttons
             Array.from(buttons.children).forEach(child => {
-                if (child.id !== 'playButton') {
-                    child.remove();
-                }
+                child.remove();
             });
-            setPlayButton('show');
+            // Remove play button and show game over
+            const playButton = document.getElementById('playButton');
+            if (playButton) {
+                playButton.remove();
+            }
+            const partyInventoryDiv = document.getElementById('partyInventory');
+            if (partyInventoryDiv) {
+                partyInventoryDiv.innerHTML = '';
+            }
+            const eventImage = document.getElementById('eventImage');
+            if (eventImage) {
+                eventImage.remove();
+            }
+            addEvent(`The adventure has come to an end. You survived for ${context.turnNumber} turns.`);
             return;
         }
         
@@ -140,6 +160,8 @@ function handleEnemyTurn(combatant, players, combatants, context, setPlayButton,
                 target.health = 0;
                 addEvent(`${target.name} has been killed!`);
                 handleDeathEffects(target);
+                context.gameParty.removeCharacter(target);
+                updateRelationships();
                 if (target.infected) {
                     handleInfectedPlayerDeath(target, combatants);
                 }
@@ -148,15 +170,27 @@ function handleEnemyTurn(combatant, players, combatants, context, setPlayButton,
         }
         
         // Check if all players are dead
-        if (!context.gameParty.characters.some(c => c.health > 0)) {
+        if (!context.gameParty.characters.some(c => c.health > 0) || context.gameParty.characters.length === 0) {
             addEvent('Game Over - The entire party has been defeated!');
-            // Clear only combat buttons, not the play button
+            // Clear all buttons including play button
             Array.from(buttons.children).forEach(child => {
-                if (child.id !== 'playButton') {
-                    child.remove();
-                }
+                child.remove();
             });
-            setPlayButton('show');
+            // Hide play button and show game over state
+            const playButton = document.getElementById('playButton');
+            if (playButton) {
+                playButton.remove();
+            }
+            // Remove game UI elements
+            const partyInventoryDiv = document.getElementById('partyInventory');
+            if (partyInventoryDiv) {
+                partyInventoryDiv.innerHTML = '';
+            }
+            const eventImage = document.getElementById('eventImage');
+            if (eventImage) {
+                eventImage.remove();
+            }
+            addEvent(`The adventure has come to an end. You survived for ${context.turnNumber} turns.`);
             return;
         }
         
@@ -232,11 +266,22 @@ function foundEnemy(context) {
     var numberOfEnemies = Math.floor(Math.random() * context.gameParty.characters.length) + 1;
     
     if (numberOfEnemies == 1) {
-        const variation = singleZombieVariations[Math.floor(Math.random() * singleZombieVariations.length)];
-        addEvent(`A zombie ${variation}!`);
+        if (isHalloween()) {
+            addEvent(getHalloweenZombieDescription());
+        } else {
+            const variation = singleZombieVariations[Math.floor(Math.random() * singleZombieVariations.length)];
+            addEvent(`A zombie ${variation}!`);
+        }
     } else {
-        const variation = multiZombieVariations[Math.floor(Math.random() * multiZombieVariations.length)];
-        addEvent(`${numberOfEnemies} zombies ${variation}!`);
+        if (isHalloween()) {
+            addEvent(`🎃 ${numberOfEnemies} costumed zombies emerge from the darkness!`);
+            for (let i = 0; i < Math.min(numberOfEnemies, 2); i++) {
+                addEvent(getHalloweenZombieDescription());
+            }
+        } else {
+            const variation = multiZombieVariations[Math.floor(Math.random() * multiZombieVariations.length)];
+            addEvent(`${numberOfEnemies} zombies ${variation}!`);
+        }
     }
 
     // create array of enemies with random morale from 0 to 9

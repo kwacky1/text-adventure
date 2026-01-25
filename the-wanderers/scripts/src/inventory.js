@@ -7,7 +7,7 @@ export function addItemToInventory(itemType) {
     context.gameParty.inventory.addItem(itemType);
 }
 
-export function updateWeaponAttributes(character, weaponItem) {
+export function updateWeaponAttributes(character, weaponItem, durability = null) {
     const weaponInfo = weapons.find(w => w[0] === weaponItem[0]);
     if (weaponInfo) {
         // If character already has a weapon that's not fists, add it to inventory
@@ -16,8 +16,9 @@ export function updateWeaponAttributes(character, weaponItem) {
             addItemToInventory([oldWeapon[0], character.weaponDurability]);
         }
         
+        // Use provided durability, or fall back to max durability from weapon definition
         character.weapon = weapons.indexOf(weaponInfo);
-        character.weaponDurability = weaponItem[1] || 100;
+        character.weaponDurability = durability !== null ? durability : weaponInfo[2];
         character.updateCharacter();
         addEvent(`${character.name} equipped the ${weaponInfo[0]}.`);
         

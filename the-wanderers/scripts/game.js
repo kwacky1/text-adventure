@@ -1,10 +1,13 @@
-import { context } from './game-state.js';
+import { context, advanceDay, getFormattedDate } from './game-state.js';
 import { food, medical } from './party.js';
-import { updateStatBars, addEvent, setPlayButton, updateRelationships, updateInteractionButtons, checkPartyAlerts } from './src/ui.js';
+import { updateStatBars, addEvent, setPlayButton, updateRelationships, updateInteractionButtons, checkPartyAlerts, updateFoodButtons, updateMedicalButtons } from './src/ui.js';
 import { createCharacterForm } from './src/character-creation.js';
 import { handleDeathEffects, getEvent } from './src/events.js';
 import { posTraits, negTraits } from './src/constants.js';
 import { checkPosTraitEvents, checkNegTraitEvents } from './src/traits.js';
+import { updateWeaponButtons } from './src/inventory.js';
+import { checkAgeEffects, checkBirthday } from './src/age-effects.js';
+import { checkSeasonalEvents } from './src/seasonal-events.js';
 
 export function playTurn() {
     // Move current events to turnX div
@@ -15,7 +18,7 @@ export function playTurn() {
     eventItem.id = `turn${context.turnNumber}`;
     const dayCounter = document.getElementById('day');
     const timeLabel = context.timeOfDay === 'day' ? 'Day' : 'Night';
-    dayCounter.textContent = `Day ${context.dayNumber} - ${timeLabel}`;
+    dayCounter.textContent = `${timeLabel} (${getFormattedDate()})`;
     if (context.turnNumber % 2 === 0) {
         eventItem.classList.add('even');
     } else {
@@ -25,11 +28,23 @@ export function playTurn() {
     eventsDiv.insertBefore(eventItem, eventsDiv.children[1]);
     currentEventsDiv.textContent = '';
     setPlayButton('hide');
+    
+    // Check for seasonal events at the START of day turns (so UI matches the message)
+    if (context.timeOfDay === 'day') {
+        checkSeasonalEvents();
+    }
+    
     // Begin new turn
     // Reset actions for all characters at the start of each turn
     for (const character of context.gameParty.characters) {
         character.resetActions();
     }
+    // Refresh all action dropdowns to re-enable them after reset
+    updateFoodButtons();
+    updateMedicalButtons();
+    updateWeaponButtons();
+    updateInteractionButtons();
+    
     updateParty();
     if (context.gameParty.characters.length === 0) {
         const allButtons = document.getElementById('buttons');
@@ -37,7 +52,9 @@ export function playTurn() {
         const partyInventoryDiv = document.getElementById('partyInventory');
         partyInventoryDiv.remove();
         const eventImage = document.getElementById('eventImage');
-        eventImage.remove();
+        if (eventImage) {
+            eventImage.remove();
+        }
         // output character is dead to the events div
         addEvent('The adventure has come to an end. You survived for ' + context.turnNumber + ' turns.');
     } else {
@@ -52,7 +69,7 @@ export function playTurn() {
             context.timeOfDay = 'night';
         } else {
             context.timeOfDay = 'day';
-            context.dayNumber += 1; // New day when transitioning night -> day
+            advanceDay(); // Advance the calendar date
         }
         
         // Update button text even during special events
@@ -74,6 +91,8 @@ export function playTurn() {
             if (character.checkHunger()) {
                 checkPosTraitEvents(character);
                 checkNegTraitEvents(character);
+                checkAgeEffects(character);
+                checkBirthday(character);
                 // Make sure attributes are within bounds
                 character.capAttributes();
                 updateStatBars(character);

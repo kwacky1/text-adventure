@@ -1,5 +1,5 @@
 import { ageArray, Character } from '../character.js';
-import { context } from '../game-state.js';
+import { context, getFormattedDate } from '../game-state.js';
 import { posTraits, negTraits } from './constants.js';
 import Party, { food, medical, weapons } from '../party.js';
 import { setGameParty } from '../game-state.js';
@@ -7,6 +7,7 @@ import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedic
 import { playTurn } from '../game.js';
 import { newCharacterFlavor } from './events.js';
 import { addItemToInventory, updateWeaponButtons } from './inventory.js';
+import { resetSeasonalEvents } from './seasonal-events.js';
 
 export async function fetchNames(amount = 10) {
     const spinner = document.createElement('div');
@@ -69,6 +70,37 @@ async function createForm() {
         const posTrait = form.querySelector('#positive-trait').value;
         const negTrait = form.querySelector('#negative-trait').value;
         
+        // Get birthday values
+        const birthMonth = parseInt(form.querySelector('#birth-month').value);
+        const birthDay = parseInt(form.querySelector('#birth-day').value);
+        
+        // Check for URL param override for birth year (e.g., ?birthYear=1996)
+        const urlParams = new URLSearchParams(window.location.search);
+        const birthYearParam = urlParams.get('birthYear');
+        
+        // Calculate birth year based on age category, or use URL param if provided
+        // Use game's current date (respects startDate URL param) instead of real-world date
+        const currentYear = context.currentDate.getFullYear();
+        let birthYear;
+        if (birthYearParam && !isNaN(parseInt(birthYearParam))) {
+            birthYear = parseInt(birthYearParam);
+            console.log(`Using custom birth year from URL: ${birthYear}`);
+        } else {
+            switch (age) {
+                case 0: // teen (13-30)
+                    birthYear = currentYear - (Math.floor(Math.random() * 18) + 13);
+                    break;
+                case 1: // adult (31-60)
+                    birthYear = currentYear - (Math.floor(Math.random() * 30) + 31);
+                    break;
+                case 2: // elder (61+)
+                    birthYear = currentYear - (Math.floor(Math.random() * 20) + 61);
+                    break;
+                default:
+                    birthYear = currentYear - 25;
+            }
+        }
+        
         // Get appearance values with full image paths
         const skin = `images/skin/${selects.skinSelect?.value || 'skin_light.png'}`;
         const hair = `images/hair/${selects.hairStyleSelect?.value || 'hair_short-straight'}_${selects.hairColorSelect?.value || 'brown.png'}`;
@@ -76,10 +108,11 @@ async function createForm() {
 
         // Create new party and character
         const gameParty = new Party();
-        const newCharacter = new Character(name, age, posTrait, negTrait, skin, hair, shirt);
+        const newCharacter = new Character(name, age, posTrait, negTrait, skin, hair, shirt, birthMonth, birthDay, birthYear);
         
         // Initialize game state
         setGameParty(gameParty);
+        resetSeasonalEvents(); // Reset seasonal event tracking for the new game
         gameParty.addCharacter(newCharacter);
         
         // Create character UI elements after clearing the form container
@@ -107,7 +140,7 @@ async function createForm() {
         
         // Show day counter
         const dayCounter = document.getElementById('day');
-        dayCounter.textContent = 'Day 1';
+        dayCounter.textContent = `Day (${getFormattedDate()})`;
         dayCounter.style.display = 'block';
 
         // Add introduction text based on positive trait
@@ -158,14 +191,50 @@ async function addNameField(form) {
 }
 
 function addAgeField(form) {
+    const birthdaySection = document.createElement('div');
+    birthdaySection.className = 'birthday-section';
+    
+    // Month selector
+    const monthLabel = document.createElement('label');
+    monthLabel.textContent = 'Birth Month: ';
+    const monthSelect = document.createElement('select');
+    monthSelect.id = 'birth-month';
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                    'July', 'August', 'September', 'October', 'November', 'December'];
+    months.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+    });
+    monthSelect.selectedIndex = Math.floor(Math.random() * 12);
+    monthLabel.appendChild(monthSelect);
+    form.appendChild(monthLabel);
+    
+    // Day selector
+    const dayLabel = document.createElement('label');
+    dayLabel.textContent = 'Birth Day: ';
+    const daySelect = document.createElement('select');
+    daySelect.id = 'birth-day';
+    for (let i = 1; i <= 28; i++) { // Use 28 to avoid invalid dates
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        daySelect.appendChild(option);
+    }
+    daySelect.selectedIndex = Math.floor(Math.random() * 28);
+    dayLabel.appendChild(daySelect);
+    form.appendChild(dayLabel);
+    
+    // Age category (determines birth year)
     const ageLabel = document.createElement('label');
     ageLabel.textContent = 'Age: ';    
     const ageInput = document.createElement('select');
     ageInput.id = 'character-age';
     for (let i = 0; i < ageArray.length; i++) {
         const option = document.createElement('option');
-        option.value = i;  // Use the index as the value
-        option.textContent = ageArray[i];  // Show the age text to the user
+        option.value = i;
+        option.textContent = ageArray[i];
         ageInput.appendChild(option);
     }
     ageInput.selectedIndex = Math.floor(Math.random() * ageArray.length);

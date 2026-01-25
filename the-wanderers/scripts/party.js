@@ -247,6 +247,10 @@ class Party {
     }
 
     updateCampsiteImage() {
+        // Don't update if no characters left (game over)
+        if (this.characters.length === 0) {
+            return;
+        }
         const campsiteImg = document.getElementById('eventImage');
         campsiteImg.src = `images/campsite/campsite${this.characters.length}.png`;
         switch (this.characters.length) {

@@ -1,4 +1,5 @@
 import { weapons } from './party.js';
+import { context } from './game-state.js';
 
 export const hungerArray = [
     'near death',
@@ -46,10 +47,10 @@ export const healthArray = [
 ];
 
 export class Character {
-  constructor(name, age, posTrait, negTrait, skin, hair, shirt) {
+  constructor(name, age, posTrait, negTrait, skin, hair, shirt, birthMonth = null, birthDay = null, birthYear = null) {
     this.id = 0;
     this.name = name;
-    this.age = age;
+    this.age = age; // Age category index (0=teen, 1=adult, 2=elder)
     this.morale = 6;
     this.hunger = 9;
     this.health = 9;
@@ -64,6 +65,75 @@ export class Character {
     this.hair = hair;
     this.shirt = shirt;
     this.actionsUsed = { food: false, medical: false, interact: false };
+    
+    // Birthday system - month (0-11), day (1-31), year
+    if (birthMonth !== null && birthDay !== null && birthYear !== null) {
+      this.birthMonth = birthMonth;
+      this.birthDay = birthDay;
+      this.birthYear = birthYear;
+    } else {
+      // Generate random birthday based on age category
+      this.generateRandomBirthday();
+    }
+  }
+
+  generateRandomBirthday() {
+    const currentDate = context.currentDate || new Date();
+    const currentYear = currentDate.getFullYear();
+    
+    // Age ranges: teen (0-30), adult (31-60), elder (61+)
+    let minAge, maxAge;
+    switch (this.age) {
+      case 0: // teen
+        minAge = 13;
+        maxAge = 30;
+        break;
+      case 1: // adult
+        minAge = 31;
+        maxAge = 60;
+        break;
+      case 2: // elder
+        minAge = 61;
+        maxAge = 80;
+        break;
+      default:
+        minAge = 20;
+        maxAge = 40;
+    }
+    
+    const actualAge = Math.floor(Math.random() * (maxAge - minAge + 1)) + minAge;
+    this.birthYear = currentYear - actualAge;
+    this.birthMonth = Math.floor(Math.random() * 12);
+    this.birthDay = Math.floor(Math.random() * 28) + 1; // Use 28 to avoid invalid dates
+  }
+
+  getActualAge() {
+    const currentDate = context.currentDate || new Date();
+    let age = currentDate.getFullYear() - this.birthYear;
+    
+    // Check if birthday has occurred this year
+    const birthDateThisYear = new Date(currentDate.getFullYear(), this.birthMonth, this.birthDay);
+    if (currentDate < birthDateThisYear) {
+      age--;
+    }
+    return age;
+  }
+
+  getAgeCategory() {
+    const actualAge = this.getActualAge();
+    if (actualAge <= 30) return 0; // teen
+    if (actualAge <= 60) return 1; // adult
+    return 2; // elder
+  }
+
+  isBirthday() {
+    const currentDate = context.currentDate || new Date();
+    return currentDate.getMonth() === this.birthMonth && currentDate.getDate() === this.birthDay;
+  }
+
+  getBirthdayString() {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[this.birthMonth]} ${this.birthDay}`;
   }
 
   resetActions() {
@@ -244,6 +314,8 @@ export class Character {
     ageElement.classList.add('stat');
     ageElement.classList.add('age');
     ageElement.innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
+    ageElement.title = `Actual age: ${this.getActualAge()} (born ${this.getBirthdayString()}, ${this.birthYear})`;
+    ageElement.style.cursor = 'help';
     statsContainer.appendChild(ageElement);
 
     const posTraitElement = document.createElement('div');
@@ -327,7 +399,9 @@ export class Character {
     this.capAttributes();
     const characterDiv = document.getElementById(this.name.split(' ').join(''));
     if (characterDiv) {
-      characterDiv.querySelector('.age').innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
+      const ageEl = characterDiv.querySelector('.age');
+      ageEl.innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;
+      ageEl.title = `Actual age: ${this.getActualAge()} (born ${this.getBirthdayString()}, ${this.birthYear})`;
       characterDiv.querySelector('.pos-trait').innerHTML = `Positive Trait: <span class="statValue">${this.posTrait}</span>`;
       characterDiv.querySelector('div.posTraitSprite img').src = "images/traits/trait_" + this.posTrait + ".png";
       characterDiv.querySelector('.neg-trait').innerHTML = `Negative Trait: <span class="statValue">${this.negTrait}</span>`;
