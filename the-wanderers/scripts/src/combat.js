@@ -75,6 +75,7 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
                         playerCharacter.weaponDurability = weapons[0][2];
                         current.attack = weapons[0][1];
                     }
+                    updateStatBars(playerCharacter);
                 }
                 
                 if (target.hp <= 0) {
