@@ -94,7 +94,6 @@ function applyElderEffects(character) {
                 if (character.health <= 0) {
                     character.health = 0;
                 }
-                updateStatBars(character);
             }
             break;
         case 'hungry':
@@ -119,7 +118,6 @@ function applyElderEffects(character) {
                 if (character.health <= 0) {
                     character.health = 0;
                 }
-                updateStatBars(character);
             }
             break;
         case 'hypochondriac':
@@ -190,9 +188,9 @@ export function checkBirthday(character) {
         for (const partyMember of context.gameParty.characters) {
             if (partyMember !== character) {
                 partyMember.morale += 1;
+                partyMember.capAttributes();
+                updateStatBars(partyMember);
             }
-            partyMember.capAttributes();
-            updateStatBars(partyMember);
         }
         addEvent(`The party celebrates ${character.name}'s birthday!`);
     }

@@ -18,7 +18,7 @@ export function playTurn() {
     eventItem.id = `turn${context.turnNumber}`;
     const dayCounter = document.getElementById('day');
     const timeLabel = context.timeOfDay === 'day' ? 'Day' : 'Night';
-    dayCounter.textContent = `Day ${context.dayNumber} - ${timeLabel} (${getFormattedDate()})`;
+    dayCounter.textContent = `${timeLabel} (${getFormattedDate()})`;
     if (context.turnNumber % 2 === 0) {
         eventItem.classList.add('even');
     } else {
@@ -69,7 +69,6 @@ export function playTurn() {
             context.timeOfDay = 'night';
         } else {
             context.timeOfDay = 'day';
-            context.dayNumber += 1; // New day when transitioning night -> day
             advanceDay(); // Advance the calendar date
         }
         

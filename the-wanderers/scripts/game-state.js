@@ -18,7 +18,6 @@ const context = {
     gameParty: null,
     remainingNames: [],
     turnNumber: 1,
-    dayNumber: 1,
     timeOfDay: 'day', // 'day' or 'night'
     currentDate: getStartDate() // Game starts on URL param date or current real date
 };
@@ -36,10 +35,6 @@ export function advanceDay() {
 export function getFormattedDate() {
     const options = { month: 'short', day: 'numeric' };
     return context.currentDate.toLocaleDateString('en-US', options);
-}
-
-export function isHoliday(month, day) {
-    return context.currentDate.getMonth() === month && context.currentDate.getDate() === day;
 }
 
 export { context };

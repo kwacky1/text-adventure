@@ -7,6 +7,7 @@ import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedic
 import { playTurn } from '../game.js';
 import { newCharacterFlavor } from './events.js';
 import { addItemToInventory, updateWeaponButtons } from './inventory.js';
+import { resetSeasonalEvents } from './seasonal-events.js';
 
 export async function fetchNames(amount = 10) {
     const spinner = document.createElement('div');
@@ -78,7 +79,8 @@ async function createForm() {
         const birthYearParam = urlParams.get('birthYear');
         
         // Calculate birth year based on age category, or use URL param if provided
-        const currentYear = new Date().getFullYear();
+        // Use game's current date (respects startDate URL param) instead of real-world date
+        const currentYear = context.currentDate.getFullYear();
         let birthYear;
         if (birthYearParam && !isNaN(parseInt(birthYearParam))) {
             birthYear = parseInt(birthYearParam);
@@ -110,6 +112,7 @@ async function createForm() {
         
         // Initialize game state
         setGameParty(gameParty);
+        resetSeasonalEvents(); // Reset seasonal event tracking for the new game
         gameParty.addCharacter(newCharacter);
         
         // Create character UI elements after clearing the form container
@@ -137,7 +140,7 @@ async function createForm() {
         
         // Show day counter
         const dayCounter = document.getElementById('day');
-        dayCounter.textContent = `Day 1 - Day (${getFormattedDate()})`;
+        dayCounter.textContent = `Day (${getFormattedDate()})`;
         dayCounter.style.display = 'block';
 
         // Add introduction text based on positive trait
