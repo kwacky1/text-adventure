@@ -50,7 +50,6 @@ export function addEvent(eventText, style = "default") {
 
 export function updateButtons(type, items, buttonText, updateFunction) {
     if (!items) return; // Early return for interaction buttons which don't use items
-    if (items.length === 0) return;
 
     context.gameParty.characters.forEach(character => {
         const characterDiv = document.getElementById(character.name.split(' ').join(''));
@@ -75,6 +74,9 @@ export function updateButtons(type, items, buttonText, updateFunction) {
         while (select.options.length > 1) {
             select.remove(1);
         }
+
+        // If no items available, just leave the default option
+        if (items.length === 0) return;
 
         // Add options for each available item
         for (const item of items) {
@@ -180,10 +182,24 @@ export function handleSelection(event, items, updateCharacterAttributes) {
                 }
             }
 
+            // Calculate interaction probability modifier based on traits
+            // friendly/optimistic: +10% positive each, disconnected/depressed: +10% negative each
+            let positiveModifier = 0;
+            for (const char of [character, target]) {
+                if (char.posTrait === 'friendly') positiveModifier += 0.1;
+                if (char.posTrait === 'optimistic') positiveModifier += 0.1;
+                if (char.negTrait === 'disconnected') positiveModifier -= 0.1;
+                if (char.negTrait === 'depressed') positiveModifier -= 0.1;
+            }
+            
             const chance = Math.random();
-            if (chance <= 0.5) {
+            // Adjust thresholds based on modifier (more positive = lower neutral threshold, higher positive threshold)
+            const neutralThreshold = Math.max(0.2, Math.min(0.7, 0.5 - positiveModifier));
+            const positiveThreshold = Math.max(0.5, Math.min(0.9, 0.75 + positiveModifier));
+            
+            if (chance <= neutralThreshold) {
                 addEvent(`${target.name} is not interested in talking right now.`);
-            } else if (chance <= 0.75) {
+            } else if (chance <= positiveThreshold) {
                 addEvent(`${target.name} is happy to chat.`);
                 if (character.relationships.get(target) < 4) {
                     character.relationships.set(target, character.relationships.get(target) + 1);
@@ -223,6 +239,22 @@ export function handleSelection(event, items, updateCharacterAttributes) {
                         // Pass durability for weapons, use correct update function
                         if (selectId === 'weaponSelect') {
                             updateWeaponAttributes(character, item, itemDurability);
+                        } else if (selectId === 'medicalSelect') {
+                            // Check if a hypochondriac steals the medical item
+                            const hypochondriacs = context.gameParty.characters.filter(
+                                c => c.negTrait === 'hypochondriac' && c !== character
+                            );
+                            if (hypochondriacs.length > 0 && Math.random() < 0.2) {
+                                // A random hypochondriac steals the item
+                                const thief = hypochondriacs[Math.floor(Math.random() * hypochondriacs.length)];
+                                addEvent(`${thief.name} panics and uses the ${item[0]} on themselves instead!`);
+                                updateCharacterAttributes(thief, item);
+                                thief.capAttributes();
+                                thief.updateCharacter();
+                                updateStatBars(thief);
+                            } else {
+                                updateCharacterAttributes(character, item);
+                            }
                         } else {
                             updateCharacterAttributes(character, item);
                         }
@@ -339,4 +371,27 @@ export function checkPartyAlerts(character) {
             addEvent(`${character.name} is ${healthArray[Math.round(character.health)]}.`);
         }
     }
+}
+
+/**
+ * Handle game over state - clears UI and shows final message
+ * @param {HTMLElement} buttons - The game buttons container
+ */
+export function handleGameOver(buttons) {
+    if (buttons) {
+        Array.from(buttons.children).forEach(child => child.remove());
+    }
+    const playButton = document.getElementById('playButton');
+    if (playButton) {
+        playButton.remove();
+    }
+    const partyInventoryDiv = document.getElementById('partyInventory');
+    if (partyInventoryDiv) {
+        partyInventoryDiv.innerHTML = '';
+    }
+    const eventImage = document.getElementById('eventImage');
+    if (eventImage) {
+        eventImage.remove();
+    }
+    addEvent(`The adventure has come to an end. You survived for ${context.turnNumber} turns.`);
 }

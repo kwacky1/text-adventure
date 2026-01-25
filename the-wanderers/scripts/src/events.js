@@ -4,6 +4,7 @@ import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 import { context } from '../game-state.js';
 import { foundEnemy } from './combat.js';
 import { foundFriend } from './character-creation.js';
+import { foundSurvivor } from './survivor-encounters.js';
 
 export const singleZombieVariations = [
     'ambushes the camp from the bushes',
@@ -19,7 +20,7 @@ export const multiZombieVariations = [
     'shamble down the road towards you'
 ];
 
-export const newCharacterFlavor = [
+export const newCharacterFlavour = [
     'They tell you they haven\'t found any shelter for days.',
     'They breathlessly explain that their previous camp was destroyed by zombies.',
     'They tell you they can help you.',
@@ -34,20 +35,9 @@ export const newCharacterFlavor = [
     'They call you an unfamiliar name and seem disappointed when you correct them.'
 ];
 
-export const medicalLocationFlavor = [
-    'in the bathroom of an abandoned house',
-    'in the backpack of a dead zombie',
-    'in a worn first aid kit',
-    'in a wrecked ambulance',
-    'under some floorboards',
-    'left on the floor of an abandoned clinic',
-    'buried under some rubble',
-    'inside a damaged vending machine'
-];
-
 export function foundMedical(who) {
     const medicalType = medical[Math.floor(Math.random() * medical.length)];
-    const location = medicalLocationFlavor[Math.floor(Math.random() * medicalLocationFlavor.length)];
+    const location = medicalType[2][Math.floor(Math.random() * medicalType[2].length)];
     addEvent(`${who} found medical supplies (${medicalType[0]}) ${location}.`);
     addItemToInventory(medicalType);
     updateMedicalButtons();
@@ -56,7 +46,8 @@ export function foundMedical(who) {
 export function foundFood(who) {
     const foodType = food[Math.floor(Math.random() * food.length)];
     const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
-    addEvent(`${who} found ${variation} (${foodType[0]}).`);
+    const location = foodType[3][Math.floor(Math.random() * foodType[3].length)];
+    addEvent(`${who} found ${variation} (${foodType[0]}) ${location}.`);
     addItemToInventory(foodType);
     updateFoodButtons();
 }
@@ -208,7 +199,12 @@ export function getEvent(chance) {
         foundFriend();
         specialEventOccurred = true;
     } else if (chance > friendChance && chance <= enemyChance) {
-        foundEnemy(context);
+        // 20% chance of survivor encounter, 80% zombie encounter
+        if (Math.random() < 0.2) {
+            foundSurvivor();
+        } else {
+            foundEnemy(context);
+        }
         specialEventOccurred = true;
     } else if (chance > enemyChance && chance <= secondItem) {
         let items = 1;
@@ -264,7 +260,25 @@ export function getEvent(chance) {
                 index2 = Math.floor(Math.random() * context.gameParty.characters.length);
             } while (index2 === index1);
             const name2 = context.gameParty.characters[index2];
-            if (Math.random() < 0.5) {
+            
+            // Calculate interaction probability modifier based on traits
+            // Positive modifiers increase positive interaction chance
+            // friendly: +20%, optimistic: -20% negative (same as +20% positive)
+            // disconnected: +20% negative, depressed: -20% positive
+            let positiveModifier = 0;
+            
+            // Check both characters' traits
+            for (const char of [name1, name2]) {
+                if (char.posTrait === 'friendly') positiveModifier += 0.2;
+                if (char.posTrait === 'optimistic') positiveModifier += 0.2;
+                if (char.negTrait === 'disconnected') positiveModifier -= 0.2;
+                if (char.negTrait === 'depressed') positiveModifier -= 0.2;
+            }
+            
+            // Base 50% for negative, modified by traits (clamped to 10%-90%)
+            const negativeChance = Math.max(0.1, Math.min(0.9, 0.5 - positiveModifier));
+            
+            if (Math.random() < negativeChance) {
                 let hasFood = false;
                 for (const foodItem of food) {
                     if (context.gameParty.inventory.hasItem(foodItem[0])) {

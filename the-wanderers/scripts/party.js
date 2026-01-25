@@ -8,6 +8,11 @@ export const food = [
         'some fruit mix',
         'a box of biscuits',
         'a packet of oatmeal'
+    ], [
+        'in a child\'s lunch box outside an old school',
+        'tucked inside a torn military jacket',
+        'stashed on the bottom row of a broken vending machine',
+        'hidden under the floorboards of a small barricaded cabin'
     ]],
     ['snack', 1, [
         'an apple',
@@ -17,6 +22,11 @@ export const food = [
         'a jar of pickles',
         'a can of fish',
         'a pickled egg'
+    ], [
+        'in the back of the pantry of a ruined house',
+        'under a pile of smashed dishes on the floor of a kitchen',
+        'inside a backpack hidden in the bushes',
+        'in the clutches of a decayed corpse'
     ]],
     ['dish', 2, [
         'a can of soup',
@@ -26,6 +36,10 @@ export const food = [
         'a frozen pie',
         'a bowl of pasta',
         'a can of stew'
+    ], [
+        'inside a toppled over microwave',
+        'sitting on a rusted stovetop',
+        'stuffed beside old batteries in a kitchen drawer'
     ]],
     ['meal', 3, [
         'a frozen roast chicken',
@@ -35,6 +49,10 @@ export const food = [
         'a frozen tv dinner',
         'some mystery pasta',
         'a really big block of cheese'
+    ], [
+        'buried under rubble at the bottom of a grocery store freezer',
+        'in a backpack beside a burned out fire pit',
+        'somehow stuffed into a small mailbox'
     ]],
     ['dessert', 2, [ // dessert is a treat, so it's also beneficial for morale
         'a tub of ice cream',
@@ -43,14 +61,34 @@ export const food = [
         'a packet of marshmallows',
         'a can of whipped cream',
         'a tin of pudding'
+    ], [
+        'inside a barely functioning minifridge',
+        'nearly crushed under a collapsed bunk bed',
+        'stuffed in the kitchen of a doll house'
     ]]
 ];
 
 export const medical = [
-    ['band aid', 1],
-    ['bandage', 2],
-    ['medicine', 3],
-    ['first aid kit', 4]
+    ['band aid', 1, [
+        'in a child\'s backpack',
+        'stuck to the inside of a locker',
+        'inside a cracked first aid box'
+    ]],
+    ['bandage', 2, [
+        'in the bathroom of an abandoned house',
+        'in the backpack of a dead zombie',
+        'buried under some rubble'
+    ]],
+    ['medicine', 3, [
+        'left on the floor of an abandoned clinic',
+        'in a wrecked ambulance',
+        'hidden in a bathroom cabinet'
+    ]],
+    ['first aid kit', 4, [
+        'in a worn first aid kit',
+        'under some floorboards',
+        'inside a damaged vending machine'
+    ]]
 ];
 
 export const weapons = [

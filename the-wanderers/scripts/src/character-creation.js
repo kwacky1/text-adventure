@@ -5,7 +5,7 @@ import Party, { food, medical, weapons } from '../party.js';
 import { setGameParty } from '../game-state.js';
 import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons, updateInteractionButtons } from './ui.js';
 import { playTurn } from '../game.js';
-import { newCharacterFlavor } from './events.js';
+import { newCharacterFlavour } from './events.js';
 import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 import { resetSeasonalEvents } from './seasonal-events.js';
 
@@ -584,8 +584,8 @@ export function foundFriend() {
     setPlayButton('hide');
     
     const friendDiv = document.createElement('div');
-    const flavorText = newCharacterFlavor[Math.floor(Math.random() * newCharacterFlavor.length)];
-    friendDiv.textContent = `You are approached by an adventurer who wants to join your party. ${flavorText}`;
+    const flavourText = newCharacterFlavour[Math.floor(Math.random() * newCharacterFlavour.length)];
+    friendDiv.textContent = `You are approached by an adventurer who wants to join your party. ${flavourText}`;
     const acceptButton = document.createElement('button');
     acceptButton.textContent = 'Accept';
     acceptButton.addEventListener('click', async () => {

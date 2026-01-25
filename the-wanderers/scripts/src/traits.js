@@ -66,12 +66,6 @@ export function checkPosTraitEvents(character) {
             addEvent(`${character.name} is feeling a bit better.`);
         }
     }
-    if (character.posTrait === 'satiated') {
-        // every other turn, hunger goes down
-        if (context.turnNumber % 2 === 0) {
-            character.hunger += 0.5;
-        }
-    }
     if (character.posTrait === 'scavenger') {
         // 10% chance of finding an extra food item
         if (Math.random() < 0.1) {
