@@ -19,7 +19,7 @@ export const multiZombieVariations = [
     'shamble down the road towards you'
 ];
 
-export const newCharacterFlavor = [
+export const newCharacterFlavour = [
     'They tell you they haven\'t found any shelter for days.',
     'They breathlessly explain that their previous camp was destroyed by zombies.',
     'They tell you they can help you.',
@@ -34,20 +34,9 @@ export const newCharacterFlavor = [
     'They call you an unfamiliar name and seem disappointed when you correct them.'
 ];
 
-export const medicalLocationFlavor = [
-    'in the bathroom of an abandoned house',
-    'in the backpack of a dead zombie',
-    'in a worn first aid kit',
-    'in a wrecked ambulance',
-    'under some floorboards',
-    'left on the floor of an abandoned clinic',
-    'buried under some rubble',
-    'inside a damaged vending machine'
-];
-
 export function foundMedical(who) {
     const medicalType = medical[Math.floor(Math.random() * medical.length)];
-    const location = medicalLocationFlavor[Math.floor(Math.random() * medicalLocationFlavor.length)];
+    const location = medicalType[2][Math.floor(Math.random() * medicalType[2].length)];
     addEvent(`${who} found medical supplies (${medicalType[0]}) ${location}.`);
     addItemToInventory(medicalType);
     updateMedicalButtons();
@@ -56,7 +45,8 @@ export function foundMedical(who) {
 export function foundFood(who) {
     const foodType = food[Math.floor(Math.random() * food.length)];
     const variation = foodType[2][Math.floor(Math.random() * foodType[2].length)];
-    addEvent(`${who} found ${variation} (${foodType[0]}).`);
+    const location = foodType[3][Math.floor(Math.random() * foodType[3].length)];
+    addEvent(`${who} found ${variation} (${foodType[0]}) ${location}.`);
     addItemToInventory(foodType);
     updateFoodButtons();
 }
