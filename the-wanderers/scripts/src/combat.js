@@ -1,4 +1,4 @@
-import { addEvent, updateStatBars, setPlayButton as setPlayButtonUI, updateRelationships } from './ui.js';
+import { addEvent, updateStatBars, setPlayButton as setPlayButtonUI, updateRelationships, handleGameOver } from './ui.js';
 import { weapons } from '../party.js';
 import { context } from '../game-state.js';
 import { handleDeathEffects, singleZombieVariations, multiZombieVariations } from './events.js';
@@ -31,7 +31,12 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
         const targetButton = document.createElement('button');
         targetButton.textContent = `Attack zombie (${target.hp} HP)`;
         targetButton.addEventListener('click', () => {
-            let damage = current.attack;
+            // Get current weapon damage (in case weapon was changed mid-combat)
+            let damage = weapons[playerCharacter.weapon][1];
+            // Add fighter bonus
+            if (playerCharacter.posTrait === 'fighter') {
+                damage += 1;
+            }
             const roll = Math.random();
             
             if (roll < 0.1) { // 10% chance to miss
@@ -53,7 +58,10 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
                     addEvent(attackDescriptions.critical[Math.floor(Math.random() * attackDescriptions.critical.length)]
                         .replace('[attacker]', current.type));
                 } else {
-                    addEvent(attackDescriptions.normal[Math.floor(Math.random() * attackDescriptions.normal.length)]
+                    // Use weapon-specific attack descriptions
+                    const weaponName = weapons[playerCharacter.weapon][0];
+                    const weaponDescriptions = attackDescriptions[weaponName] || attackDescriptions.fist;
+                    addEvent(weaponDescriptions[Math.floor(Math.random() * weaponDescriptions.length)]
                         .replace('[attacker]', current.type));
                 }
                 target.hp -= damage;
@@ -76,6 +84,7 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
                         current.attack = weapons[0][1];
                     }
                     updateStatBars(playerCharacter);
+                    playerCharacter.updateCharacter();
                 }
                 
                 if (target.hp <= 0) {
@@ -141,24 +150,7 @@ function handleEnemyTurn(combatant, players, combatants, context, setPlayButton,
         const validTargets = context.gameParty.characters.filter(c => c.health > 0);
         if (validTargets.length === 0) {
             addEvent('The party has been defeated...');
-            // Clear all buttons
-            Array.from(buttons.children).forEach(child => {
-                child.remove();
-            });
-            // Remove play button and show game over
-            const playButton = document.getElementById('playButton');
-            if (playButton) {
-                playButton.remove();
-            }
-            const partyInventoryDiv = document.getElementById('partyInventory');
-            if (partyInventoryDiv) {
-                partyInventoryDiv.innerHTML = '';
-            }
-            const eventImage = document.getElementById('eventImage');
-            if (eventImage) {
-                eventImage.remove();
-            }
-            addEvent(`The adventure has come to an end. You survived for ${context.turnNumber} turns.`);
+            handleGameOver(buttons);
             return;
         }
         
@@ -192,25 +184,7 @@ function handleEnemyTurn(combatant, players, combatants, context, setPlayButton,
         // Check if all players are dead
         if (!context.gameParty.characters.some(c => c.health > 0) || context.gameParty.characters.length === 0) {
             addEvent('Game Over - The entire party has been defeated!');
-            // Clear all buttons including play button
-            Array.from(buttons.children).forEach(child => {
-                child.remove();
-            });
-            // Hide play button and show game over state
-            const playButton = document.getElementById('playButton');
-            if (playButton) {
-                playButton.remove();
-            }
-            // Remove game UI elements
-            const partyInventoryDiv = document.getElementById('partyInventory');
-            if (partyInventoryDiv) {
-                partyInventoryDiv.innerHTML = '';
-            }
-            const eventImage = document.getElementById('eventImage');
-            if (eventImage) {
-                eventImage.remove();
-            }
-            addEvent(`The adventure has come to an end. You survived for ${context.turnNumber} turns.`);
+            handleGameOver(buttons);
             return;
         }
         

@@ -372,3 +372,26 @@ export function checkPartyAlerts(character) {
         }
     }
 }
+
+/**
+ * Handle game over state - clears UI and shows final message
+ * @param {HTMLElement} buttons - The game buttons container
+ */
+export function handleGameOver(buttons) {
+    if (buttons) {
+        Array.from(buttons.children).forEach(child => child.remove());
+    }
+    const playButton = document.getElementById('playButton');
+    if (playButton) {
+        playButton.remove();
+    }
+    const partyInventoryDiv = document.getElementById('partyInventory');
+    if (partyInventoryDiv) {
+        partyInventoryDiv.innerHTML = '';
+    }
+    const eventImage = document.getElementById('eventImage');
+    if (eventImage) {
+        eventImage.remove();
+    }
+    addEvent(`The adventure has come to an end. You survived for ${context.turnNumber} turns.`);
+}

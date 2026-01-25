@@ -4,6 +4,7 @@ import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 import { context } from '../game-state.js';
 import { foundEnemy } from './combat.js';
 import { foundFriend } from './character-creation.js';
+import { foundSurvivor } from './survivor-encounters.js';
 
 export const singleZombieVariations = [
     'ambushes the camp from the bushes',
@@ -198,7 +199,12 @@ export function getEvent(chance) {
         foundFriend();
         specialEventOccurred = true;
     } else if (chance > friendChance && chance <= enemyChance) {
-        foundEnemy(context);
+        // 20% chance of survivor encounter, 80% zombie encounter
+        if (Math.random() < 0.2) {
+            foundSurvivor();
+        } else {
+            foundEnemy(context);
+        }
         specialEventOccurred = true;
     } else if (chance > enemyChance && chance <= secondItem) {
         let items = 1;

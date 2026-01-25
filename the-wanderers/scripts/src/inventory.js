@@ -34,8 +34,12 @@ export function updateFoodAttributes(character, foodItem) {
     }
     if (foodItem[0] === 'dessert') {
         character.morale += 1;
-    } else if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
+    }
+    if (character.negTrait === 'hungry' && (foodItem[0] === 'rations' || foodItem[0] === 'snack')) {
         character.hunger -= foodItem[1];
+        addEvent(`That food didn't make ${character.name} feel much better.`);
+    } else {
+        addEvent(`${character.name} ate the ${foodItem[0]}.`);
     }
     updateFoodButtons();
 }
