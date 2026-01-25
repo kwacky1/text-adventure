@@ -254,7 +254,25 @@ export function getEvent(chance) {
                 index2 = Math.floor(Math.random() * context.gameParty.characters.length);
             } while (index2 === index1);
             const name2 = context.gameParty.characters[index2];
-            if (Math.random() < 0.5) {
+            
+            // Calculate interaction probability modifier based on traits
+            // Positive modifiers increase positive interaction chance
+            // friendly: +20%, optimistic: -20% negative (same as +20% positive)
+            // disconnected: +20% negative, depressed: -20% positive
+            let positiveModifier = 0;
+            
+            // Check both characters' traits
+            for (const char of [name1, name2]) {
+                if (char.posTrait === 'friendly') positiveModifier += 0.2;
+                if (char.posTrait === 'optimistic') positiveModifier += 0.2;
+                if (char.negTrait === 'disconnected') positiveModifier -= 0.2;
+                if (char.negTrait === 'depressed') positiveModifier -= 0.2;
+            }
+            
+            // Base 50% for negative, modified by traits (clamped to 10%-90%)
+            const negativeChance = Math.max(0.1, Math.min(0.9, 0.5 - positiveModifier));
+            
+            if (Math.random() < negativeChance) {
                 let hasFood = false;
                 for (const foodItem of food) {
                     if (context.gameParty.inventory.hasItem(foodItem[0])) {

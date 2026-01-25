@@ -166,10 +166,16 @@ export function playTurn() {
                     updateRelationships();
                 }
             } else {
-                addEvent(`${character.name} died of hunger.`);
-                handleDeathEffects(character);
-                context.gameParty.removeCharacter(character);
-                updateRelationships();
+                // Satiated characters cannot die from hunger - they survive at 0
+                if (character.posTrait === 'satiated') {
+                    character.hunger = 0;
+                    addEvent(`${character.name} is starving but manages to hold on.`);
+                } else {
+                    addEvent(`${character.name} died of hunger.`);
+                    handleDeathEffects(character);
+                    context.gameParty.removeCharacter(character);
+                    updateRelationships();
+                }
             }
             checkPartyAlerts(character);
         };

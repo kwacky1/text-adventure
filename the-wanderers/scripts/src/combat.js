@@ -36,6 +36,17 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
             
             if (roll < 0.1) { // 10% chance to miss
                 addEvent(`${current.type} misses the zombie!`);
+            } else if (playerCharacter.negTrait === 'clumsy' && roll < 0.2) {
+                // Clumsy characters have 10% chance to hurt themselves
+                playerCharacter.health -= 1;
+                addEvent(`${current.type} swings wildly and hurts themself!`);
+                updateStatBars(playerCharacter);
+                if (playerCharacter.health <= 0) {
+                    playerCharacter.health = 0;
+                    addEvent(`${playerCharacter.name} has been knocked out by their own clumsiness!`);
+                    handleDeathEffects(playerCharacter);
+                    context.gameParty.removeCharacter(playerCharacter);
+                }
             } else {
                 if (roll > 0.9) { // 10% chance for critical hit
                     damage *= 2;
@@ -49,7 +60,15 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
                 
                 // Update weapon durability
                 if (playerCharacter.weapon > 0) {  // If not using fists
-                    playerCharacter.weaponDurability--;
+                    // Fighter: 50% chance to preserve durability
+                    // Clumsy: Uses 2 durability instead of 1
+                    let durabilityLoss = 1;
+                    if (playerCharacter.posTrait === 'fighter' && Math.random() < 0.5) {
+                        durabilityLoss = 0;
+                    } else if (playerCharacter.negTrait === 'clumsy') {
+                        durabilityLoss = 2;
+                    }
+                    playerCharacter.weaponDurability -= durabilityLoss;
                     if (playerCharacter.weaponDurability <= 0) {
                         addEvent(`${playerCharacter.name}'s ${weapons[playerCharacter.weapon][0]} breaks!`);
                         playerCharacter.weapon = 0;  // Back to fists

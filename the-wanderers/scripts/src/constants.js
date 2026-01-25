@@ -1,19 +1,19 @@
 export const posTraits = [
     ['resilient', 'Every turn has a 10% chance to heal', 'Has a higher chance of being cured of illness and infection'],
-    ['satiated', 'Every other turn, hunger does not go down', 'Food items are more effective by 0.5 points'],
-    ['friendly', 'Starts with higher relationships with other party members', 'Can never become cold with other party members'],
+    ['satiated', 'Cannot die from hunger - survives at 0', 'Food items are more effective by 0.5 points'],
+    ['friendly', 'Starts with higher relationships with other party members', 'Higher chance of positive interactions'],
     ['scavenger', 'Every turn has a 10% chance to gain a random food item', 'Gets a food item from every zombie killed'],
-    ['optimistic', 'Every turn has a 10% chance to raise morale', 'Morale cannot fall below bad'],
-    ['fighter', 'Does an extra 1 damage for each attack', 'Has a 50% chance to damage two zombies at once']
+    ['optimistic', 'Lower chance of negative interactions', 'Morale cannot fall below bad'],
+    ['fighter', 'Does an extra 1 damage for each attack', '50% chance to preserve weapon durability']
 ];
 
 export const negTraits = [
     ['vulnerable', 'Takes an extra 1 damage from each attack', 'Has a lower chance of curing illness and infection'],
     ['hungry', 'Every other turn, extra hunger is depleted', 'Rations and snack have no effect'],
-    ['disconnected', 'Starts with lower relationships with other party members', 'Can never become family with other party members'],
-    ['hypochondriac', 'Every turn has a 10% chance to use a medical item without benefit', 'Every turn has a 10% chance to display symptoms of illness despite not being sick'],
-    ['depressed', 'Every turn has a 10% chance to lower morale', 'Morale cannot rise above good'],
-    ['clumsy', 'Every turn has a 10% chance to get hurt', 'Does 1 less damage for each attack']
+    ['disconnected', 'Starts with lower relationships with other party members', 'Higher chance of negative interactions'],
+    ['hypochondriac', 'Every turn has a 10% chance to use a medical item without benefit', '20% chance to steal medical items meant for others'],
+    ['depressed', 'Lower chance of positive interactions', 'Morale cannot rise above good'],
+    ['clumsy', '10% chance to hurt self when attacking', 'Uses double weapon durability']
 ];
 
 export const relationships = [
