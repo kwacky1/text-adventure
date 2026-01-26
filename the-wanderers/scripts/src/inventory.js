@@ -1,6 +1,7 @@
 import { addEvent, updateButtons, updateFoodButtons, updateMedicalButtons } from './ui.js';
 import { weapons } from '../party.js';
 import { context } from '../game-state.js';
+import { recordFoodEaten, recordMedicalUsed } from './game-stats.js';
 
 export function addItemToInventory(itemType) {
     // Use the new Inventory class's addItem method instead of directly manipulating inventoryMap
@@ -41,12 +42,16 @@ export function updateFoodAttributes(character, foodItem) {
     } else {
         addEvent(`${character.name} ate the ${foodItem[0]}.`);
     }
+    // Track food eaten
+    recordFoodEaten();
     updateFoodButtons();
 }
 
 export function updateMedicalAttributes(character, medicalItem) {
     character.health += medicalItem[1];
     addEvent(`${character.name} used the ${medicalItem[0]}.`);
+    // Track medical item used
+    recordMedicalUsed();
 
     handleInfectionCure(character, medicalItem);
     handleSicknessCure(character, medicalItem);

@@ -3,11 +3,12 @@ import { context, getFormattedDate } from '../game-state.js';
 import { posTraits, negTraits } from './constants.js';
 import Party, { food, medical, weapons } from '../party.js';
 import { setGameParty } from '../game-state.js';
-import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons, updateInteractionButtons } from './ui.js';
+import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons, updateInteractionButtons, updateRelationships } from './ui.js';
 import { playTurn } from '../game.js';
 import { newCharacterFlavour } from './events.js';
 import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 import { resetSeasonalEvents } from './seasonal-events.js';
+import { recordNewPartyMember, resetGameStats } from './game-stats.js';
 
 export async function fetchNames(amount = 10) {
     const spinner = document.createElement('div');
@@ -113,7 +114,10 @@ async function createForm() {
         // Initialize game state
         setGameParty(gameParty);
         resetSeasonalEvents(); // Reset seasonal event tracking for the new game
+        resetGameStats(); // Reset game statistics for new game
         gameParty.addCharacter(newCharacter);
+        // Track the first party member with their name and turn 1
+        recordNewPartyMember(name, 1);
         
         // Create character UI elements after clearing the form container
         const charactersDiv = document.getElementById('characters');
@@ -530,9 +534,9 @@ async function addPlayer() {
     try {
         // If we don't have any remaining names, fetch more
         if (!context.remainingNames || context.remainingNames.length === 0) {
-            context.remainingNames = await fetchNames(10);
-            if (context.remainingNames.length === 0) {
-                context.remainingNames = await fetchNames(10); // Try one more time if first attempt failed
+            await fetchNames(10);
+            if (!context.remainingNames || context.remainingNames.length === 0) {
+                await fetchNames(10); // Try one more time if first attempt failed
             }
         }
         
@@ -568,6 +572,8 @@ async function addPlayer() {
         // Create and add the character
         const newCharacter = new Character(firstName, age, posTrait, negTrait, skin, hair, shirt);
         context.gameParty.addCharacter(newCharacter);
+        // Track new party member with their name and current turn
+        recordNewPartyMember(firstName, context.turnNumber);
         
         // Create UI elements for the character
         newCharacter.createCharacter();
@@ -617,11 +623,12 @@ export function foundFriend() {
                 itemMessage = ` They brought a ${weaponType[0]} with them.`;
             }
             addEvent(`${newMember.name} has joined the party!${itemMessage}`);
-            // Update party inventory display
-            context.gameParty.inventory.updateDisplay();
         } else {
             addEvent(`${newMember.name} has joined the party!`);
         }
+        
+        // Update party inventory display to refresh mini avatars
+        context.gameParty.inventory.updateDisplay();
 
         // make morale of party members go up when a new member joins
         for (const character of context.gameParty.characters) {
@@ -637,6 +644,7 @@ export function foundFriend() {
         updateMedicalButtons();
         updateWeaponButtons();
         updateInteractionButtons();
+        updateRelationships();
 
         friendDiv.remove();
         acceptButton.remove();

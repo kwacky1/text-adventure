@@ -1,3 +1,8 @@
+import { context } from './game-state.js';
+import { updateFoodAttributes, updateMedicalAttributes, updateWeaponAttributes } from './src/inventory.js';
+import { hungerArray, healthArray } from './character.js';
+import { updateStatBars } from './src/ui.js';
+
 // Item category definitions
 export const food = [
     ['rations', 0.5, [
@@ -112,10 +117,20 @@ export class Inventory {
             existingItem.quantity += 1;
             this.inventoryMap.set(itemType[0], existingItem);
         } else {
+            // Determine the value to store
+            // For weapons: if full definition (3+ elements), use index 2 (durability)
+            // If abbreviated (2 elements like [name, durability]), use index 1
+            // For food/medical, use index 1 (effectiveness)
+            let valueToStore = itemType[1];
+            const isWeapon = weapons.some(w => w[0] === itemType[0]);
+            if (isWeapon && itemType.length >= 3) {
+                valueToStore = itemType[2]; // Use max durability from weapon definition
+            }
+            
             // If it does not exist, add it to the map
             this.inventoryMap.set(itemType[0], {
                 name: itemType[0],
-                value: itemType[1],
+                value: valueToStore,
                 quantity: 1
             });
         }
@@ -156,9 +171,9 @@ export class Inventory {
         
         // Create categories
         const categories = {
-            food: { title: '🍗 Food', items: [], icon: '🍽️' },
-            medical: { title: '🩹 Medical', items: [], icon: '💊' },
-            weapons: { title: '⚔️ Weapons', items: [], icon: '🗡️' }
+            food: { title: '🍗 Food', items: [], icon: '🍽️', type: 'food' },
+            medical: { title: '🩹 Medical', items: [], icon: '💊', type: 'medical' },
+            weapons: { title: '⚔️ Weapons', items: [], icon: '🗡️', type: 'weapon' }
         };
         
         // Categorize items
@@ -175,6 +190,16 @@ export class Inventory {
             else if (weapons.some(weaponItem => weaponItem[0] === key)) {
                 categories.weapons.items.push(item);
             }
+        });
+        
+        // Sort items by effectiveness (highest value first)
+        categories.food.items.sort((a, b) => b.value - a.value);
+        categories.medical.items.sort((a, b) => b.value - a.value);
+        // Sort weapons by damage from weapons array (not stored value which may be durability)
+        categories.weapons.items.sort((a, b) => {
+            const aWeapon = weapons.find(w => w[0] === a.name);
+            const bWeapon = weapons.find(w => w[0] === b.name);
+            return (bWeapon ? bWeapon[1] : 0) - (aWeapon ? aWeapon[1] : 0);
         });
         
         // Create category container
@@ -216,6 +241,13 @@ export class Inventory {
                         <span class="item-quantity">x${item.quantity}</span>
                         <span class="item-value">${valueDisplay}</span>
                     `;
+                    
+                    // Add mini avatars for quick equip/use
+                    const miniAvatars = this.createMiniAvatars(item, category.type);
+                    if (miniAvatars) {
+                        itemElement.appendChild(miniAvatars);
+                    }
+                    
                     itemList.appendChild(itemElement);
                 });
                 
@@ -233,6 +265,140 @@ export class Inventory {
         }
         
         partyInventoryDiv.appendChild(inventoryContainer);
+    }
+
+    /**
+     * Create mini avatar buttons for quick equip/use
+     * @param {Object} item - The inventory item
+     * @param {string} type - 'food', 'medical', or 'weapon'
+     * @returns {HTMLElement|null} Container with mini avatars or null if none eligible
+     */
+    createMiniAvatars(item, type) {
+        if (!context.gameParty || !context.gameParty.characters || context.gameParty.characters.length === 0) {
+            return null;
+        }
+        
+        let eligibleCharacters = [];
+        
+        if (type === 'food') {
+            // Get characters who aren't full (hunger < max) and haven't used food action, sorted by lowest hunger first
+            const maxHunger = hungerArray.length - 1;
+            eligibleCharacters = context.gameParty.characters
+                .filter(c => c.hunger < maxHunger && (!c.actionsUsed || !c.actionsUsed.food))
+                .sort((a, b) => a.hunger - b.hunger); // Most hungry first
+        } else if (type === 'medical') {
+            // Get characters who aren't at full health and haven't used medical action, sorted by lowest health first
+            const maxHealth = healthArray.length - 1;
+            eligibleCharacters = context.gameParty.characters
+                .filter(c => c.health < maxHealth && (!c.actionsUsed || !c.actionsUsed.medical))
+                .sort((a, b) => a.health - b.health); // Most injured first
+        } else if (type === 'weapon') {
+            // Get characters whose current weapon is weaker than this one
+            const weaponInfo = weapons.find(w => w[0] === item.name);
+            if (weaponInfo) {
+                const itemDamage = weaponInfo[1];
+                eligibleCharacters = context.gameParty.characters
+                    .filter(c => weapons[c.weapon][1] < itemDamage)
+                    .sort((a, b) => weapons[a.weapon][1] - weapons[b.weapon][1]); // Weakest weapon first
+            }
+        }
+        
+        if (eligibleCharacters.length === 0) {
+            return null;
+        }
+        
+        const container = document.createElement('div');
+        container.className = 'mini-avatars';
+        
+        for (const character of eligibleCharacters) {
+            const avatarBtn = document.createElement('button');
+            avatarBtn.className = 'mini-avatar-btn';
+            avatarBtn.title = `Give ${item.name} to ${character.name}`;
+            
+            // Create mini avatar container for layered images
+            const avatarContainer = document.createElement('div');
+            avatarContainer.className = 'mini-avatar-layers';
+            
+            // Skin layer
+            const skinImg = document.createElement('img');
+            skinImg.src = character.skin;
+            skinImg.alt = '';
+            skinImg.className = 'mini-avatar-layer';
+            avatarContainer.appendChild(skinImg);
+            
+            // Hair layer
+            const hairImg = document.createElement('img');
+            hairImg.src = character.hair;
+            hairImg.alt = '';
+            hairImg.className = 'mini-avatar-layer';
+            avatarContainer.appendChild(hairImg);
+            
+            // Shirt layer
+            const shirtImg = document.createElement('img');
+            shirtImg.src = character.shirt;
+            shirtImg.alt = character.name;
+            shirtImg.className = 'mini-avatar-layer';
+            avatarContainer.appendChild(shirtImg);
+            
+            avatarBtn.appendChild(avatarContainer);
+            
+            // Add click handler
+            avatarBtn.addEventListener('click', () => {
+                this.quickUseItem(item, character, type);
+            });
+            
+            container.appendChild(avatarBtn);
+        }
+        
+        return container;
+    }
+
+    /**
+     * Quick use/equip an item on a character
+     * @param {Object} item - The inventory item
+     * @param {Object} character - The character to give the item to
+     * @param {string} type - 'food', 'medical', or 'weapon'
+     */
+    quickUseItem(item, character, type) {
+        // Find the full item data
+        let fullItem;
+        if (type === 'food') {
+            fullItem = food.find(f => f[0] === item.name);
+        } else if (type === 'medical') {
+            fullItem = medical.find(m => m[0] === item.name);
+        } else if (type === 'weapon') {
+            fullItem = weapons.find(w => w[0] === item.name);
+        }
+        
+        if (!fullItem) return;
+        
+        // Check if action has already been used (for food/medical)
+        if ((type === 'food' || type === 'medical') && character.actionsUsed?.[type]) {
+            return;
+        }
+        
+        // Remove from inventory
+        this.removeItem(item.name);
+        
+        // Apply the item effect and mark action as used
+        if (type === 'food') {
+            character.actionsUsed.food = true; // Set before update so dropdown gets disabled
+            updateFoodAttributes(character, fullItem);
+        } else if (type === 'medical') {
+            character.actionsUsed.medical = true; // Set before update so dropdown gets disabled
+            updateMedicalAttributes(character, fullItem);
+        } else if (type === 'weapon') {
+            // Get durability from the item before it was removed
+            const itemDurability = item.value;
+            updateWeaponAttributes(character, fullItem, itemDurability);
+        }
+        
+        character.capAttributes();
+        character.updateCharacter();
+        updateStatBars(character);
+        
+        // Refresh inventory display
+        this.updateDisplay();
     }
 }
 
@@ -272,7 +438,7 @@ class Party {
         const index = this.characters.indexOf(character);
         if (index !== -1) {
             this.characters.splice(index, 1);
-            const characterItem = document.getElementById(character.name);
+            const characterItem = document.getElementById(character.getCharacterId());
             if (characterItem) {
                 characterItem.remove();
             }

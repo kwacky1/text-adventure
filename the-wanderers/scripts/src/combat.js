@@ -4,6 +4,7 @@ import { context } from '../game-state.js';
 import { handleDeathEffects, singleZombieVariations, multiZombieVariations } from './events.js';
 import { attackDescriptions } from './constants.js';
 import { isHalloween, getHalloweenZombieDescription } from './seasonal-events.js';
+import { recordZombieKill, recordWeaponUse } from './game-stats.js';
 
 function handlePlayerTurn(current, combatants, players, context, setPlayButton, index) {
     const playerCharacter = context.gameParty.characters.find(c => c.name === current.type);
@@ -64,6 +65,8 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
                     addEvent(weaponDescriptions[Math.floor(Math.random() * weaponDescriptions.length)]
                         .replace('[attacker]', current.type));
                 }
+                // Track weapon usage
+                recordWeaponUse(weapons[playerCharacter.weapon][0]);
                 target.hp -= damage;
                 
                 // Update weapon durability
@@ -89,6 +92,9 @@ function handlePlayerTurn(current, combatants, players, context, setPlayButton, 
                 
                 if (target.hp <= 0) {
                     addEvent('The zombie is defeated!');
+                    // Track the zombie kill with the weapon used
+                    const weaponName = weapons[playerCharacter.weapon][0];
+                    recordZombieKill(weaponName);
                     // Remove the dead enemy from combatants
                     const targetIndex = combatants.indexOf(target);
                     if (targetIndex > -1) {

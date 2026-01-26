@@ -24,6 +24,15 @@ export const relationships = [
     'family'
 ];
 
+// Emoji placeholders for relationship levels (will be replaced with sprites later)
+export const relationshipEmojis = [
+    '❄️',  // cold
+    '👤',  // strangers
+    '🤝',  // acquaintances
+    '😊',  // friends
+    '❤️'   // family
+];
+
 export const attackDescriptions = {
     // Weapon-specific attack descriptions
     fist: [
