@@ -117,10 +117,20 @@ export class Inventory {
             existingItem.quantity += 1;
             this.inventoryMap.set(itemType[0], existingItem);
         } else {
+            // Determine the value to store
+            // For weapons: if full definition (3+ elements), use index 2 (durability)
+            // If abbreviated (2 elements like [name, durability]), use index 1
+            // For food/medical, use index 1 (effectiveness)
+            let valueToStore = itemType[1];
+            const isWeapon = weapons.some(w => w[0] === itemType[0]);
+            if (isWeapon && itemType.length >= 3) {
+                valueToStore = itemType[2]; // Use max durability from weapon definition
+            }
+            
             // If it does not exist, add it to the map
             this.inventoryMap.set(itemType[0], {
                 name: itemType[0],
-                value: itemType[1],
+                value: valueToStore,
                 quantity: 1
             });
         }

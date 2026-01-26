@@ -131,7 +131,8 @@ export function playTurn() {
                         character.updateCharacter(); // Update trait display (text and sprites)
                         updateStatBars(character);
                     }
-                }                if (character.morale <= 0 && context.gameParty.characters.length > 1) {
+                }               
+                if (character.morale <= 0 && context.gameParty.characters.length > 1) {
                     // Calculate average relationship level (0=cold to 4=family)
                     let totalRelationship = 0;
                     let otherCharacters = context.gameParty.characters.filter(c => c !== character);

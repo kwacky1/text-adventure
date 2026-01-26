@@ -599,7 +599,18 @@ function createStatsSection(title, statsList) {
     const list = document.createElement('ul');
     for (const stat of statsList) {
         const item = document.createElement('li');
-        item.innerHTML = `<span class="stat-label">${stat.label}:</span> <span class="stat-value">${stat.value}</span>`;
+        
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'stat-label';
+        labelSpan.textContent = `${stat.label}:`;
+        
+        const valueSpan = document.createElement('span');
+        valueSpan.className = 'stat-value';
+        valueSpan.textContent = stat.value;
+        
+        item.appendChild(labelSpan);
+        item.appendChild(document.createTextNode(' '));
+        item.appendChild(valueSpan);
         list.appendChild(item);
     }
     section.appendChild(list);
