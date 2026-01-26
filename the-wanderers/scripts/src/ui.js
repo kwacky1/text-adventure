@@ -3,6 +3,7 @@ import { context } from '../game-state.js';
 import { food, medical, weapons } from '../party.js';
 import { updateFoodAttributes, updateMedicalAttributes, updateWeaponAttributes } from './inventory.js';
 import { relationships } from './constants.js';
+import { getGameStats, finalizeLongestSurvivor } from './game-stats.js';
 
 export function updateStatBars(character) {
     const characterDiv = document.getElementById(character.name);
@@ -374,7 +375,7 @@ export function checkPartyAlerts(character) {
 }
 
 /**
- * Handle game over state - clears UI and shows final message
+ * Handle game over state - clears UI and shows final message with statistics
  * @param {HTMLElement} buttons - The game buttons container
  */
 export function handleGameOver(buttons) {
@@ -394,4 +395,115 @@ export function handleGameOver(buttons) {
         eventImage.remove();
     }
     addEvent(`The adventure has come to an end. You survived for ${context.turnNumber} turns.`);
+    
+    // Finalize longest survivor stats for any characters still alive
+    if (context.gameParty && context.gameParty.characters) {
+        const remainingNames = context.gameParty.characters.map(c => c.name);
+        finalizeLongestSurvivor(remainingNames, context.turnNumber);
+    }
+    
+    // Display end game statistics
+    displayEndGameStats();
+}
+
+/**
+ * Display end game statistics in a styled panel
+ */
+function displayEndGameStats() {
+    const stats = getGameStats();
+    
+    // Create stats container
+    const statsContainer = document.createElement('div');
+    statsContainer.className = 'end-game-stats';
+    statsContainer.innerHTML = '<h2>Adventure Statistics</h2>';
+    
+    // Create stats grid
+    const statsGrid = document.createElement('div');
+    statsGrid.className = 'stats-grid';
+    
+    // Combat stats section
+    const combatSection = createStatsSection('Combat', [
+        { label: 'Zombies Killed', value: stats.zombiesKilled },
+        { label: 'Hostile Survivors Defeated', value: stats.hostileSurvivorsKilled },
+        { label: 'Favourite Weapon', value: capitalizeFirst(stats.favouriteWeapon) }
+    ]);
+    statsGrid.appendChild(combatSection);
+    
+    // Party stats section
+    const longestSurvivorText = stats.longestSurvivor.name 
+        ? `${stats.longestSurvivor.name} (${stats.longestSurvivor.turns} turns)`
+        : 'None';
+    const partySection = createStatsSection('Party', [
+        { label: 'Total Members Recruited', value: stats.totalPartyMembers },
+        { label: 'Longest Survivor', value: longestSurvivorText }
+    ]);
+    statsGrid.appendChild(partySection);
+    
+    // Supplies stats section
+    const suppliesSection = createStatsSection('Supplies', [
+        { label: 'Food Eaten', value: stats.foodEaten },
+        { label: 'Medical Items Used', value: stats.medicalUsed }
+    ]);
+    statsGrid.appendChild(suppliesSection);
+    
+    // Survivor encounters section
+    const enc = stats.survivorEncounters;
+    const encounterSection = createStatsSection('Survivor Encounters', [
+        { label: 'Trades Accepted', value: enc.merchantTradesAccepted },
+        { label: 'Trades Declined', value: enc.merchantTradesDeclined },
+        { label: 'Steal Attempts', value: enc.merchantStealAttempts },
+        { label: 'People Helped', value: enc.personInNeedHelped },
+        { label: 'People Turned Away', value: enc.personInNeedDeclined },
+        { label: 'Hostile Encounters', value: enc.hostileEncounters }
+    ]);
+    statsGrid.appendChild(encounterSection);
+    
+    statsContainer.appendChild(statsGrid);
+    
+    // Add to the image container (where campsite image was)
+    const imageContainer = document.getElementById('imageContainer');
+    if (imageContainer) {
+        imageContainer.appendChild(statsContainer);
+    } else {
+        // Fallback to current events area if imageContainer doesn't exist
+        const currentEventDiv = document.getElementById('currentEvent');
+        if (currentEventDiv) {
+            currentEventDiv.appendChild(statsContainer);
+        }
+    }
+}
+
+/**
+ * Create a stats section with a title and list of stats
+ * @param {string} title - Section title
+ * @param {Array} statsList - Array of {label, value} objects
+ * @returns {HTMLElement} The stats section element
+ */
+function createStatsSection(title, statsList) {
+    const section = document.createElement('div');
+    section.className = 'stats-section';
+    
+    const header = document.createElement('h3');
+    header.textContent = title;
+    section.appendChild(header);
+    
+    const list = document.createElement('ul');
+    for (const stat of statsList) {
+        const item = document.createElement('li');
+        item.innerHTML = `<span class="stat-label">${stat.label}:</span> <span class="stat-value">${stat.value}</span>`;
+        list.appendChild(item);
+    }
+    section.appendChild(list);
+    
+    return section;
+}
+
+/**
+ * Capitalize the first letter of a string
+ * @param {string} str - String to capitalize
+ * @returns {string} Capitalized string
+ */
+function capitalizeFirst(str) {
+    if (!str || str === 'None') return str || '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }

@@ -8,6 +8,7 @@ import { playTurn } from '../game.js';
 import { newCharacterFlavour } from './events.js';
 import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 import { resetSeasonalEvents } from './seasonal-events.js';
+import { recordNewPartyMember, resetGameStats } from './game-stats.js';
 
 export async function fetchNames(amount = 10) {
     const spinner = document.createElement('div');
@@ -113,7 +114,10 @@ async function createForm() {
         // Initialize game state
         setGameParty(gameParty);
         resetSeasonalEvents(); // Reset seasonal event tracking for the new game
+        resetGameStats(); // Reset game statistics for new game
         gameParty.addCharacter(newCharacter);
+        // Track the first party member with their name and turn 1
+        recordNewPartyMember(name, 1);
         
         // Create character UI elements after clearing the form container
         const charactersDiv = document.getElementById('characters');
@@ -568,6 +572,8 @@ async function addPlayer() {
         // Create and add the character
         const newCharacter = new Character(firstName, age, posTrait, negTrait, skin, hair, shirt);
         context.gameParty.addCharacter(newCharacter);
+        // Track new party member with their name and current turn
+        recordNewPartyMember(firstName, context.turnNumber);
         
         // Create UI elements for the character
         newCharacter.createCharacter();

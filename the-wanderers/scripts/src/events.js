@@ -5,6 +5,7 @@ import { context } from '../game-state.js';
 import { foundEnemy } from './combat.js';
 import { foundFriend } from './character-creation.js';
 import { foundSurvivor } from './survivor-encounters.js';
+import { recordPartyMemberLeft } from './game-stats.js';
 
 export const singleZombieVariations = [
     'ambushes the camp from the bushes',
@@ -63,6 +64,9 @@ export function foundWeapon(who, id) {
 }
 
 export function handleDeathEffects(character) {
+    // Track this party member leaving
+    recordPartyMemberLeft(character.name, context.turnNumber);
+    
     // when a character dies check the relationships of the other characters and set morale accordingly
     /*
     Family -3

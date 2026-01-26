@@ -12,6 +12,16 @@ import {
     survivorFleeMessages,
     survivorGiveUpMessages
 } from './constants.js';
+import { 
+    recordMerchantTradeAccepted, 
+    recordMerchantTradeDeclined, 
+    recordMerchantStealAttempt,
+    recordPersonInNeedHelped,
+    recordPersonInNeedDeclined,
+    recordHostileEncounter,
+    recordHostileSurvivorKill,
+    recordWeaponUse
+} from './game-stats.js';
 
 /**
  * Get a random element from an array
@@ -97,6 +107,8 @@ function merchantEncounter() {
         // Add merchant item to inventory
         addItemToInventory(merchantItem);
         addEvent(`You trade your ${partyItem.name} for the ${merchantItem[0]}.`);
+        // Track accepted trade
+        recordMerchantTradeAccepted();
         
         updateAllInventoryButtons();
         context.gameParty.inventory.updateDisplay();
@@ -110,6 +122,8 @@ function merchantEncounter() {
     declineButton.textContent = 'Decline';
     declineButton.addEventListener('click', () => {
         addEvent('You politely decline. The survivor nods and walks away.');
+        // Track declined trade
+        recordMerchantTradeDeclined();
         clearCombatButtons(buttons);
         setPlayButton('show');
     });
@@ -130,6 +144,8 @@ function merchantEncounter() {
  */
 function attemptSteal(merchantItem, buttons) {
     clearCombatButtons(buttons);
+    // Track steal attempt
+    recordMerchantStealAttempt();
     
     const roll = Math.random();
     if (roll < 0.25) {
@@ -192,6 +208,8 @@ function personInNeedEncounter() {
         if (itemToGive) {
             context.gameParty.inventory.removeItem(itemToGive[0]);
             addEvent(`You give them the ${itemToGive[0]}. They thank you profusely.`);
+            // Track helping person in need
+            recordPersonInNeedHelped();
             
             // Boost party morale
             context.gameParty.characters.forEach(character => {
@@ -218,6 +236,8 @@ function personInNeedEncounter() {
     declineButton.textContent = 'Turn them away';
     declineButton.addEventListener('click', () => {
         clearCombatButtons(buttons);
+        // Track declining person in need
+        recordPersonInNeedDeclined();
         
         // 25% chance they become hostile
         if (Math.random() < 0.25) {
@@ -238,6 +258,9 @@ function hostileSurvivorEncounter() {
     // Number of enemies scales with party size for balance
     // Solo players always face 1 enemy, larger parties face 1-3
     const numberOfEnemies = Math.min(3, Math.floor(Math.random() * context.gameParty.characters.length) + 1);
+    
+    // Track hostile encounter
+    recordHostileEncounter();
     
     // Use solo or group introductions based on party size
     const isSolo = context.gameParty.characters.length === 1;
@@ -365,6 +388,8 @@ function handlePlayerSurvivorTurn(current, combatants, players, setPlayButton, i
                     addEvent(getRandomElement(weaponDescriptions)
                         .replace('[attacker]', current.type));
                 }
+                // Track weapon usage
+                recordWeaponUse(weapons[playerCharacter.weapon][0]);
                 target.hp -= damage;
                 
                 // Update weapon durability
@@ -388,6 +413,8 @@ function handlePlayerSurvivorTurn(current, combatants, players, setPlayButton, i
                 
                 if (target.hp <= 0) {
                     addEvent('The hostile survivor is defeated!');
+                    // Track hostile survivor kill
+                    recordHostileSurvivorKill();
                     const targetIndex = combatants.indexOf(target);
                     if (targetIndex > -1) {
                         combatants.splice(targetIndex, 1);
