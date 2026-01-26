@@ -7,6 +7,15 @@ import { foundFriend } from './character-creation.js';
 import { foundSurvivor } from './survivor-encounters.js';
 import { recordPartyMemberLeft } from './game-stats.js';
 
+/**
+ * Check if a character is still viable (not dying from health, hunger, or morale)
+ * @param {Object} character - The character to check
+ * @returns {boolean} True if character is viable
+ */
+function isCharacterViable(character) {
+    return character.health > 0 && character.hunger > 0 && character.morale > 0;
+}
+
 export const singleZombieVariations = [
     'ambushes the camp from the bushes',
     'lurches out from the doorway of an abandoned building',
@@ -102,8 +111,9 @@ export function handleDeathEffects(character) {
             updateStatBars(remainingCharacter);
             
             // Check if this character has a worse weapon than the dying character
+            // Only consider characters who are still viable
             const currentWeaponDamage = weapons[remainingCharacter.weapon][1];
-            if (currentWeaponDamage < dyingWeaponDamage && currentWeaponDamage < worstWeaponDamage) {
+            if (isCharacterViable(remainingCharacter) && currentWeaponDamage < dyingWeaponDamage && currentWeaponDamage < worstWeaponDamage) {
                 worstWeaponCharacter = remainingCharacter;
                 worstWeaponDamage = currentWeaponDamage;
             }
@@ -125,9 +135,13 @@ export function handleDeathEffects(character) {
         addEvent(`${worstWeaponCharacter.name} takes ${character.name}'s ${dyingWeapon[0]}, replacing their ${oldWeaponName}.`);
     } else if (dyingWeapon[0] !== 'fist') {
         // If no one needs the weapon and it's not fists, add it to inventory
-        addItemToInventory([dyingWeapon[0], character.weaponDurability]);
-        addEvent(`The party collects ${character.name}'s ${dyingWeapon[0]}.`);
-        context.gameParty.inventory.updateDisplay();
+        // Only collect if there are viable party members remaining
+        const livingCharacters = context.gameParty.characters.filter(c => c !== character && isCharacterViable(c));
+        if (livingCharacters.length > 0) {
+            addItemToInventory([dyingWeapon[0], character.weaponDurability]);
+            addEvent(`The party collects ${character.name}'s ${dyingWeapon[0]}.`);
+            context.gameParty.inventory.updateDisplay();
+        }
     }
 }
 
@@ -231,9 +245,16 @@ export function getEvent(chance) {
             const sickCharacter = healthyCharacters[Math.floor(Math.random() * healthyCharacters.length)];
             sickCharacter.health -= 1;
             sickCharacter.sick = true;
-            updateStatBars(sickCharacter);
             event = `${sickCharacter.name} is feeling queasy.`;
             addEvent(event);
+            if (sickCharacter.health <= 0) {
+                addEvent(`${sickCharacter.name} succumbed to the sudden illness.`);
+                handleDeathEffects(sickCharacter);
+                context.gameParty.removeCharacter(sickCharacter);
+                updateRelationships();
+            } else {
+                updateStatBars(sickCharacter);
+            }
         } else {
             addEvent(event);
         }
@@ -309,8 +330,15 @@ export function getEvent(chance) {
             if (Math.random() < 0.5) {
                 const character = context.gameParty.characters[0];
                 character.health -= 1;
-                updateStatBars(character);
                 addEvent(`${character.name} tripped over a loose brick and hurt their leg.`);
+                if (character.health <= 0) {
+                    addEvent(`${character.name} couldn't recover from the fall.`);
+                    handleDeathEffects(character);
+                    context.gameParty.removeCharacter(character);
+                    updateRelationships();
+                } else {
+                    updateStatBars(character);
+                }
             } else {
                 const character = context.gameParty.characters[0];
                 character.morale += 1;

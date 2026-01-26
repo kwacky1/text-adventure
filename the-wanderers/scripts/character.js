@@ -102,9 +102,17 @@ export class Character {
     }
     
     const actualAge = Math.floor(Math.random() * (maxAge - minAge + 1)) + minAge;
-    this.birthYear = currentYear - actualAge;
     this.birthMonth = Math.floor(Math.random() * 12);
     this.birthDay = Math.floor(Math.random() * 28) + 1; // Use 28 to avoid invalid dates
+    
+    // Calculate birth year, accounting for whether birthday has passed this year
+    const birthDateThisYear = new Date(currentYear, this.birthMonth, this.birthDay);
+    if (currentDate < birthDateThisYear) {
+      // Birthday hasn't occurred yet this year, so birth year is one less
+      this.birthYear = currentYear - actualAge - 1;
+    } else {
+      this.birthYear = currentYear - actualAge;
+    }
   }
 
   getActualAge() {
@@ -138,6 +146,16 @@ export class Character {
 
   resetActions() {
     this.actionsUsed = { food: false, medical: false, interact: false };
+  }
+
+  /**
+   * Get a normalized ID for use in HTML/CSS (removes accents, spaces, special chars)
+   */
+  getCharacterId() {
+    return this.name
+      .normalize('NFD')                    // Decompose accented characters
+      .replace(/[\u0300-\u036f]/g, '')     // Remove diacritical marks
+      .replace(/[^a-zA-Z0-9]/g, '');       // Remove non-alphanumeric chars
   }
 
   checkHunger() {
@@ -192,7 +210,7 @@ export class Character {
   createCharacter() {
     const charactersDiv = document.getElementById("characters");
     const characterDiv = charactersDiv.appendChild(document.createElement('div'));
-    characterDiv.id = this.name.split(' ').join('');
+    characterDiv.id = this.getCharacterId();
     characterDiv.classList.add('character');
 
     // Avatar container
@@ -302,14 +320,58 @@ export class Character {
 
     characterDiv.appendChild(avatarContainer);
 
+    // Create name row container (name on left, relationships on right)
+    const nameRow = document.createElement('div');
+    nameRow.className = 'name-row';
+
     const nameElement = document.createElement('h2');
     nameElement.classList.add('name');
     nameElement.textContent = this.name;
-    characterDiv.appendChild(nameElement);
+    nameRow.appendChild(nameElement);
+
+    // Relationships container (will be populated by updateRelationships)
+    const relationships = document.createElement('div');
+    relationships.classList.add('relationships');
+    nameRow.appendChild(relationships);
+
+    characterDiv.appendChild(nameRow);
 
     const statsContainer = document.createElement('div');
     statsContainer.id = 'playerStats';
 
+    // Most important stats first: Weapon, Hunger, Health, Morale
+    // Display weapon with durability information
+    const weapon = document.createElement('div');
+    weapon.classList.add('stat', 'weapon');
+    weapon.id = 'weapon';
+    
+    if (this.weapon === 0) {
+      weapon.innerHTML = `Weapon: <span class="statValue">${weapons[this.weapon][0]}</span>`;
+    } else {
+      weapon.innerHTML = `Weapon: <span class="statValue">${weapons[this.weapon][0]} (${this.weaponDurability}/${weapons[this.weapon][2]})</span>`;
+    }
+    
+    statsContainer.appendChild(weapon);
+
+    const hungerStat = document.createElement('div');
+    hungerStat.classList.add('stat', 'hunger');
+    hungerStat.id = 'hungerStat';
+    hungerStat.innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
+    statsContainer.appendChild(hungerStat);
+
+    const healthStat = document.createElement('div');
+    healthStat.classList.add('stat', 'health');
+    healthStat.id = 'healthStat';
+    healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
+    statsContainer.appendChild(healthStat);
+
+    const moraleStat = document.createElement('div');
+    moraleStat.classList.add('stat', 'morale');
+    moraleStat.id = 'moraleStat';
+    moraleStat.innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
+    statsContainer.appendChild(moraleStat);
+
+    // Less critical stats: Age, Traits
     const ageElement = document.createElement('div');
     ageElement.classList.add('stat');
     ageElement.classList.add('age');
@@ -329,37 +391,6 @@ export class Character {
     negTraitElement.classList.add('neg-trait');
     negTraitElement.innerHTML = `Negative Trait: <span class="neg-trait">${this.negTrait}</span>`;
     statsContainer.appendChild(negTraitElement);
-
-    const moraleStat = document.createElement('div');
-    moraleStat.classList.add('stat', 'morale');
-    moraleStat.id = 'moraleStat';
-    moraleStat.innerHTML = `Morale: <span class="statValue">${moraleArray[this.morale]}</span>`;
-    statsContainer.appendChild(moraleStat);
-
-    const hungerStat = document.createElement('div');
-    hungerStat.classList.add('stat', 'hunger');
-    hungerStat.id = 'hungerStat';
-    hungerStat.innerHTML = `Hunger: <span class="statValue">${hungerArray[Math.round(this.hunger)]}</span>`;
-    statsContainer.appendChild(hungerStat);
-
-    const healthStat = document.createElement('div');
-    healthStat.classList.add('stat', 'health');
-    healthStat.id = 'healthStat';
-    healthStat.innerHTML = `Health: <span class="statValue">${healthArray[this.health]}</span>`;
-    statsContainer.appendChild(healthStat);
-
-    // Display weapon with durability information
-    const weapon = document.createElement('div');
-    weapon.classList.add('stat');
-    weapon.id = 'weapon';
-    
-    if (this.weapon === 0) {
-      weapon.innerHTML = `Weapon: <span class="statValue">${weapons[this.weapon][0]}</span>`;
-    } else {
-      weapon.innerHTML = `Weapon: <span class="statValue">${weapons[this.weapon][0]} (${this.weaponDurability}/${weapons[this.weapon][2]})</span>`;
-    }
-    
-    statsContainer.appendChild(weapon);
 
     characterDiv.appendChild(statsContainer);
 
@@ -388,16 +419,11 @@ export class Character {
     interactSelect.id = 'interactionSelect';
     interactSelect.innerHTML = `<option value="interaction">Interact with</option>`;
     inventoryList.appendChild(interactSelect);
-
-    const relationships = document.createElement('div');
-    relationships.classList.add('relationships');
-    relationships.innerHTML = `<p>Relationships for ${this.name}</p>`;
-    characterDiv.appendChild(relationships);
   }
 
   updateCharacter() {
     this.capAttributes();
-    const characterDiv = document.getElementById(this.name.split(' ').join(''));
+    const characterDiv = document.getElementById(this.getCharacterId());
     if (characterDiv) {
       const ageEl = characterDiv.querySelector('.age');
       ageEl.innerHTML = `Age: <span class="statValue">${ageArray[this.age]}</span>`;

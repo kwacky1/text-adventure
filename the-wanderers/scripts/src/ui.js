@@ -2,19 +2,29 @@ import { healthArray, hungerArray, moraleArray } from '../character.js';
 import { context } from '../game-state.js';
 import { food, medical, weapons } from '../party.js';
 import { updateFoodAttributes, updateMedicalAttributes, updateWeaponAttributes } from './inventory.js';
-import { relationships } from './constants.js';
+import { relationships, relationshipEmojis } from './constants.js';
 import { getGameStats, finalizeLongestSurvivor } from './game-stats.js';
 
 export function updateStatBars(character) {
-    const characterDiv = document.getElementById(character.name);
+    const characterDiv = document.getElementById(character.getCharacterId());
     if (characterDiv) {
         const healthBar = characterDiv.querySelector('.health');
         const hungerBar = characterDiv.querySelector('.hunger');
         const moraleBar = characterDiv.querySelector('.morale');
+        const weaponBar = characterDiv.querySelector('.weapon');
         
         if (healthBar) updateBar(healthBar, (character.health / (healthArray.length - 1)) * 100);
         if (hungerBar) updateBar(hungerBar, (character.hunger / (hungerArray.length - 1)) * 100);
         if (moraleBar) updateBar(moraleBar, (character.morale / (moraleArray.length - 1)) * 100);
+        
+        // Update weapon durability bar (only for non-fist weapons)
+        if (weaponBar && character.weapon !== 0) {
+            const maxDurability = weapons[character.weapon][2];
+            updateBar(weaponBar, (character.weaponDurability / maxDurability) * 100);
+        } else if (weaponBar) {
+            // Fists have no durability bar - clear it
+            updateBar(weaponBar, 0);
+        }
     }
 }
 
@@ -53,7 +63,7 @@ export function updateButtons(type, items, buttonText, updateFunction) {
     if (!items) return; // Early return for interaction buttons which don't use items
 
     context.gameParty.characters.forEach(character => {
-        const characterDiv = document.getElementById(character.name.split(' ').join(''));
+        const characterDiv = document.getElementById(character.getCharacterId());
         if (!characterDiv) return;
 
         const select = characterDiv.querySelector(`#${type}Select`);
@@ -115,7 +125,7 @@ export function updateMedicalButtons() {
 export function updateInteractionButtons() {
     // Update interaction dropdowns for each character
     context.gameParty.characters.forEach(character => {
-        const characterDiv = document.getElementById(character.name.split(' ').join(''));
+        const characterDiv = document.getElementById(character.getCharacterId());
         if (!characterDiv) return;
 
         const interactionSelect = characterDiv.querySelector('#interactionSelect');
@@ -165,22 +175,16 @@ export function handleSelection(event, items, updateCharacterAttributes) {
             const character = context.gameParty.characters.find(char => char.name === characterName);
             const target = context.gameParty.characters.find(char => char.name === targetName);
 
-            // Mark interact action as used and disable the dropdown
+            // Mark interact action as used for BOTH characters (prevents reciprocal interaction)
             character.actionsUsed.interact = true;
+            target.actionsUsed.interact = true;
             event.target.disabled = true;
             event.target.selectedIndex = 0;
 
-            // Remove the reciprocal interaction option
-            const targetSelect = document.querySelector(`#${targetName.split(' ').join('')} #options #interactionSelect`);
+            // Remove the reciprocal interaction option and disable target's dropdown
+            const targetSelect = document.querySelector(`#${target.getCharacterId()} #options #interactionSelect`);
             if (targetSelect) {
-                const options = Array.from(targetSelect.options);
-                const reciprocalOption = options.find(option => 
-                    option.dataset.characterName === targetName && 
-                    option.dataset.targetName === characterName
-                );
-                if (reciprocalOption) {
-                    targetSelect.remove(reciprocalOption.index);
-                }
+                targetSelect.disabled = true;
             }
 
             // Calculate interaction probability modifier based on traits
@@ -205,11 +209,13 @@ export function handleSelection(event, items, updateCharacterAttributes) {
                 if (character.relationships.get(target) < 4) {
                     character.relationships.set(target, character.relationships.get(target) + 1);
                     target.relationships.set(character, target.relationships.get(character) + 1);
-                    updateRelationships();
                 }
             } else {
                 addEvent(`${target.name} is feeling down.`);
             }
+            
+            // Update relationships display for both characters (to show new level and disable avatars)
+            updateRelationships();
             
         } else {
             // For weapons, look up from the source weapons array since the filtered items may have changed
@@ -298,26 +304,129 @@ export function setPlayButton(display) {
 
 export function updateRelationships() {
     for (const character of context.gameParty.characters) {
-        const characterItem = document.getElementById(character.name);
-        const relationshipsDiv = characterItem.querySelector('.relationships');
-        relationshipsDiv.innerHTML = '<p>Relationships</p>';
+        const characterItem = document.getElementById(character.getCharacterId());
+        if (!characterItem) continue;
         
-        const relationshipsList = document.createElement('ul');
-        relationshipsDiv.appendChild(relationshipsList);
+        const relationshipsDiv = characterItem.querySelector('.relationships');
+        if (!relationshipsDiv) continue;
+        
+        // Clear previous content (no header since it's inline with name)
+        relationshipsDiv.innerHTML = '';
+        
+        // Create container for interaction avatars
+        const interactionContainer = document.createElement('div');
+        interactionContainer.className = 'interaction-avatars';
+        
+        // Check if this character can still interact
+        const canInteract = !character.actionsUsed || !character.actionsUsed.interact;
         
         for (const [relatedCharacter, relationshipType] of character.relationships.entries()) {
             if (relatedCharacter !== character && context.gameParty.characters.includes(relatedCharacter)) {
-                const relationshipItem = document.createElement('li');
-                const relationshipName = relationships[relationshipType] || 'unknown';
-                relationshipItem.textContent = `${relatedCharacter.name}: ${relationshipName}`;
-                relationshipsList.appendChild(relationshipItem);
+                // Create avatar + relationship container
+                const avatarWrapper = document.createElement('div');
+                avatarWrapper.className = 'interaction-avatar-wrapper';
+                
+                // Create clickable button with mini avatar
+                const avatarBtn = document.createElement('button');
+                avatarBtn.className = 'interaction-avatar-btn';
+                avatarBtn.title = canInteract 
+                    ? `Talk to ${relatedCharacter.name} (${relationships[relationshipType] || 'unknown'})`
+                    : `Already interacted this turn`;
+                avatarBtn.disabled = !canInteract;
+                
+                // Create mini avatar layers container
+                const avatarContainer = document.createElement('div');
+                avatarContainer.className = 'mini-avatar-layers';
+                
+                // Skin layer
+                const skinImg = document.createElement('img');
+                skinImg.src = relatedCharacter.skin;
+                skinImg.alt = '';
+                skinImg.className = 'mini-avatar-layer';
+                avatarContainer.appendChild(skinImg);
+                
+                // Hair layer
+                const hairImg = document.createElement('img');
+                hairImg.src = relatedCharacter.hair;
+                hairImg.alt = '';
+                hairImg.className = 'mini-avatar-layer';
+                avatarContainer.appendChild(hairImg);
+                
+                // Shirt layer
+                const shirtImg = document.createElement('img');
+                shirtImg.src = relatedCharacter.shirt;
+                shirtImg.alt = relatedCharacter.name;
+                shirtImg.className = 'mini-avatar-layer';
+                avatarContainer.appendChild(shirtImg);
+                
+                avatarBtn.appendChild(avatarContainer);
+                
+                // Add click handler for interaction
+                if (canInteract) {
+                    avatarBtn.addEventListener('click', () => {
+                        handleInteraction(character, relatedCharacter);
+                    });
+                }
+                
+                avatarWrapper.appendChild(avatarBtn);
+                
+                // Add relationship emoji
+                const relationshipLabel = document.createElement('span');
+                relationshipLabel.className = 'relationship-emoji';
+                relationshipLabel.textContent = relationshipEmojis[relationshipType] || '❓';
+                relationshipLabel.title = relationships[relationshipType] || 'unknown';
+                avatarWrapper.appendChild(relationshipLabel);
+                
+                interactionContainer.appendChild(avatarWrapper);
             }
         }
+        
+        relationshipsDiv.appendChild(interactionContainer);
     }
 }
 
+/**
+ * Handle interaction between two characters via mini avatar click
+ */
+function handleInteraction(character, target) {
+    // Mark interact action as used for BOTH characters (prevents reciprocal interaction)
+    character.actionsUsed.interact = true;
+    target.actionsUsed.interact = true;
+    
+    // Calculate interaction probability modifier based on traits
+    let positiveModifier = 0;
+    for (const char of [character, target]) {
+        if (char.posTrait === 'friendly') positiveModifier += 0.1;
+        if (char.posTrait === 'optimistic') positiveModifier += 0.1;
+        if (char.negTrait === 'disconnected') positiveModifier -= 0.1;
+        if (char.negTrait === 'depressed') positiveModifier -= 0.1;
+    }
+    
+    const chance = Math.random();
+    const neutralThreshold = Math.max(0.2, Math.min(0.7, 0.5 - positiveModifier));
+    const positiveThreshold = Math.max(0.5, Math.min(0.9, 0.75 + positiveModifier));
+    
+    if (chance <= neutralThreshold) {
+        addEvent(`${target.name} is not interested in talking right now.`);
+    } else if (chance <= positiveThreshold) {
+        addEvent(`${target.name} is happy to chat.`);
+        if (character.relationships.get(target) < 4) {
+            character.relationships.set(target, character.relationships.get(target) + 1);
+            target.relationships.set(character, target.relationships.get(character) + 1);
+        }
+    } else {
+        addEvent(`${target.name} is feeling down.`);
+    }
+    
+    // Update relationships display for all characters (to show new relationship level and disable buttons)
+    updateRelationships();
+    
+    // Also disable the dropdown
+    updateInteractionButtons();
+}
+
 export function clearAndPopulateOptions(character) {
-    const characterItem = document.getElementById(character.name);
+    const characterItem = document.getElementById(character.getCharacterId());
     if (!characterItem) return;
 
     const optionsDiv = characterItem.querySelector('#options');

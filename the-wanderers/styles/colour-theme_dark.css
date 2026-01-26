@@ -68,8 +68,9 @@ form label {
     border: 2px solid #4b4b6b;
 }
 
-.name {
+.name-row {
     border: 2px solid #4b4b6b;
+    border-top: none;
 }
 
 #gameButtons {

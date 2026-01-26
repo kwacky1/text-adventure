@@ -39,11 +39,12 @@ export function playTurn() {
     for (const character of context.gameParty.characters) {
         character.resetActions();
     }
-    // Refresh all action dropdowns to re-enable them after reset
+    // Refresh all action dropdowns and relationship avatars to re-enable them after reset
     updateFoodButtons();
     updateMedicalButtons();
     updateWeaponButtons();
     updateInteractionButtons();
+    updateRelationships();
     
     updateParty();
     if (context.gameParty.characters.length === 0) {
@@ -109,7 +110,14 @@ export function playTurn() {
                     if (Math.random() < 0.1) {
                         character.health -= 1;
                         addEvent(`${character.name} is feeling worse.`);
-                        updateStatBars(character);
+                        if (character.health <= 0) {
+                            addEvent(`${character.name} succumbed to their illness.`);
+                            handleDeathEffects(character);
+                            context.gameParty.removeCharacter(character);
+                            updateRelationships();
+                        } else {
+                            updateStatBars(character);
+                        }
                     }
                 }
                 if (character.infected) {
@@ -120,6 +128,7 @@ export function playTurn() {
                         character.posTrait = posTraits[Math.floor(Math.random() * posTraits.length)][0];
                         character.negTrait = negTraits[Math.floor(Math.random() * negTraits.length)][0];
                         addEvent(`${character.name} is feeling strange.`);
+                        character.updateCharacter(); // Update trait display (text and sprites)
                         updateStatBars(character);
                     }
                 }                if (character.morale <= 0 && context.gameParty.characters.length > 1) {
@@ -185,6 +194,14 @@ export function playTurn() {
                     }
                     character.capAttributes();
                     updateStatBars(character);
+                    
+                    // Check if health dropped to 0 - satiated prevents hunger death but not health death
+                    if (character.health <= 0) {
+                        addEvent(`${character.name}'s body gave out from the strain of starvation.`);
+                        handleDeathEffects(character);
+                        context.gameParty.removeCharacter(character);
+                        updateRelationships();
+                    }
                 } else {
                     addEvent(`${character.name} died of hunger.`);
                     handleDeathEffects(character);

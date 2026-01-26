@@ -75,14 +75,27 @@ function merchantEncounter() {
     const intro = getRandomElement(merchantIntroductions);
     addEvent(intro + '.');
     
-    // Get a random item from a pool (food, medical, or weapon)
-    const merchantItem = getRandomMerchantItem();
-    
-    // Get a random item from party inventory
+    // Get a random item from party inventory first
     const partyItem = getRandomPartyItem();
     
     if (!partyItem) {
         addEvent('They look at your empty packs and walk away disappointed.');
+        setPlayButton('show');
+        return;
+    }
+    
+    // Get a random item from a pool (food, medical, or weapon)
+    // Make sure it's different from what they're asking for
+    let merchantItem = getRandomMerchantItem();
+    let attempts = 0;
+    while (merchantItem[0] === partyItem.name && attempts < 10) {
+        merchantItem = getRandomMerchantItem();
+        attempts++;
+    }
+    
+    // If we still couldn't find a different item, just walk away
+    if (merchantItem[0] === partyItem.name) {
+        addEvent('They look at your inventory, shrug, and walk away.');
         setPlayButton('show');
         return;
     }
@@ -201,8 +214,13 @@ function personInNeedEncounter() {
     // Give button
     const giveButton = document.createElement('button');
     giveButton.textContent = hasItem ? `Give ${itemType}` : `No ${itemType} to give`;
-    giveButton.disabled = !hasItem;
     giveButton.addEventListener('click', () => {
+        if (!hasItem) {
+            addEvent(`You have no ${itemType} to share.`);
+            clearCombatButtons(buttons);
+            setPlayButton('show');
+            return;
+        }
         // Find first available item of the type
         const itemToGive = itemPool.find(item => context.gameParty.inventory.hasItem(item[0]));
         if (itemToGive) {
@@ -508,12 +526,12 @@ function survivorCombatVictory(buttons, setPlayButton) {
         const lootRoll = Math.random();
         if (lootRoll < 0.33) {
             const foodItem = getRandomElement(food);
-            addEvent(`You find some ${foodItem[0]} on one of the survivors.`);
+            addEvent(`You find some food (${foodItem[0]}) on one of the survivors.`);
             addItemToInventory(foodItem);
             updateFoodButtons();
         } else if (lootRoll < 0.67) {
             const medItem = getRandomElement(medical);
-            addEvent(`You find a ${medItem[0]} on one of the survivors.`);
+            addEvent(`You find some medical supplies (${medItem[0]}) on one of the survivors.`);
             addItemToInventory(medItem);
             updateMedicalButtons();
         } else {

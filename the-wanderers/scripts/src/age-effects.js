@@ -1,8 +1,9 @@
 import { context } from '../game-state.js';
 import { food, medical, weapons } from '../party.js';
-import { addEvent, updateStatBars, updateFoodButtons, updateMedicalButtons } from './ui.js';
+import { addEvent, updateStatBars, updateFoodButtons, updateMedicalButtons, updateRelationships } from './ui.js';
 import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 import { ageArray } from '../character.js';
+import { handleDeathEffects } from './events.js';
 
 // Age category constants
 export const AGE_TEEN = 0;    // 0-30 years
@@ -93,6 +94,12 @@ function applyElderEffects(character) {
                 addEvent(`${character.name}'s aging body is feeling fragile.`);
                 if (character.health <= 0) {
                     character.health = 0;
+                    addEvent(`${character.name}'s frail body gave out.`);
+                    handleDeathEffects(character);
+                    context.gameParty.removeCharacter(character);
+                    updateRelationships();
+                } else {
+                    updateStatBars(character);
                 }
             }
             break;
@@ -117,6 +124,12 @@ function applyElderEffects(character) {
                 addEvent(`${character.name}'s joints aren't what they used to be.`);
                 if (character.health <= 0) {
                     character.health = 0;
+                    addEvent(`${character.name} took a bad fall and didn't get back up.`);
+                    handleDeathEffects(character);
+                    context.gameParty.removeCharacter(character);
+                    updateRelationships();
+                } else {
+                    updateStatBars(character);
                 }
             }
             break;
@@ -163,7 +176,7 @@ export function checkBirthday(character) {
         addEvent(`${character.name} is now ${ageLabels[newAgeCategory]}!`);
         
         // Update age display in UI
-        const characterDiv = document.getElementById(character.name);
+        const characterDiv = document.getElementById(character.getCharacterId());
         if (characterDiv) {
             const ageElement = characterDiv.querySelector('.age');
             if (ageElement) {
