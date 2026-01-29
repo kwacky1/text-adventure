@@ -1,6 +1,19 @@
-.vscode/
-test/
+# Dependencies
 node_modules/
-.babelrc
-package*.json
+
+# Build output
 coverage/
+
+# Environment files
+.env
+.env.local
+
+# Data files (SQLite databases)
+data/
+
+# IDE
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
