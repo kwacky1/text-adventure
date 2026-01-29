@@ -252,12 +252,15 @@ function giveBirthdayGift(character) {
     } else {
         // Give weapon
         const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1]; // Exclude fist
+        // Randomize durability to 50-100% of max
+        const maxDurability = weaponType[2];
+        const durability = Math.floor(maxDurability * (0.5 + Math.random() * 0.5));
         if (isSolo) {
             addEvent(`${character.name} also found a ${weaponType[0]}!`);
         } else {
             addEvent(`${character.name} also received a ${weaponType[0]} as a gift!`);
         }
-        addItemToInventory(weaponType);
+        addItemToInventory([weaponType[0], durability]);
         updateWeaponButtons();
     }
     

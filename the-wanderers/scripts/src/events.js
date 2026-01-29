@@ -64,10 +64,13 @@ export function foundFood(who) {
 
 export function foundWeapon(who, id) {
     const weaponType = weapons[Math.floor(Math.random() * (weapons.length - 1)) + 1];
+    // Randomize durability to 50-100% of max
+    const maxDurability = weaponType[2];
+    const durability = Math.floor(maxDurability * (0.5 + Math.random() * 0.5));
     addEvent(`${who} found a ${weaponType[0]}.`);
     
     // Simply add it to inventory and let the player decide who to give it to using the dropdown
-    addItemToInventory(weaponType);
+    addItemToInventory([weaponType[0], durability]);
     context.gameParty.inventory.updateDisplay();
     updateWeaponButtons();
 }

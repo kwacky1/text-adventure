@@ -51,6 +51,22 @@ function getRandomWeaponExcludingFists() {
 }
 
 /**
+ * Prepare item for inventory - randomizes weapon durability if applicable
+ * @param {Array} item - Item definition
+ * @returns {Array} Item ready for inventory
+ */
+function prepareItemForInventory(item) {
+    const isWeapon = weapons.some(w => w[0] === item[0]);
+    if (isWeapon && item.length >= 3) {
+        // Randomize durability to 50-100% of max
+        const maxDurability = item[2];
+        const durability = Math.floor(maxDurability * (0.5 + Math.random() * 0.5));
+        return [item[0], durability];
+    }
+    return item;
+}
+
+/**
  * Main entry point for survivor encounters
  * Called from events.js when a survivor encounter is triggered
  */
@@ -118,7 +134,7 @@ function merchantEncounter() {
         // Remove party item from inventory
         context.gameParty.inventory.removeItem(partyItem.name);
         // Add merchant item to inventory
-        addItemToInventory(merchantItem);
+        addItemToInventory(prepareItemForInventory(merchantItem));
         addEvent(`You trade your ${partyItem.name} for the ${merchantItem[0]}.`);
         // Track accepted trade
         recordMerchantTradeAccepted();
@@ -170,7 +186,7 @@ function attemptSteal(merchantItem, buttons) {
         // Survivor gives up the item
         const giveUpMsg = getRandomElement(survivorGiveUpMessages);
         addEvent(giveUpMsg);
-        addItemToInventory(merchantItem);
+        addItemToInventory(prepareItemForInventory(merchantItem));
         updateAllInventoryButtons();
         context.gameParty.inventory.updateDisplay();
         setPlayButton('show');
@@ -536,8 +552,11 @@ function survivorCombatVictory(buttons, setPlayButton) {
             updateMedicalButtons();
         } else {
             const weaponItem = getRandomWeaponExcludingFists();
+            // Randomize durability to 50-100% of max
+            const maxDurability = weaponItem[2];
+            const durability = Math.floor(maxDurability * (0.5 + Math.random() * 0.5));
             addEvent(`You find a ${weaponItem[0]} on one of the survivors.`);
-            addItemToInventory(weaponItem);
+            addItemToInventory([weaponItem[0], durability]);
             updateWeaponButtons();
         }
     }
