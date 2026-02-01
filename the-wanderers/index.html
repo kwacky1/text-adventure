@@ -16,12 +16,9 @@
     </head>
 <body>
     <h1>The Wanderers</h1> <span id="day">Day 0</span>
-    <div id="buttons" style="display: none;">
-        <div id="playButtonContainer"></div>
+    <div id="buttons">
+        <button id="playButton" style="display: none;">Play Turn</button>
         <div id="gameButtons"></div>
-        <div id="foodButtons"></div>
-        <div id="medicalButtons"></div>
-        <div id="weaponButtons"></div>
     </div>
     <div id="content" style="display: none;">
         <div id="events">
@@ -34,7 +31,7 @@
     <div id="partyInventory"></div>
     <div id="characters"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.4/purify.min.js"></script>
-    <script type="module" src="scripts/game.js"></script>
+    <script type="module" src="web-game.js"></script>
     <script type="module" src="scripts/settings.js"></script>
     <div id="footer">
         <label for="styleselector">Choose a style:</label>
