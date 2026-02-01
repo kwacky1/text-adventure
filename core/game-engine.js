@@ -5,6 +5,7 @@
 
 import { 
     food, medical, weapons, posTraits, negTraits,
+    hungerArray, healthArray,
     attackDescriptions, singleZombieVariations, multiZombieVariations,
     newCharacterFlavour, defaultNames,
     merchantIntroductions, personInNeedIntroductions, hostileSurvivorIntroductions,
@@ -32,7 +33,30 @@ export class GameEngine {
         this.session.stats.recordNewPartyMember(character.name, this.session.turnNumber);
         this.session.status = 'playing';
         
-        await this.renderer.displayEvent(`${character.name} sets up camp.`);
+        // Build intro text with trait-based variation
+        let introText = 'A new illness has swept the world and the infected have begun to rise from the dead. ';
+        const posTrait = character.positiveTrait;
+        const name = character.name;
+        switch(posTrait) {
+            case 'resilient':
+                introText += `Despite this, ${name} knows they're going to push through.`;
+                break;
+            case 'friendly':
+                introText += `The other survivors are out there somewhere, and ${name}'s already looking.`;
+                break;
+            case 'scavenger':
+                introText += `Luckily, ${name} is equipped for this situation.`;
+                break;
+            case 'optimistic':
+                introText += `The world is ending, but ${name}'s life doesn't have to just yet.`;
+                break;
+            case 'fighter':
+                introText += `They'd better look out, though - ${name} knows how to fight.`;
+                break;
+            default:
+                introText += `The world is ending, but ${name}'s life doesn't have to just yet.`;
+        }
+        await this.renderer.displayEvent(introText);
         await this.renderer.displayPartyStatus(this.session.party.characters);
     }
 
@@ -116,6 +140,12 @@ export class GameEngine {
 
         // Random event
         const eventOccurred = await this.processRandomEvent();
+
+        // Check again for game over after random events (e.g., death in combat)
+        if (this.session.isGameOver()) {
+            await this.handleGameOver();
+            return;
+        }
 
         // Advance time for next turn
         this.session.advanceTime();
@@ -324,6 +354,9 @@ export class GameEngine {
         }
 
         this.session.handleCharacterDeparture(character);
+        
+        // Refresh UI to reflect character removal (silent refresh - no verbose output)
+        await this.renderer.refreshPartyUI(this.session.party.characters, this.session.party.inventory);
     }
 
     /**
@@ -651,12 +684,28 @@ export class GameEngine {
         const accept = await this.renderer.promptConfirm(`Do you want ${name} to join your party?`);
         
         if (accept) {
+            // Generate random appearance for NPC characters
+            const skinOptions = ['skin_dark.png', 'skin_dark-mid.png', 'skin_mid.png', 'skin_light-mid.png', 'skin_light.png'];
+            const hairStyleOptions = ['hair_long-curly', 'hair_long-straight', 'hair_short-fluffy', 'hair_short-straight'];
+            const hairColorOptions = ['blonde.png', 'ginger.png', 'brown.png', 'red.png', 'black.png'];
+            const shirtStyleOptions = ['shirt_hoodie', 'shirt_jacket', 'shirt_scarf', 'shirt_vest'];
+            const shirtColorOptions = ['red.png', 'yellow.png', 'green.png', 'blue.png'];
+            
+            const skinChoice = skinOptions[Math.floor(Math.random() * skinOptions.length)];
+            const hairStyle = hairStyleOptions[Math.floor(Math.random() * hairStyleOptions.length)];
+            const hairColor = hairColorOptions[Math.floor(Math.random() * hairColorOptions.length)];
+            const shirtStyle = shirtStyleOptions[Math.floor(Math.random() * shirtStyleOptions.length)];
+            const shirtColor = shirtColorOptions[Math.floor(Math.random() * shirtColorOptions.length)];
+            
             // Generate random character data for NPCs (not player-created)
             const characterData = {
                 name: name,
                 age: Math.floor(Math.random() * 3),
                 posTrait: posTraits[Math.floor(Math.random() * posTraits.length)][0],
-                negTrait: negTraits[Math.floor(Math.random() * negTraits.length)][0]
+                negTrait: negTraits[Math.floor(Math.random() * negTraits.length)][0],
+                skin: `images/skin/${skinChoice}`,
+                hair: `images/hair/${hairStyle}_${hairColor}`,
+                shirt: `images/shirts/${shirtStyle}_${shirtColor}`
             };
             
             const character = this.createCharacterFromData(characterData);
@@ -979,6 +1028,7 @@ export class GameEngine {
             }
         }
 
+        await this.renderer.clearCombat();
         this.session.inCombat = false;
         this.session.status = 'playing';
         this.session.combatState = null;
@@ -1000,14 +1050,24 @@ export class GameEngine {
         // Check if items can be used
         const canUseFood = !character.actionsUsed.food && food.some(f => this.session.party.inventory.hasItem(f[0]));
         const canUseMedical = !character.actionsUsed.medical && medical.some(m => this.session.party.inventory.hasItem(m[0]));
-        const canEquipWeapon = weapons.slice(1).some(w => this.session.party.inventory.hasItem(w[0]));
+        
+        // Find best available weapon upgrade
+        const currentWeaponDamage = weapons[character.weapon][1];
+        const availableWeapons = weapons.slice(1).filter(w => this.session.party.inventory.hasItem(w[0]));
+        const betterWeapons = availableWeapons.filter(w => w[1] > currentWeaponDamage);
+        const bestUpgrade = betterWeapons.sort((a, b) => b[1] - a[1])[0] || null;
+        const canEquipWeapon = bestUpgrade !== null;
 
-        // Prompt for action choice
+        // Prompt for action choice with detailed options
         const action = await this.renderer.promptCombatAction(playerId, character.name, {
             canAttack: true,
             canUseFood,
             canUseMedical,
-            canEquipWeapon
+            canEquipWeapon,
+            currentWeapon: weapons[character.weapon],
+            bestWeaponUpgrade: bestUpgrade,
+            hungerState: hungerArray[character.hunger],
+            healthState: healthArray[character.health]
         });
 
         if (action === 'food') {
@@ -1226,6 +1286,7 @@ export class GameEngine {
             }
         }
 
+        await this.renderer.clearCombat();
         this.session.inCombat = false;
         this.session.status = 'playing';
         this.session.combatState = null;
@@ -1247,22 +1308,32 @@ export class GameEngine {
         // Check if items can be used
         const canUseFood = !character.actionsUsed.food && food.some(f => this.session.party.inventory.hasItem(f[0]));
         const canUseMedical = !character.actionsUsed.medical && medical.some(m => this.session.party.inventory.hasItem(m[0]));
-        const canEquipWeapon = weapons.slice(1).some(w => this.session.party.inventory.hasItem(w[0]));
+        
+        // Find best available weapon upgrade
+        const currentWeaponDamage = weapons[character.weapon][1];
+        const availableWeapons = weapons.slice(1).filter(w => this.session.party.inventory.hasItem(w[0]));
+        const betterWeapons = availableWeapons.filter(w => w[1] > currentWeaponDamage);
+        const bestUpgrade = betterWeapons.sort((a, b) => b[1] - a[1])[0] || null;
+        const canEquipWeapon = bestUpgrade !== null;
 
-        // Prompt for action choice
+        // Prompt for action choice with detailed options
         const action = await this.renderer.promptCombatAction(playerId, character.name, {
             canAttack: true,
             canUseFood,
             canUseMedical,
-            canEquipWeapon
+            canEquipWeapon,
+            currentWeapon: weapons[character.weapon],
+            bestWeaponUpgrade: bestUpgrade,
+            hungerState: hungerArray[character.hunger],
+            healthState: healthArray[character.health]
         });
 
         if (action === 'food') {
             await this.handleCombatItemUse(character, 'food');
-            return; // Turn used for item, no attack
+            // Food doesn't use turn - continue to attack
         } else if (action === 'medical') {
             await this.handleCombatItemUse(character, 'medical');
-            return; // Turn used for item, no attack
+            // Medical doesn't use turn - continue to attack
         } else if (action === 'weapon') {
             await this.handleCombatWeaponEquip(character);
             // Weapon swap doesn't use turn - continue to attack
@@ -1519,9 +1590,17 @@ export class GameEngine {
                 await this.renderer.displayEvent(
                     `${char1.name} and ${char2.name} are arguing over who gets to eat ${variation}.`
                 );
-                char1.relationships.set(char2, (char1.relationships.get(char2) || 1) - 1);
-                char2.relationships.set(char1, (char2.relationships.get(char1) || 1) - 1);
+            } else {
+                // No food to argue about - generic tension
+                const tensionEvents = [
+                    `${char1.name} snaps at ${char2.name} over something trivial.`,
+                    `${char1.name} and ${char2.name} sit in awkward silence, tension thick in the air.`,
+                    `${char1.name} blames ${char2.name} for their current situation.`
+                ];
+                await this.renderer.displayEvent(tensionEvents[Math.floor(Math.random() * tensionEvents.length)]);
             }
+            char1.relationships.set(char2, (char1.relationships.get(char2) || 1) - 1);
+            char2.relationships.set(char1, (char2.relationships.get(char1) || 1) - 1);
         } else {
             // Positive interaction
             await this.renderer.displayEvent(

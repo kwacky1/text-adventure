@@ -235,6 +235,14 @@ export class CliRenderer extends Renderer {
     }
 
     /**
+     * Silent refresh of party UI (no console output for CLI)
+     * Used after character death to update UI without verbose output
+     */
+    async refreshPartyUI(characters, inventory) {
+        // No-op for CLI - we show compact status at end of turn
+    }
+
+    /**
      * Display compact party status (one line per character)
      */
     async displayPartyStatusCompact(characters) {
@@ -245,9 +253,9 @@ export class CliRenderer extends Renderer {
             const hungerColor = char.hunger <= 2 ? 'red' : char.hunger <= 5 ? 'yellow' : 'green';
             const moraleColor = char.morale <= 2 ? 'red' : char.morale <= 5 ? 'yellow' : 'green';
             return `${char.name} ` + 
-                chalk[healthColor]('♥' + char.health) + ' ' +
-                chalk[hungerColor]('🍗' + Math.round(char.hunger)) + ' ' +
-                chalk[moraleColor]('☺' + char.morale);
+                chalk[healthColor]('♥ ' + char.health) + ' ' +
+                chalk[hungerColor]('🍗 ' + Math.round(char.hunger)) + ' ' +
+                chalk[moraleColor]('☺ ' + char.morale);
         }).join(chalk.gray(' | ')) + chalk.gray(' ───'));
     }
 
@@ -264,9 +272,9 @@ export class CliRenderer extends Renderer {
         const medCount = categories.medical.reduce((sum, item) => sum + item.quantity, 0);
         const weaponCount = categories.weapons.reduce((sum, item) => sum + item.quantity, 0);
         
-        if (foodCount > 0) parts.push(chalk.yellow(`🍗${foodCount}`));
-        if (medCount > 0) parts.push(chalk.cyan(`🩹${medCount}`));
-        if (weaponCount > 0) parts.push(chalk.red(`⚔${weaponCount}`));
+        if (foodCount > 0) parts.push(chalk.yellow(`🍗 ${foodCount}`));
+        if (medCount > 0) parts.push(chalk.cyan(`🩹 ${medCount}`));
+        if (weaponCount > 0) parts.push(chalk.red(`⚔ ${weaponCount}`));
         
         if (parts.length === 0) {
             console.log(chalk.gray('─── Inventory: Empty ───'));
@@ -313,7 +321,7 @@ export class CliRenderer extends Renderer {
         console.log();
     }
 
-    async displayInventory(inventory) {
+    async displayInventory(inventory, party = null) {
         await loadDependencies();
         
         console.log();
@@ -363,17 +371,21 @@ export class CliRenderer extends Renderer {
             return 'attack';
         }
         
+        const currentWeaponName = options.currentWeapon ? options.currentWeapon[0] : 'fist';
         const choices = [
-            { id: 'attack', shortcut: 'a', label: 'Attack', description: 'Strike an enemy' }
+            { id: 'attack', shortcut: 'a', label: `Attack (${currentWeaponName})`, description: 'Strike an enemy' }
         ];
-        if (options.canEquipWeapon) {
-            choices.push({ id: 'weapon', shortcut: 'w', label: 'Equip Weapon', description: 'Swap weapon (free action)' });
+        if (options.canEquipWeapon && options.bestWeaponUpgrade) {
+            const upgradeName = options.bestWeaponUpgrade[0];
+            choices.push({ id: 'weapon', shortcut: 'w', label: `Swap ${currentWeaponName} for ${upgradeName}`, description: 'Free action' });
         }
         if (options.canUseFood) {
-            choices.push({ id: 'food', shortcut: 'f', label: 'Use Food', description: 'Restore hunger' });
+            const hungerState = options.hungerState || 'hungry';
+            choices.push({ id: 'food', shortcut: 'f', label: `Use Food (${hungerState})`, description: 'Restore hunger' });
         }
         if (options.canUseMedical) {
-            choices.push({ id: 'medical', shortcut: 'm', label: 'Use Medical', description: 'Restore health' });
+            const healthState = options.healthState || 'injured';
+            choices.push({ id: 'medical', shortcut: 'm', label: `Use Medical (${healthState})`, description: 'Restore health' });
         }
         
         return await this.promptWithShortcuts(`${characterName}'s action:`, choices);
@@ -453,12 +465,13 @@ export class CliRenderer extends Renderer {
         console.log();
     }
 
-    async updateTurnDisplay(turnNumber, timeOfDay, formattedDate) {
+    async updateTurnDisplay(turnNumber, timeOfDay, formattedDate, isEndOfTurn = false) {
         await loadDependencies();
         
         const timeIcon = timeOfDay === 'day' ? '☀' : '🌙';
+        const turnLabel = isEndOfTurn ? `End of Turn ${turnNumber}` : `Turn ${turnNumber}`;
         console.log();
-        console.log(chalk.bold.blue(`═══ Turn ${turnNumber} - ${timeIcon} ${timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1)} (${formattedDate}) ═══`));
+        console.log(chalk.bold.blue(`═══ ${turnLabel} - ${timeIcon} ${timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1)} (${formattedDate}) ═══`));
     }
 
     async promptCharacterCreation(availableNames, playerId = null) {

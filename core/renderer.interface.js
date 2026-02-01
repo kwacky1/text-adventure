@@ -112,6 +112,17 @@ export class Renderer {
     }
 
     /**
+     * Silent refresh of party UI after character death
+     * Updates display without verbose output (CLI: no-op, Web: DOM update)
+     * @param {Array<CharacterStats>} characters
+     * @param {Inventory} inventory
+     * @returns {Promise<void>}
+     */
+    async refreshPartyUI(characters, inventory) {
+        // Optional - default no-op
+    }
+
+    /**
      * Display full party status
      * @param {Array<CharacterStats>} characters
      * @returns {Promise<void>}
@@ -135,7 +146,7 @@ export class Renderer {
      * @param {Object} inventory - Inventory data
      * @returns {Promise<void>}
      */
-    async displayInventory(inventory) {
+    async displayInventory(inventory, party = null) {
         throw new Error('displayInventory must be implemented by renderer');
     }
 
@@ -164,7 +175,7 @@ export class Renderer {
      * Prompt player to select combat action (attack, use food, use medical, equip weapon)
      * @param {string} playerId - Player who should choose
      * @param {string} characterName - Character taking action
-     * @param {Object} options - Available actions { canAttack, canUseFood, canUseMedical, canEquipWeapon }
+     * @param {Object} options - Available actions { canAttack, canUseFood, canUseMedical, canEquipWeapon, currentWeapon, bestWeaponUpgrade, hungerState, healthState }
      * @returns {Promise<string>} - Selected action: 'attack', 'food', 'medical', or 'weapon'
      */
     async promptCombatAction(playerId, characterName, options) {
@@ -173,15 +184,17 @@ export class Renderer {
             return 'attack';
         }
         
-        const choices = [{ id: 'attack', label: 'Attack' }];
-        if (options.canEquipWeapon) {
-            choices.push({ id: 'weapon', label: 'Equip Weapon', description: 'Swap weapon (free action)' });
+        const currentWeaponName = options.currentWeapon ? options.currentWeapon[0] : 'fist';
+        const choices = [{ id: 'attack', label: `Attack (${currentWeaponName})` }];
+        if (options.canEquipWeapon && options.bestWeaponUpgrade) {
+            const upgradeName = options.bestWeaponUpgrade[0];
+            choices.push({ id: 'weapon', label: `Equip ${upgradeName} (swap ${currentWeaponName})`, description: 'Free action' });
         }
         if (options.canUseFood) {
-            choices.push({ id: 'food', label: 'Use Food', description: 'Restore hunger' });
+            choices.push({ id: 'food', label: `Use Food (${options.hungerState || 'hungry'})`, description: 'Restore hunger' });
         }
         if (options.canUseMedical) {
-            choices.push({ id: 'medical', label: 'Use Medical', description: 'Restore health' });
+            choices.push({ id: 'medical', label: `Use Medical (${options.healthState || 'injured'})`, description: 'Restore health' });
         }
         
         return await this.promptChoice(`${characterName}'s action:`, choices);
@@ -205,6 +218,15 @@ export class Renderer {
      */
     async displayCombat(combatState) {
         throw new Error('displayCombat must be implemented by renderer');
+    }
+
+    /**
+     * Clear the combat display when combat ends
+     * @returns {Promise<void>}
+     */
+    async clearCombat() {
+        // Default implementation - does nothing
+        // Subclasses should override to remove combat UI elements
     }
 
     /**

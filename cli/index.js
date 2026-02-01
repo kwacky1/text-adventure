@@ -38,11 +38,12 @@ async function main() {
 
     // Main game loop
     while (!session.isGameOver()) {
-        // Show current turn info before menu
+        // Show current turn info before menu (end of previous turn actions)
         await renderer.updateTurnDisplay(
             session.turnNumber,
             session.timeOfDay,
-            session.getFormattedDate()
+            session.getFormattedDate(),
+            true  // isEndOfTurn - we're at the end, waiting for player input
         );
 
         // Player action menu
@@ -128,8 +129,26 @@ async function handleInventoryAction(renderer, session, engine) {
     
     const [type, itemName] = choice.split(':');
     
-    // Select character
-    const characterOptions = session.party.characters.map(c => ({
+    // Select character - filter to those who haven't used this action type
+    const eligibleCharacters = session.party.characters.filter(c => {
+        if (type === 'food') return !c.actionsUsed.food;
+        if (type === 'medical') return !c.actionsUsed.medical;
+        return true; // Weapons have no action limit
+    });
+    
+    // Sort by most in need (lowest value first)
+    if (type === 'food') {
+        eligibleCharacters.sort((a, b) => a.hunger - b.hunger);
+    } else if (type === 'medical') {
+        eligibleCharacters.sort((a, b) => a.health - b.health);
+    }
+    
+    if (eligibleCharacters.length === 0) {
+        await renderer.displayEvent(`No characters can use ${type} this turn.`, { type: 'info' });
+        return;
+    }
+    
+    const characterOptions = eligibleCharacters.map(c => ({
         id: c.name,
         label: c.name,
         description: type === 'food' ? `Hunger: ${c.getHungerStatus()}` :

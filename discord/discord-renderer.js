@@ -201,6 +201,14 @@ export class DiscordRenderer extends Renderer {
         // Stats shown in party status embed
     }
 
+    /**
+     * Silent refresh of party UI after character death
+     * Discord shows compact updates in the event flow
+     */
+    async refreshPartyUI(characters, inventory) {
+        // No-op for Discord - updates appear in event flow
+    }
+
     async displayPartyStatus(characters) {
         await this.flushEvents();
         
@@ -243,7 +251,7 @@ export class DiscordRenderer extends Renderer {
         return '█'.repeat(filled) + '░'.repeat(empty);
     }
 
-    async displayInventory(inventory) {
+    async displayInventory(inventory, party = null) {
         await this.flushEvents();
         
         const embed = new EmbedBuilder()
