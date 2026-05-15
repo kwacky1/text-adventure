@@ -45,6 +45,46 @@ export const newCharacterFlavour = [
     'They call you an unfamiliar name and seem disappointed when you correct them.'
 ];
 
+const startingItemMessages = [
+    'You managed to grab some supplies before fleeing.',
+    'You packed a few things before the world fell apart.',
+    'A quick raid on a nearby store paid off before you left.',
+    'You had a go-bag ready — it wasn\'t much, but it helps.',
+    'You scavenged what you could on the way out.'
+];
+
+export function grantStartingItems(character) {
+    const isScavenger = character.posTrait === 'scavenger';
+
+    // Item pools — low-tier only
+    const starterFood = food.filter(f => f[0] === 'rations' || f[0] === 'snack');
+    const starterMedical = medical.filter(m => m[0] === 'band aid' || m[0] === 'bandage');
+    const starterWeapons = weapons.filter(w => w[0] === 'stick');
+    const allPools = [starterFood, starterMedical, starterWeapons];
+
+    // Roll for up to 3 item slots with decreasing probability
+    const chances = isScavenger ? [0.8, 0.6, 0.4] : [0.6, 0.4, 0.2];
+    const itemsGranted = [];
+
+    for (const chance of chances) {
+        if (Math.random() < chance) {
+            const pool = allPools[Math.floor(Math.random() * allPools.length)];
+            const item = pool[Math.floor(Math.random() * pool.length)];
+            addItemToInventory(item);
+            itemsGranted.push(item[0]);
+        }
+    }
+
+    if (itemsGranted.length > 0) {
+        const message = startingItemMessages[Math.floor(Math.random() * startingItemMessages.length)];
+        addEvent(message);
+        addEvent(`Starting supplies: ${itemsGranted.join(', ')}.`);
+        updateFoodButtons();
+        updateMedicalButtons();
+        updateWeaponButtons();
+    }
+}
+
 export function foundMedical(who) {
     const medicalType = medical[Math.floor(Math.random() * medical.length)];
     const location = medicalType[2][Math.floor(Math.random() * medicalType[2].length)];

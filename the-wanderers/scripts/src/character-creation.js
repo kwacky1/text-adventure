@@ -5,7 +5,7 @@ import Party, { food, medical, weapons } from '../party.js';
 import { setGameParty } from '../game-state.js';
 import { updateStatBars, addEvent, setPlayButton, updateFoodButtons, updateMedicalButtons, updateInteractionButtons, updateRelationships } from './ui.js';
 import { playTurn } from '../game.js';
-import { newCharacterFlavour } from './events.js';
+import { newCharacterFlavour, grantStartingItems } from './events.js';
 import { addItemToInventory, updateWeaponButtons } from './inventory.js';
 import { resetSeasonalEvents } from './seasonal-events.js';
 import { recordNewPartyMember, resetGameStats } from './game-stats.js';
@@ -118,6 +118,9 @@ async function createForm() {
         gameParty.addCharacter(newCharacter);
         // Track the first party member with their name and turn 1
         recordNewPartyMember(name, 1);
+        
+        // Grant starting items (chance-based)
+        grantStartingItems(newCharacter);
         
         // Create character UI elements after clearing the form container
         const charactersDiv = document.getElementById('characters');
