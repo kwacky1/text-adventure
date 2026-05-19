@@ -543,7 +543,18 @@ async function addPlayer() {
             }
         }
         
-        // Get a random name
+        // Get a name that isn't already used by an existing party member
+        const existingNames = context.gameParty.characters.map(c => c.name.toLowerCase());
+        if (context.remainingNames) {
+            context.remainingNames = context.remainingNames.filter(n => !existingNames.includes(n.toLowerCase()));
+        }
+        // If all names were duplicates, fetch fresh ones
+        if (!context.remainingNames || context.remainingNames.length === 0) {
+            await fetchNames(10);
+            if (context.remainingNames) {
+                context.remainingNames = context.remainingNames.filter(n => !existingNames.includes(n.toLowerCase()));
+            }
+        }
         const firstName = context.remainingNames && context.remainingNames.length > 0 ? 
             context.remainingNames.shift() : 
             "Survivor";
